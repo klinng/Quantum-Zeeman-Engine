@@ -438,12 +438,150 @@ with 2p; adding that coupling is a natural next extension.
 """),
 ]
 
+# --------------------------------------------------------------------------------------------
+NB6 = [
+("markdown", r"""# Extension B: The virtual spectrometer (colours, prism, polarisation filters)
+
+**Goal.** Take the Zeeman lines computed in Levels 1 to 4 and put real optics in front of them:
+see their colours, split light with a prism, and filter by polarisation, one component at a time.
+
+**The chain.** source in a field $B$, then a line of sight at angle $\theta$ from $B$, then a polariser or
+analyser, then a prism (colours) and/or a high-resolution stage (Zeeman components).
+
+**An honest scale note.** A Zeeman shift is tiny: the outermost sodium D2 component moves only
+about 27 pm per tesla. All the components are the *same yellow*. We will see that a prism cannot
+separate them and exactly how fine an instrument has to be. Plots draw the colour of the light on a
+yellow strip along the axis so the scale stays honest.
+"""),
+("code", HEAD + r"""import pandas as pd
+from src.optics.color import wavelength_to_rgb, rainbow_strip
+from src.optics.prism import refractive_index, deviation_deg, min_deviation_deg, screen_position_m
+from src.optics.spectrometer import (sodium_d_components, observe, required_resolving_power,
+                                     LAMP_LINES, vacuum_cm1_to_air_nm)
+
+plt.figure(figsize=(8, 1))
+plt.imshow(rainbow_strip(380, 750, 600, 30), aspect='auto', extent=[380, 750, 0, 1])
+plt.yticks([]); plt.xlabel('wavelength (nm)'); plt.title('Visible spectrum as the code draws it'); plt.show()
+
+print('Colour of sodium D light (589 nm), RGB =', tuple(round(c, 2) for c in wavelength_to_rgb(589.3)))
+print(LAMP_LINES.assign(rgb=[tuple(round(c, 2) for c in wavelength_to_rgb(w)) for w in LAMP_LINES.wavelength_nm]).to_string(index=False))"""),
+("markdown", r"""## Glass bends colours differently
+
+A prism works because the refractive index depends on wavelength. The code uses the Sellmeier
+equation with catalogue constants for two glasses:
+"""),
+("code", r"""wl = np.array([404.7, 486.1, 546.1, 589.3, 656.3])
+tab = pd.DataFrame({'wavelength (nm)': wl,
+                    'n (BK7)': refractive_index(wl, 'BK7'),
+                    'n (SF11)': refractive_index(wl, 'SF11')}).round(5)
+print(tab.to_string(index=False))
+print()
+print('BK7 index at the d line (587.6 nm): %.5f  (catalogue 1.5168)' % refractive_index(587.56, 'BK7'))
+print('Minimum deviation of a 60 deg SF11 prism at 589 nm: %.2f deg' % min_deviation_deg(589.3, 60, 'SF11'))"""),
+("code", r"""from src.optics.figures import fig_prism_setup
+fig_prism_setup(); plt.show()"""),
+("markdown", r"""Violet bends most, red least. The lower panel shows what a screen 2 m away would show for a lamp with
+sodium, mercury and hydrogen lines: well separated colours, but the sodium D1 and D2 lines sit almost on
+top of each other because they are only 0.6 nm apart.
+
+## Why a prism cannot show the Zeeman components
+
+Compare how far apart things land on the screen, in micrometres:
+"""),
+("code", r"""c = sodium_d_components(1.0)                                   # B = 1 tesla
+x_um = screen_position_m(c.wavelength_nm.to_numpy(), 2.0, glass='SF11') * 1e6
+d2 = c.line == 'D2'
+print('Na D2 components at 1 T, spread on a screen 2 m away (SF11 prism): %.1f micrometres' % (np.ptp(x_um[d2])))
+sep = screen_position_m(float(vacuum_cm1_to_air_nm(16956.17)), 2.0, glass='SF11') - screen_position_m(float(vacuum_cm1_to_air_nm(16973.37)), 2.0, glass='SF11')
+print('Na D1 vs D2 (0.6 nm apart):                                       %.1f micrometres' % (abs(sep) * 1e6))
+print()
+airy_um = 1.22 * 589.3e-9 * 2.0 / 0.01 * 1e6          # diffraction-limited spot of a 1 cm beam focused at 2 m
+print('Smallest focused spot of a 1 cm wide beam at 2 m (diffraction limit): about %.0f micrometres' % airy_um)
+print()
+print('The whole D2 Zeeman pattern is spread over less than that spot, so the components blur together.')
+print('A prism of this kind cannot show them; a finer instrument is needed.')"""),
+("markdown", r"""## The instrument ladder
+
+Resolving power $R=\lambda/\Delta\lambda$ says how fine an instrument can see. The closest sodium Zeeman
+components need a certain $R$ at each field; instruments provide a certain $R$. Where they meet is the
+weakest field at which the pattern is visible:
+"""),
+("code", r"""from src.optics.instruments import fig_instrument_ladder, instrument_ladder
+from src.optics.spectrometer import field_for_resolving_power
+
+print('Resolving power needed to separate the closest Zeeman components of Na:')
+for b in (0.1, 0.5, 1.0, 2.0, 5.0):
+    print('  B = %4.1f T : R = %8.0f' % (b, required_resolving_power(sodium_d_components(b))))
+print()
+rows = [(k, round(v), round(field_for_resolving_power(v), 3)) for k, v in instrument_ladder().items()]
+print(pd.DataFrame(rows, columns=['instrument', 'ideal R', 'weakest resolvable field (T)']).to_string(index=False))
+fig_instrument_ladder(); plt.show()"""),
+("markdown", r"""**Take-away.** A 5 cm glass prism (R about 2000) would only reveal the pattern at about 25 T, where the weak-field
+picture has already broken down. A large grating needs roughly 0.5 T, a Fabry-Perot about 0.05 T. This is why Zeeman
+spectroscopy uses high-resolution instruments, and why the spectrum below is drawn in picometres, not as colours.
+
+## Polarisation: what each viewing direction shows
+
+A field-aligned atom radiates three kinds of light. With $q=m_{upper}-m_{lower}$:
+$\pi$ ($q=0$) is a dipole along $B$, intensity $\propto\sin^2\theta$; $\sigma^\pm$ ($q=\pm1$) is a dipole rotating around $B$,
+intensity $\propto(1+\cos^2\theta)/2$, where $\theta$ is the angle between line of sight and $B$.
+Across the field the $\pi$ light is linear along $B$ and the $\sigma$ light linear across it; along the field only
+circular $\sigma$ light remains.
+"""),
+("code", r"""from src.optics.figures import fig_polarisation_ellipses, fig_polarisation_filters
+fig_polarisation_ellipses(); plt.show()"""),
+("code", r"""fig_polarisation_filters(2.0); plt.show()"""),
+("markdown", r"""Top row: looking across $B$. A polariser parallel to $B$ keeps only $\pi$ lines; one perpendicular keeps only $\sigma$.
+Bottom row: looking along $B$ there are no $\pi$ lines, and a circular analyser (quarter-wave plate plus polariser)
+separates $\sigma^+$ (red) from $\sigma^-$ (green).
+
+## Check against the textbook: classic intensity ratios
+
+Viewed across the field in weak field, the four D1 components are equally bright, and the D2 components
+have relative intensities 4 : 3 : 1 (the $\pi$ lines : inner $\sigma$ : outer $\sigma$). Nothing here is typed in:
+it comes from the matrix elements and the angular pattern.
+"""),
+("code", r"""comps = sodium_d_components(0.05)
+seen = observe(comps, 90.0)
+d1 = seen[seen.line == 'D1'].observed.to_numpy()
+print('D1 observed intensities:', np.round(d1, 3), '  (all equal)')
+d2 = seen[seen.line == 'D2'].assign(absshift=lambda d: d.shift_pm.abs()).sort_values('absshift')
+pi, s_in, s_out = d2.observed.to_numpy()[[0, 2, 4]]
+print('D2: pi : inner sigma : outer sigma = %.2f : %.2f : %.2f' % (pi / s_out, s_in / s_out, 1.0))"""),
+("markdown", r"""## Animations
+
+Generated by `scripts/make_optics_figures.py --gif` into `docs/figures/`.
+
+**1. Colour filter scan.** A colour (band-pass) filter sweeps across the lamp spectrum and only the lines inside its
+pass band reach the screen. This is "filter each colour one by one".
+
+![filter scan](../docs/figures/optics_filter_scan.gif)
+
+**2. Field ramp.** Raising $B$ makes the Zeeman components of Na D1 and D2 fan out.
+
+![field ramp](../docs/figures/optics_zeeman_field_ramp.gif)
+
+**3. Rotating polariser.** Across the field, $\pi$ and $\sigma$ lines trade places as the polariser turns (Malus's law).
+
+![polariser rotation](../docs/figures/optics_polariser_rotation.gif)
+
+**4. Tilting the line of sight.** From across the field to along it: $\pi$ fades out and $\sigma$ becomes circular.
+
+![view angle](../docs/figures/optics_view_angle.gif)
+"""),
+("markdown", r"""**Take-away.** Colour tells you the *element* and the *transition*; the Zeeman components live far finer than
+the eye or a prism can see; and polarisation is the tool that sorts them: linear filters across the field, circular
+filters along it. Together they let you pick out single components and compare their intensities with theory.
+"""),
+]
+
 NOTEBOOKS = {
     "01_normal_zeeman_lab.ipynb": NB1,
     "02_anomalous_zeeman_lab.ipynb": NB2,
     "03_paschen_back_transition_lab.ipynb": NB3,
     "04_tensor_operators_torch.ipynb": NB4,
     "05_hydrogen_n2_lab.ipynb": NB5,
+    "06_virtual_spectrometer_lab.ipynb": NB6,
 }
 
 for name, cells in NOTEBOOKS.items():

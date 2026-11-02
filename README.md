@@ -34,6 +34,36 @@ from diagonalising the Hamiltonian and applying the dipole operator.*
 2S₁/₂ / 2P₁/₂ crossing at 573 G. A magnetic field never mixes 2s with 2p, so these levels cross
 instead of repelling.*
 
+## The virtual spectrometer: colours, a prism, and polarisation filters
+
+Put optics in front of the computed lines and watch what each filter lets through (Extension B, `src/optics/`).
+
+<p align="center">
+  <img src="docs/figures/optics_polarisation_filters.png" width="780" alt="Sodium D lines at 2 tesla through polarisers across the field and circular analysers along it">
+</p>
+
+*Sodium D lines at 2 T. Top row, looking across the field: a polariser parallel to B keeps only the π lines,
+one perpendicular keeps only the σ lines. Bottom row, looking along the field: no π light, and a circular analyser
+separates σ+ (red) from σ− (green). The yellow strip is the colour of the light itself.*
+
+| Animation | What it shows |
+|---|---|
+| ![filter scan](docs/figures/optics_filter_scan.gif) | **Colour filter sweeping the spectrum**: only the lamp lines inside the pass band reach the prism screen |
+| ![polariser](docs/figures/optics_polariser_rotation.gif) | **Rotating polariser** (Malus's law): π and σ lines trade places |
+| ![view angle](docs/figures/optics_view_angle.gif) | **Tilting the line of sight**: π fades out, σ becomes circular |
+| ![field ramp](docs/figures/optics_zeeman_field_ramp.gif) | **Field ramp**: the Zeeman components of Na D1 and D2 fan out |
+
+**An honest scale note.** The Zeeman shift is tiny: about 27 pm per tesla for the outermost sodium D2 line, and every
+component is the same yellow. A prism cannot separate them. The closest components need a resolving power of about
+55 000 at 1 T, while a 5 cm glass prism offers about 2 000:
+
+<p align="center">
+  <img src="docs/figures/optics_instrument_ladder.png" width="780" alt="Resolving power of prisms, gratings and a Fabry-Perot against what the Zeeman pattern needs">
+</p>
+
+Reproduced from the model with nothing typed in: the four D1 components are equally bright and the D2 components
+have relative intensities 4 : 3 : 1 when viewed across the field.
+
 ## Why decompose a problem?
 
 1. **Understand** the phenomenon, the math and the physics behind it, one layer at a time.
@@ -54,6 +84,9 @@ All four levels are implemented and tested. Each has a notebook in `notebooks/` 
 **Extension A: hydrogen n = 2** (`hydrogen.py`, notebook 5, `docs/ext_hydrogen_n2.tex`) puts the 2s and
 2p levels in one Hamiltonian, adds the Lamb shift, and predicts the 2S-2P level-crossing field
 (573 G, against "about 570 G" in the literature).
+
+**Extension B: the virtual spectrometer** (`src/optics/`, notebook 6, `docs/ext_optics.tex`) adds colours, a glass prism,
+polarisation filters and an instrument ladder, with four animations.
 
 ## The model
 
@@ -81,6 +114,9 @@ eigenvectors.
 | ζ recovered from synthetic data (1 µeV noise) | about 0.01 % error | known input | `src/fitting.py`, Notebook 4 |
 | H 2S₁/₂(−½) × 2P₁/₂(+½) crossing | 573.4 G | about 570 G | literature includes hyperfine structure; Lamb shift is the only input |
 | H 2P₃/₂ − 2P₁/₂ from Dirac theory vs measured | 10949 MHz | 10969 MHz | 0.2 % apart (QED); the measured value is not yet source-checked |
+| Na D1 components across B (weak field) | 4 equal | 4 equal | classic result, from matrix elements and the angular pattern |
+| Na D2 components across B (π : inner σ : outer σ) | 4.00 : 2.99 : 1.00 | 4 : 3 : 1 | classic result |
+| Resolving power to separate Zeeman components at 1 T | about 55 000 | prism 2 000, grating 1.2×10⁵ | a prism cannot show the pattern |
 
 Reference values live in `data/experimental_reference.csv`. Please verify them against
 [NIST ASD](https://physics.nist.gov/asd) before citing them.
@@ -91,7 +127,8 @@ Reference values live in `data/experimental_reference.csv`. Please verify them a
 git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
-python -m pytest -q                       # 47 tests
+python scripts/run_all.py                 # or do everything in one go (add --fast to skip GIFs)
+python -m pytest -q                       # 68 tests
 python scripts/make_figures.py --gif      # figures and animation into docs/figures/
 python scripts/execute_notebooks.py       # run the notebooks and save their output
 cd docs && latexmk -pdf main.tex          # build the PDF report
@@ -118,11 +155,12 @@ print(lines[["polarisation", "wavenumber_cm1", "intensity"]])
 
 ```
 src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, validation, animation, torch_engine
-tests/          47 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2
+src/optics/     color, prism, polarization, spectrometer, instruments, figures (the virtual spectrometer)
+tests/          68 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, optics
 data/           experimental reference values
-notebooks/      one lab per level plus hydrogen, with explanations and saved output
+notebooks/      six labs (levels 1 to 4, hydrogen, virtual spectrometer), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per level), figures, and CODE_GUIDE.md
-scripts/        make_figures.py, make_notebooks.py, execute_notebooks.py
+scripts/        run_all.py, make_figures.py, make_optics_figures.py, make_notebooks.py, execute_notebooks.py
 .github/        CI: tests, notebook execution and PDF build on every push
 ```
 
@@ -132,6 +170,9 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 
 - [x] Levels 1 to 4: Zeeman physics, spectra, selection rules, fitting
 - [x] Add hydrogen n = 2 (2s and 2p levels together, Lamb shift)
+- [x] Virtual spectrometer: colours, prism, polarisation filters, instrument ladder
+- [ ] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
+- [ ] Add the Paschen-Back collapse of the D lines (60 T) to the optics animations
 - [ ] Add an electric field to mix 2s with 2p (Lamb-Retherford quenching, anticrossings)
 - [ ] Add a two-electron system (e.g. helium or calcium) with LS-coupling mixing
 - [ ] Compare full spectra with published high-field measurements

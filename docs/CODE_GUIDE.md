@@ -8,7 +8,8 @@ the code. Energies are in **eV**, fields in **tesla**, and angular momentum oper
 ```
 constants.py ──► hamiltonians.py ──► solvers.py ──► animation.py / validation.py
                                  ├──► transitions.py (Level 4) ──► fitting.py
-                                 └──► hydrogen.py (Extension A: n = 2, 2s + 2p)
+                                 ├──► hydrogen.py (Extension A: n = 2, 2s + 2p)
+                                 └──► optics/ (Extension B: colours, prism, polarisation filters, instruments)
 ```
 
 1. **Build** the Hamiltonian as a matrix (`hamiltonians.py`).
@@ -103,6 +104,55 @@ Puts **two different orbital levels** (2s and 2p) in one Hamiltonian. Energies a
   because at exactly B = 0 degenerate levels have arbitrary eigenvectors.
 - **`level_index(labels, term, mj)`** looks up a level's column, e.g. `level_index(labels, "2S1/2", -0.5)`.
 
+## `src/optics/`: Extension B, the virtual spectrometer
+
+A package with one file per idea. It takes the Zeeman components from `transitions.zeeman_lines` and puts
+optics in front of them: colours, a glass prism, polarisation filters, and the question of how fine an
+instrument must be. Chain: **source in field B → line of sight at angle θ from B → polariser/analyser → prism and/or
+high-resolution stage.**
+
+**`color.py`**
+- `wavelength_to_rgb(nm)` gives the display colour of a visible wavelength (a piecewise fit; black outside 380 to 750 nm).
+  It is an approximation for plots, not a colour standard.
+- `rainbow_strip(...)` builds an RGB image of the visible spectrum, used as a plot background.
+
+**`prism.py`**
+- `refractive_index(nm, glass)` is the Sellmeier equation with catalogue constants for `"BK7"` and `"SF11"`.
+- `deviation_deg(nm, incidence, apex, glass)` applies Snell's law at both faces and returns the total bend of a ray.
+- `min_deviation_incidence_deg` and `min_deviation_deg` give the symmetric (minimum-deviation) setting,
+  δ_min = 2 asin(n sin(A/2)) − A.
+- `screen_position_m(nm, distance)` converts the bend into a position on a screen, relative to the 589 nm line.
+- `prism_resolving_power(nm, base_mm, glass)` is R = b·|dn/dλ|, the finest wavelength difference the prism can separate.
+
+**`polarization.py`** (Jones calculus; the conventions are written at the top of the file)
+- `component_jones(q, theta)` is the Jones vector of a component with q = m_upper − m_lower seen at angle θ from B.
+  Its squared length is the brightness pattern: sin²θ for π, (1 + cos²θ)/2 for σ.
+- `angular_intensity(q, theta)` returns that squared length.
+- `linear_polariser(phi)`, `quarter_wave_plate(angle)` and `circular_polariser(±1)` are the 2×2 matrices of the optical elements.
+- `transmitted_intensity(jones, element)` is |M·J|² after an element (or product of elements).
+- `polarisation_ellipse(jones)` gives the path traced by the electric-field tip, for drawing.
+
+**`spectrometer.py`**
+- `LAMP_LINES` is a small lamp table (Hg, H and Na lines) used for colour demonstrations. The relative intensities are illustrative.
+- `vacuum_cm1_to_air_nm` converts wavenumbers to air wavelengths.
+- `sodium_d_components(B)` runs the atomic model and returns every D1/D2 component with its polarisation,
+  air wavelength, shift in pm from the zero-field line, and emission rate. B must be above zero.
+- `observe(components, theta, element)` multiplies each rate by |M·J|²: this is the intensity an observer sees at that
+  angle through that filter.
+- `bandpass_transmission` is a colour filter; `gaussian_spectrum` blurs lines with an instrument profile.
+- `required_resolving_power(components)` is the λ/Δλ needed to separate the two closest components;
+  `field_for_resolving_power(R)` inverts it: the weakest field at which an instrument of power R just separates them.
+
+**`instruments.py`**
+- `grating_resolving_power` (R = m·N) and `fabry_perot_resolving_power` (R ≈ m·F) add two instrument types to the prism.
+- `instrument_ladder()` lists ideal resolving powers from a prism up to a Fabry-Perot. Real instruments reach less.
+- `required_power_vs_field(B_values)` is the power the sodium pattern needs at each field.
+- `fig_instrument_ladder()` draws both comparisons. The result: a 5 cm BK7 prism would need about 26 T, a large grating 0.45 T.
+
+**`figures.py`**: static figures `fig_prism_setup`, `fig_polarisation_filters`, `fig_polarisation_ellipses`, and four animations
+`animate_filter_scan` (a colour filter sweeping across the lamp spectrum), `animate_zeeman_field_ramp`,
+`animate_polariser_rotation` (Malus's law) and `animate_view_angle` (π fades out, σ becomes circular).
+
 ## `src/animation.py`: plots and animation
 
 - **`plot_energy_levels(...)`** static energy-versus-field diagram built on `track_levels`.
@@ -126,6 +176,8 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_physical_constants.py` | Bohr magneton value; Landé g-factors; weak-field slopes = g_J·m_j; Paschen-Back limit; exact stretched states. |
 | `test_transitions.py` | 3-j values; selection rules; parity forbids s→s; Na D1/D2 have 4/6 components at the textbook positions and intensities; D2:D1 = 2. |
 | `test_fitting.py` | Known ζ and g_s are recovered from synthetic data. |
+| `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
+| `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
 
 Run them all with `python -m pytest -q`.
@@ -133,7 +185,9 @@ Run them all with `python -m pytest -q`.
 ## `scripts/`
 
 - **`make_figures.py`** regenerates every figure in `docs/figures/` (add `--gif` for the animation).
-- **`make_notebooks.py`** writes the four notebooks from their source text.
+- **`make_optics_figures.py`** renders the virtual-spectrometer figures and, with `--gif`, its four animations.
+- **`run_all.py`** one command for everything (tests, figures, notebooks, PDF). Options: `--fast` (no GIFs), `--no-pdf`.
+- **`make_notebooks.py`** writes the six notebooks from their source text.
 - **`execute_notebooks.py`** runs all notebook cells and saves the printed output and plots inside the `.ipynb` files.
 
 ## `notebooks/`
@@ -141,11 +195,12 @@ Run them all with `python -m pytest -q`.
 One lab per level, each with theory in markdown, code, and saved output.
 1. Normal Zeeman and the Lorentz triplet · 2. Spin-orbit, Landé g and ζ from sodium ·
 3. Weak field to Paschen-Back, with tracked levels · 4. Selection rules, line intensities and fitting ·
-5. Hydrogen n = 2: Lamb shift, level crossings, and why B never mixes 2s with 2p.
+5. Hydrogen n = 2: Lamb shift, level crossings, and why B never mixes 2s with 2p ·
+6. The virtual spectrometer: colours, prism, polarisation filters, and which instrument can resolve the Zeeman pattern.
 
 ## `docs/` and `.github/`
 
-- `docs/main.tex` includes one `.tex` file per level plus `ext_hydrogen_n2.tex`; build with `cd docs && latexmk -pdf main.tex`.
+- `docs/main.tex` includes one `.tex` file per level plus `ext_hydrogen_n2.tex` and `ext_optics.tex`; build with `cd docs && latexmk -pdf main.tex`.
 - `.github/workflows/latex.yml` runs the tests, executes the notebooks and builds the PDF on every push.
 
 ---

@@ -27,6 +27,7 @@ jobs:
           python-version: "3.12"
       - run: pip install numpy scipy matplotlib pandas
       - run: python scripts/make_figures.py
+      - run: python scripts/make_optics_figures.py
       - uses: xu-cheng/latex-action@v3
         with:
           root_file: main.tex
