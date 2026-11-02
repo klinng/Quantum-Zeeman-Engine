@@ -1,0 +1,15 @@
+\section{Level 2: Anomalous Zeeman effect (spin--orbit and Land\'e $g$)}
+Spin adds a moment with $g_s \approx 2.0023$. With spin--orbit coupling
+$H_{SO} = \zeta\,\vb{L}\cdot\vb{S}$ the good quantum number is $j$, with
+\begin{equation}
+  E_{SO}(j) = \tfrac{\zeta}{2}\big[j(j+1) - l(l+1) - s(s+1)\big],
+  \qquad E(l+\tfrac12) - E(l-\tfrac12) = \zeta\,(l+\tfrac12).
+\end{equation}
+For weak fields ($\mu_B B \ll \zeta$) the projection theorem gives
+\begin{equation}
+  \Delta E = g_J\, \mu_B B\, m_j, \qquad
+  g_J = 1 + (g_s - 1)\,\frac{j(j+1) + s(s+1) - l(l+1)}{2j(j+1)} .
+\end{equation}
+For a $p$ electron ($g_s=2$): $g_J(^2P_{1/2}) = 2/3$ and $g_J(^2P_{3/2}) = 4/3$; for $^2S_{1/2}$,
+$g_J = 2$. This is why the sodium D lines split into 4 and 6 components rather than 3.
+\emph{Numerical check:} \texttt{tests/test\_physical\_constants.py} verifies the slopes at small $B$.

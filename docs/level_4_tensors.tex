@@ -1,0 +1,11 @@
+\section{Level 4: Wigner--Eckart theorem and spherical tensors}
+\emph{Planned.} The Zeeman operator is a rank-1 spherical tensor, $H_Z \propto B\,T^{(1)}_0(\vb{L}+g_s\vb{S})$.
+The Wigner--Eckart theorem factorises its matrix elements as
+\begin{equation}
+  \bra{\gamma' j' m'} T^{(k)}_q \ket{\gamma j m}
+  = (-1)^{j'-m'}\begin{pmatrix} j' & k & j\\ -m' & q & m\end{pmatrix}
+    \bra{\gamma' j'}\!\vert T^{(k)}\vert\!\ket{\gamma j},
+\end{equation}
+which explains the selection rules $\Delta m = 0,\pm1$ and gives intensities of the Zeeman components.
+Next steps: implement the 3-$j$ symbols (\texttt{sympy.physics.wigner}), and compare relative
+line intensities with experiment. The PyTorch module can then fit $\zeta$ by autograd.

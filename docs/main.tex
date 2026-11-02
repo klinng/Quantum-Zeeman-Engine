@@ -1,0 +1,53 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,physics,siunitx,graphicx,booktabs,hyperref}
+\usepackage[margin=2.5cm]{geometry}
+\graphicspath{{figures/}}
+
+\title{Quantum Zeeman Engine\\ \large From the normal Zeeman effect to Paschen--Back, level by level}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\begin{abstract}
+We decompose the Zeeman effect into successive levels. Each level gets a derivation (this
+report), a numerical model (\texttt{src/}), a plot or animation, and a comparison with
+experimental values. If the numerical result reproduces the measurement, the model underneath is
+correct.
+\end{abstract}
+
+\section{Method}
+For one electron with orbital momentum $l$ and spin $1/2$,
+\begin{equation}
+  H = H_0 + \zeta\, \vb{L}\!\cdot\!\vb{S} + \mu_B B\,(g_l L_z + g_s S_z),
+\end{equation}
+built as a matrix in the product basis $\ket{l,m_l}\otimes\ket{\tfrac12,m_s}$ and diagonalised
+with \texttt{numpy.linalg.eigh}. The spin--orbit constant $\zeta$ is fixed from the measured
+fine-structure splitting, then everything else is a prediction.
+
+\input{level_1_normal}
+\input{level_2_anomalous}
+\input{level_3_paschen_back}
+\input{level_4_tensors}
+
+\section{Validation against experiment}
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Quantity & Reference & Model \\
+\midrule
+Na $3p$ fine-structure splitting (\si{\per\centi\metre}) & 17.196 & 17.196 (input) \\
+$g_J(^2P_{1/2})$ & $2/3$ & see Level 2 \\
+$g_J(^2P_{3/2})$ & $4/3$ & see Level 2 \\
+\bottomrule
+\end{tabular}
+\caption{Reference values are in \texttt{data/experimental\_reference.csv}. Check them against NIST ASD before publishing.}
+\end{table}
+
+\end{document}

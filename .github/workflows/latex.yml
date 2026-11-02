@@ -1,0 +1,35 @@
+name: Build tests and LaTeX PDF
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy scipy matplotlib pandas pytest pillow
+      - run: python -m pytest -q
+
+  pdf:
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy scipy matplotlib pandas
+      - run: python scripts/make_figures.py
+      - uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: docs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zeeman-report
+          path: docs/main.pdf

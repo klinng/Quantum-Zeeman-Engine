@@ -1,0 +1,12 @@
+\section{Level 1: Normal Zeeman effect (orbital only)}
+Ignoring spin, an electron with orbital momentum $\vb{L}$ has magnetic moment
+$\vb{\mu}_l = -\mu_B \vb{L}/\hbar$, so
+\begin{equation}
+  H_Z = \frac{\mu_B}{\hbar} B L_z, \qquad
+  \Delta E = \mu_B B\, m_l, \quad m_l = -l,\dots,l .
+\end{equation}
+Each level splits into $2l+1$ equally spaced components. A transition between two such
+levels with $\Delta m_l = 0,\pm1$ gives three lines: the $\pi$ line (unshifted) and the two
+$\sigma$ lines shifted by $\pm \mu_B B$. In wavenumbers,
+$\Delta\tilde\nu = \pm \mu_B B/(hc) \approx \pm 0.4669\,B[\si{T}]\ \si{\per\centi\metre}$.
+\emph{Numerical check:} set $\zeta=0$ in the code; the spectrum must be equally spaced.
