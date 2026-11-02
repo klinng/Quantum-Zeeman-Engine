@@ -1,11 +1,68 @@
-\section{Level 4: Wigner--Eckart theorem and spherical tensors}
-\emph{Planned.} The Zeeman operator is a rank-1 spherical tensor, $H_Z \propto B\,T^{(1)}_0(\vb{L}+g_s\vb{S})$.
-The Wigner--Eckart theorem factorises its matrix elements as
+\section{Level 4: Wigner--Eckart theorem, selection rules and line intensities}
+Levels 1--3 gave the \emph{positions} of the energy levels. To predict a spectrum we also need
+which transitions occur, how polarised they are and how bright. All three follow from one fact:
+the electric-dipole operator $\vb{r}$ is a rank-1 spherical tensor.
+
+\subsection{Matrix elements}
+Write $\vb{r} = r\,\vb{C}^{(1)}$ with components $C^{(1)}_q$, $q\in\{-1,0,+1\}$. The
+Wigner--Eckart theorem factorises every matrix element into a geometric part (a 3-$j$ symbol) and a
+radial part that is the same for all $m$:
 \begin{equation}
-  \bra{\gamma' j' m'} T^{(k)}_q \ket{\gamma j m}
-  = (-1)^{j'-m'}\begin{pmatrix} j' & k & j\\ -m' & q & m\end{pmatrix}
-    \bra{\gamma' j'}\!\vert T^{(k)}\vert\!\ket{\gamma j},
+  \bra{l'm'} C^{(1)}_q \ket{l\,m}
+  = (-1)^{m'}\sqrt{(2l+1)(2l'+1)}
+    \begin{pmatrix} l' & 1 & l\\ 0 & 0 & 0\end{pmatrix}
+    \begin{pmatrix} l' & 1 & l\\ -m' & q & m\end{pmatrix}.
 \end{equation}
-which explains the selection rules $\Delta m = 0,\pm1$ and gives intensities of the Zeeman components.
-Next steps: implement the 3-$j$ symbols (\texttt{sympy.physics.wigner}), and compare relative
-line intensities with experiment. The PyTorch module can then fit $\zeta$ by autograd.
+The 3-$j$ symbols vanish unless
+\begin{equation}
+  l' = l\pm1 \ (\text{parity}),\qquad m' - m = q \in\{-1,0,+1\}.
+\end{equation}
+These are the selection rules. Light emitted with $q=0$ is $\pi$-polarised and with $q=\pm1$ is
+$\sigma^\pm$. The dipole operator does not act on spin, so $m_s$ is conserved at the level of the
+uncoupled basis $\ket{m_l,m_s}$.
+
+\subsection{Intensities between exact eigenstates}
+Spin--orbit coupling mixes the $\ket{m_l,m_s}$ states, so the eigenstates $\ket{u}$ (upper
+manifold) and $\ket{k}$ (lower manifold) are superpositions. The intensity of the component
+$u\to k$ with polarisation $q$ is
+\begin{equation}
+  I_{uk}^{(q)} \;\propto\; \big|\bra{u}\, D_q \ket{k}\big|^2,
+\end{equation}
+where $D_q$ is the dipole matrix in the uncoupled basis, and the states are the numerically
+diagonalised eigenvectors. Intensities are normalised so that every upper state emits a total of 1.
+Because $\sum_{q,k}|\bra{u}D_q\ket{k}|^2$ is the same for every $p$ state, this is automatic for
+$p\to s$ transitions (checked by the tests).
+
+\subsection{Result: the sodium D lines}
+Setting the energy origin from the measured D1 line ($16956.17\ \si{\per\centi\metre}$) and
+$\zeta$ from the measured fine-structure splitting, the model predicts, with no further input,
+the following weak-field pattern (shifts in units of $\mu_B B$):
+\begin{table}[h]
+\centering
+\begin{tabular}{llcc}
+\toprule
+Line & Polarisation & Shift $(\mu_B B)$ & Relative intensity\\
+\midrule
+D1 & $\pi$      & $\pm 2/3$ & $1/3$\\
+D1 & $\sigma^\pm$ & $\pm 4/3$ & $2/3$\\
+D2 & $\pi$      & $\pm 1/3$ & $2/3$\\
+D2 & $\sigma^\pm$ & $\pm 1$   & $1$\\
+D2 & $\sigma^\pm$ & $\pm 5/3$ & $1/3$\\
+\bottomrule
+\end{tabular}
+\caption{Computed Zeeman pattern of the sodium D lines (LS coupling). D1 has 4 components, D2 has 6;
+the total intensity ratio D2\,:\,D1 is exactly $2:1$, the ratio of the statistical weights $(2j+1)$.
+All entries are reproduced by \texttt{tests/test\_transitions.py}.}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{na_d_lines_zeeman.pdf}
+\caption{Computed Zeeman components of Na D1 (left) and D2 (right) at $B=1\ \si{T}$. Colours show polarisation.}
+\end{figure}
+
+\subsection{Fitting parameters back from data}
+The same machinery runs in reverse. Given measured level energies at several fields,
+\texttt{src/fitting.py} varies $\zeta$ (and optionally $g_s$) to minimise the sum of squared
+residuals. On synthetic data with $1\ \si{\micro eV}$ noise the true $\zeta$ is recovered to about
+$0.01\,\%$ starting from a guess that is a factor 2 off (Notebook~4).

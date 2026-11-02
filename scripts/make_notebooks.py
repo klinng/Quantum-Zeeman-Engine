@@ -1,16 +1,22 @@
-"""Create the four lab notebooks (run once; notebooks are then edited normally)."""
+"""Create the four lab notebooks. Run once, then execute them with scripts/execute_notebooks.py
+(or open them in VSCode / Jupyter and click Run All)."""
 import json
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "notebooks"
 OUT.mkdir(exist_ok=True)
 
-HEAD = "import sys; sys.path.insert(0, '..')\nimport numpy as np, matplotlib.pyplot as plt\n"
+HEAD = r"""import sys
+sys.path.insert(0, '..')          # so `import src...` works from the notebooks folder
+import numpy as np
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 110, 'axes.grid': True, 'grid.alpha': 0.3})
+"""
 
 
 def nb(cells):
     def cell(kind, src):
-        c = {"cell_type": kind, "metadata": {}, "source": src.splitlines(keepends=True)}
+        c = {"cell_type": kind, "metadata": {}, "source": src.strip("\n").splitlines(keepends=True)}
         if kind == "code":
             c.update(execution_count=None, outputs=[])
         return c
@@ -18,31 +24,317 @@ def nb(cells):
             "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}}}
 
 
+# --------------------------------------------------------------------------------------------
+NB1 = [
+("markdown", r"""# Level 1: The normal Zeeman effect
+
+**Goal.** See, in numbers and plots, that a magnetic field splits an orbital level into equally
+spaced components, and that this produces the famous Lorentz *triplet*.
+
+**Physics.** An electron with orbital angular momentum $\mathbf L$ has a magnetic moment
+$-\mu_B\mathbf L/\hbar$. In a field $B$ along $z$ the energy shifts by
+
+$$\Delta E = \mu_B B\, m_l, \qquad m_l = -l,\dots,+l .$$
+
+**Trick used here.** The real electron also has spin. To isolate the *orbital-only* effect we switch
+spin off in the code: spin-orbit constant $\zeta = 0$ and spin g-factor $g_s = 0$.
+"""),
+("code", HEAD + r"""from src.solvers import energy_vs_field
+from src.constants import MU_B_EV
+
+b = np.linspace(0, 10, 50)                        # tesla
+e = energy_vs_field(1, b, 0.0, g_s=0.0)           # l=1, zeta=0, g_s=0 -> orbital only
+plt.plot(b, e * 1e3)
+plt.xlabel('B (T)'); plt.ylabel('E (meV)'); plt.title('p orbital, orbital-only Zeeman effect')
+plt.show()
+
+spacing_per_tesla = (e[-1, -1] - e[-1, 0]) / 2 / b[-1]
+print('level spacing per tesla (eV/T):', spacing_per_tesla)
+print('Bohr magneton mu_B       (eV/T):', MU_B_EV)"""),
+("markdown", r"""Three distinct lines appear (each is doubly degenerate because spin is switched off): $m_l=-1,0,+1$.
+The measured spacing per tesla equals the Bohr magneton, as the formula predicts.
+
+## The Lorentz triplet
+
+Now let the p level decay to an s level. Selection rules (Level 4 explains why) allow
+$\Delta m_l = 0, \pm 1$, so we see three lines: an unshifted $\pi$ line and two $\sigma$ lines
+shifted by $\pm\mu_B B$.
+"""),
+("code", r"""from src.transitions import zeeman_lines
+from src.animation import plot_stick_spectrum
+from src.constants import MU_B_J, HBAR
+import scipy.constants as sc
+
+df = zeeman_lines(1, 0, 1.0, 0.0, 0.0, 0.0, g_s=0.0)   # B = 1 T, p -> s
+print(df[['polarisation', 'wavenumber_cm1', 'intensity']].round(4).to_string(index=False))
+print('mu_B B / (h c) at 1 T = %.4f cm^-1' % (MU_B_J * 1.0 / (sc.h * sc.c) / 100))
+
+plot_stick_spectrum(df, 0.0, title='Normal Zeeman triplet at B = 1 T')
+plt.show()"""),
+("markdown", r"""The table lists 6 components, but they sit at only **3 distinct positions**: spin-up and spin-down give
+identical shifts when spin is switched off, so they lie on top of each other. The shifts are
+$-0.467,\ 0,\ +0.467\ \mathrm{cm^{-1}}$ per tesla, exactly $\mu_B B/(hc)$.
+
+## Does it depend on $l$?
+
+For a level with orbital momentum $l$ there are $2l+1$ equally spaced sublevels. Check $l=2$:
+"""),
+("code", r"""for l in (1, 2, 3):
+    levels = np.unique(np.round(energy_vs_field(l, [1.0], 0.0, g_s=0.0)[0] / MU_B_EV, 6))
+    print('l =', l, ' energies / (mu_B B) =', levels)"""),
+("markdown", r"""**Take-away.** With spin ignored, the Hamiltonian is just $\mu_B B L_z$. Its eigenvalues are the integers
+$m_l$ in units of $\mu_B B$, and the spectrum is a symmetric triplet. Real atoms usually show *more*
+than three lines. That is the anomalous Zeeman effect (Level 2).
+"""),
+]
+
+# --------------------------------------------------------------------------------------------
+NB2 = [
+("markdown", r"""# Level 2: The anomalous Zeeman effect (spin-orbit + Landé $g$)
+
+**Goal.** Add electron spin and spin-orbit coupling, and reproduce the Landé $g$-factors that
+explain why sodium's D lines split into 4 and 6 components rather than 3.
+
+**Physics.**
+$$H = \zeta\,\mathbf L\!\cdot\!\mathbf S + \mu_B B\,(g_l L_z + g_s S_z),\qquad
+g_J = 1 + (g_s-1)\frac{j(j+1)+s(s+1)-l(l+1)}{2j(j+1)}$$
+For weak fields ($\mu_B B \ll \zeta$): $\Delta E = g_J\,\mu_B B\,m_j$.
+
+**Fixing $\zeta$ from experiment.** For one p electron, $E(j{=}3/2) - E(j{=}1/2) = \tfrac32\zeta$.
+Sodium's measured 3p fine-structure splitting is $17.196\ \mathrm{cm^{-1}}$. We set $\zeta$ from that
+single number. Everything after that is a prediction.
+"""),
+("code", HEAD + r"""from src.validation import zeta_from_fine_structure, fine_structure_splitting_cm1
+from src.hamiltonians import landé_g
+from src.solvers import energy_vs_field
+from src.constants import MU_B_EV
+
+zeta = zeta_from_fine_structure(17.196, l=1)
+print('zeta = %.6f eV = %.4f meV' % (zeta, zeta * 1e3))
+print('splitting recomputed from the matrix:', round(fine_structure_splitting_cm1(1, zeta), 6), 'cm^-1')
+print('crossover field B* = zeta/mu_B = %.1f T' % (zeta / MU_B_EV))"""),
+("markdown", r"""## Do the numerical slopes match the Landé formula?
+
+At a small field every level moves linearly with slope $g_J m_j$ (in units of $\mu_B$).
+We compute the slopes numerically and compare with the formula:
+"""),
+("code", r"""b = 1e-3 * zeta / MU_B_EV                                   # tiny field: mu_B B << zeta
+e0 = energy_vs_field(1, [0.0], zeta)[0]
+e1 = energy_vs_field(1, [b], zeta)[0]
+numeric = np.sort((e1 - e0) / (MU_B_EV * b))
+
+g12, g32 = landé_g(1, 0.5), landé_g(1, 1.5)
+expected = np.sort([g12 * m for m in (-0.5, 0.5)] + [g32 * m for m in (-1.5, -0.5, 0.5, 1.5)])
+
+print('g_J(2P1/2) = %.4f   g_J(2P3/2) = %.4f   (g_s = 2.0023)' % (g12, g32))
+print('%10s %10s' % ('numeric', 'Lande'))
+for n_, x in zip(numeric, expected):
+    print('%10.4f %10.4f' % (n_, x))"""),
+("code", r"""from src.animation import plot_energy_levels, b_scale_tesla
+ax = plot_energy_levels(1, 0.3 * b_scale_tesla(zeta), zeta)
+ax.set_title('Weak-field region: straight lines with slopes g_J m_j')
+plt.show()"""),
+("markdown", r"""## Why 10 lines instead of 3
+
+Compare the p to s spectrum with spin switched off (Level 1) and on (this level), at the same field:
+"""),
+("code", r"""from src.transitions import zeeman_lines
+from src.constants import wavenumber_to_ev
+
+gap = wavenumber_to_ev(16956.17) + zeta           # puts 2P1/2 at the measured Na D1 energy
+normal = zeeman_lines(1, 0, 1.0, 0.0, 0.0, gap, g_s=0.0)
+anomalous = zeeman_lines(1, 0, 1.0, zeta, 0.0, gap)
+distinct = lambda d: len(np.unique(np.round(d.wavenumber_cm1.to_numpy(), 4)))
+print('distinct line positions, spin off (normal Zeeman)     :', distinct(normal))
+print('distinct line positions, spin-orbit on (Na D1 + D2)   :', distinct(anomalous))"""),
+("markdown", r"""**Take-away.** Spin-orbit coupling creates two $j$ levels with *different* $g_J$ values, so the
+sublevels fan out at different rates and the lines no longer coincide. Sodium D1 gives 4 lines and D2
+gives 6, which is 10 in total. The numbers above reproduce the textbook $g_J = 2/3$ and $4/3$ (small
+differences come from using $g_s = 2.0023$ instead of exactly 2).
+"""),
+]
+
+# --------------------------------------------------------------------------------------------
+NB3 = [
+("markdown", r"""# Level 3: From weak field to Paschen-Back
+
+**Goal.** Follow the levels continuously as $B$ grows from "weak" ($\mu_B B \ll \zeta$) to "strong"
+($\mu_B B \gg \zeta$), and see $\mathbf L$ and $\mathbf S$ decouple.
+
+**Physics.** In a strong field the Zeeman term wins and $m_l, m_s$ become good quantum numbers:
+$$E \simeq \mu_B B\,(m_l + g_s m_s) + \zeta\, m_l m_s .$$
+The crossover field is $B^\ast = \zeta/\mu_B$.
+
+**Numerical subtlety.** `numpy.linalg.eigh` always returns eigenvalues *sorted*. When two physical
+levels cross, sorting swaps them and hides the crossing. `solvers.track_levels` follows each level
+by matching eigenvectors from one field step to the next.
+"""),
+("code", HEAD + r"""from src.validation import zeta_from_fine_structure
+from src.solvers import energy_vs_field, track_levels
+from src.constants import MU_B_EV, G_S
+
+zeta = zeta_from_fine_structure(17.196, l=1)
+bstar = zeta / MU_B_EV
+b = np.linspace(0, 5 * bstar, 400)
+print('B* = %.1f T' % bstar)
+
+sorted_e = energy_vs_field(1, b, zeta)
+tracked = track_levels(1, b, zeta)
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+for k in range(6):
+    axes[0].plot(b, sorted_e[:, k] * 1e3)
+    axes[1].plot(b, tracked[:, k] * 1e3)
+axes[0].set_title('Sorted by energy (crossings hidden)')
+axes[1].set_title('Tracked levels (crossings visible)')
+for a in axes:
+    a.set_xlabel('B (T)'); a.axvline(bstar, color='k', ls=':', lw=1)
+axes[0].set_ylabel('Energy (meV)')
+plt.tight_layout(); plt.show()"""),
+("markdown", r"""The dotted line marks $B^\ast$. Levels with different $m_j = m_l + m_s$ really do cross (right panel).
+Levels with the *same* $m_j$ repel each other and never cross. Sorting merges both pictures into one.
+
+## Compare with the Paschen-Back formula
+
+Overlay the strong-field prediction on the exact curves:
+"""),
+("code", r"""fig, ax = plt.subplots(figsize=(7, 4.5))
+for k in range(6):
+    ax.plot(b, tracked[:, k] * 1e3, color='tab:blue', lw=1.5)
+for ml in (1, 0, -1):
+    for ms in (0.5, -0.5):
+        pb = MU_B_EV * b * (ml + G_S * ms) + zeta * ml * ms
+        ax.plot(b, pb * 1e3, 'r--', lw=0.8)
+ax.plot([], [], color='tab:blue', label='exact diagonalisation')
+ax.plot([], [], 'r--', label='Paschen-Back formula')
+ax.axvline(bstar, color='k', ls=':', lw=1)
+ax.set_xlabel('B (T)'); ax.set_ylabel('Energy (meV)'); ax.legend()
+plt.show()"""),
+("code", r"""# Slopes at a very large field (100 B*) versus the strong-field prediction (m_l + g_s m_s)
+b_hi = np.array([100 * bstar, 101 * bstar])
+e_hi = energy_vs_field(1, b_hi, zeta)
+slopes = np.sort((e_hi[1] - e_hi[0]) / (b_hi[1] - b_hi[0]) / MU_B_EV)
+pred = np.sort([ml + G_S * ms for ml in (1, 0, -1) for ms in (0.5, -0.5)])
+print('%10s %10s' % ('slope/mu_B', 'ml+gs*ms'))
+for s_, p_ in zip(slopes, pred):
+    print('%10.4f %10.4f' % (s_, p_))"""),
+("markdown", r"""The agreement improves as $B$ grows: at $5B^\ast$ the slopes are still a couple of percent off because
+the spin-orbit term keeps mixing states of equal $m_j$, but at $100B^\ast$ they match the formula.
+
+**Take-away.** Below $B^\ast$ the levels are grouped by $j$ (Level 2); far above it they are grouped by
+$m_l + g_s m_s$ and the red dashed lines match. The two stretched states ($m_l = \pm1$, $m_s = \pm\tfrac12$)
+are exact at every field, which the unit tests check. The animation `docs/figures/p_orbital_split.gif`
+shows the same transition as a movie.
+"""),
+]
+
+# --------------------------------------------------------------------------------------------
+NB4 = [
+("markdown", r"""# Level 4: Selection rules, line intensities and parameter fitting
+
+**Goal.** Predict not only *where* the Zeeman lines are but also *how bright* and *how polarised*
+they are, then fit a parameter back from "measured" data.
+
+**Physics.** The electric-dipole operator is a rank-1 spherical tensor. By the Wigner-Eckart theorem
+its matrix elements are proportional to a Wigner 3-j symbol:
+$$\langle l'm'|C^{(1)}_q|l\,m\rangle = (-1)^{m'}\sqrt{(2l+1)(2l'+1)}
+\begin{pmatrix} l' & 1 & l\\ 0&0&0\end{pmatrix}
+\begin{pmatrix} l' & 1 & l\\ -m' & q & m\end{pmatrix}.$$
+This enforces $\Delta l = \pm1$ and $m' - m = q \in \{-1,0,+1\}$ ($q=0$: $\pi$ light, $q=\pm1$: $\sigma$).
+Intensities are the squared matrix elements between the exact eigenstates of each level.
+"""),
+("code", HEAD + r"""from src.transitions import dipole_matrices
+
+d = dipole_matrices(1, 0)          # upper l=1 (6 states) to lower l=0 (2 states)
+fig, axes = plt.subplots(1, 3, figsize=(10, 3.6))
+for ax, q in zip(axes, (-1, 0, 1)):
+    im = ax.imshow(d[q], cmap='RdBu', vmin=-0.7, vmax=0.7)
+    ax.set_title('q = %+d' % q)
+    ax.set_yticks(range(6)); ax.set_yticklabels(['(+1,up)', '(+1,dn)', '(0,up)', '(0,dn)', '(-1,up)', '(-1,dn)'], fontsize=8)
+    ax.set_xticks([0, 1]); ax.set_xticklabels(['s up', 's dn'], fontsize=8)
+    ax.grid(False)
+axes[0].set_ylabel('upper state (m_l, spin)')
+plt.tight_layout(); plt.show()"""),
+("markdown", r"""Each panel is the dipole operator for one polarisation. Only one orbital row is non-zero per $q$
+(selection rule $\Delta m = q$) and spin is never flipped (blocks are diagonal in spin).
+
+## Sodium D lines: positions, polarisation, intensities
+"""),
+("code", r"""from src.validation import zeta_from_fine_structure
+from src.transitions import zeeman_lines
+from src.animation import plot_stick_spectrum
+from src.constants import MU_B_EV, wavenumber_to_ev, ev_to_wavenumber
+
+zeta = zeta_from_fine_structure(17.196, l=1)
+gap = wavenumber_to_ev(16956.17) + zeta           # measured Na D1 sets the energy origin
+d1c, d2c = gap - zeta, gap + zeta / 2
+B = 0.05                                          # weak field so the textbook patterns are clean
+df = zeeman_lines(1, 0, B, zeta, 0.0, gap)
+mid = 0.5 * (d1c + d2c)
+
+for name, centre, sel in (('D1', d1c, df.energy_ev < mid), ('D2', d2c, df.energy_ev >= mid)):
+    sub = df[sel].copy()
+    sub['shift (mu_B B)'] = (sub.energy_ev - centre) / (MU_B_EV * B)
+    print(name, '  components:', len(sub), '  total intensity: %.3f' % sub.intensity.sum())
+    print(sub[['polarisation', 'shift (mu_B B)', 'intensity']].round(3).to_string(index=False))
+    print()
+
+ratio = df[df.energy_ev >= mid].intensity.sum() / df[df.energy_ev < mid].intensity.sum()
+print('D2 : D1 intensity ratio = %.4f   (statistical weights 4 : 2 -> 2)' % ratio)"""),
+("markdown", r"""Textbook values for sodium (LS coupling): D1 lines at $\pm\tfrac23$ ($\pi$) and $\pm\tfrac43$ ($\sigma$)
+in units of $\mu_B B$ with relative intensities $1:2$; D2 lines at $\pm\tfrac13$ ($\pi$), $\pm1$ ($\sigma$),
+$\pm\tfrac53$ ($\sigma$) with intensities $2:3:1$. The numbers above reproduce all of it, with no
+pattern typed in by hand. They come purely from diagonalising $H$ and applying the dipole operator.
+"""),
+("code", r"""df1 = zeeman_lines(1, 0, 1.0, zeta, 0.0, gap)
+mid = 0.5 * (d1c + d2c)
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.6))
+plot_stick_spectrum(df1[df1.energy_ev < mid], ev_to_wavenumber(d1c), axes[0], 'Na D1, B = 1 T')
+plot_stick_spectrum(df1[df1.energy_ev >= mid], ev_to_wavenumber(d2c), axes[1], 'Na D2, B = 1 T')
+plt.tight_layout(); plt.show()"""),
+("markdown", r"""## Fitting a parameter back from data
+
+In a real experiment you measure energies and want the physical constants. Here we create
+synthetic "measurements" with a known $\zeta$ and 1 micro-eV noise, then recover it with
+`src.fitting.fit_parameters` (SciPy least squares), starting from a deliberately wrong guess.
+"""),
+("code", r"""from src.fitting import fit_parameters
+from src.solvers import energy_vs_field
+
+rng = np.random.default_rng(1)
+bs = np.linspace(1, 40, 15)
+data = energy_vs_field(1, bs, zeta) + rng.normal(0, 1e-6, size=(bs.size, 6))   # eV
+
+res = fit_parameters(1, bs, data, zeta0_ev=2.0 * zeta)                         # start 2x too large
+print('true zeta  = %.6f eV' % zeta)
+print('fitted     = %.6f eV   (relative error %.3f %%)' % (res.zeta_ev, 100 * (res.zeta_ev - zeta) / zeta))
+print('rms residual = %.2e eV' % res.rms_residual_ev)
+
+res2 = fit_parameters(1, bs, data, zeta0_ev=zeta, g_s0=2.0, fit_g_s=True)
+print('fit with g_s free:  zeta = %.6f eV,  g_s = %.5f  (true g_s = 2.00232)' % (res2.zeta_ev, res2.g_s))"""),
+("markdown", r"""## Optional: the same fit with PyTorch autograd
+
+`src/torch_engine.py` does the same job with automatic differentiation. It needs PyTorch
+(`pip install torch`), which is optional for this project.
+"""),
+("code", r"""try:
+    from src.torch_engine import fit_zeta
+    z_torch = fit_zeta(1, bs, data, zeta0=1e-3)
+    print('torch fit zeta = %.6f eV   (scipy fit = %.6f eV)' % (z_torch, res.zeta_ev))
+except ImportError:
+    print('PyTorch is not installed here, so this optional cell is skipped.')"""),
+("markdown", r"""**Take-away.** Level 4 completes the chain: Hamiltonian, then energies, then transition
+amplitudes, then a full predicted spectrum with polarisation and intensity. Matching the known sodium
+pattern is the strongest evidence in the project that the model is right. The fitting step shows how
+the same machinery works in reverse to extract constants from data.
+"""),
+]
+
 NOTEBOOKS = {
-    "01_normal_zeeman_lab.ipynb": [
-        ("markdown", "# Level 1: Normal Zeeman effect\nWith spin-orbit off (zeta = 0) levels are equally spaced, dE = mu_B B m_l."),
-        ("code", HEAD + "from src.solvers import energy_vs_field\nfrom src.constants import MU_B_EV\n"
-                 "b = np.linspace(0, 10, 50)\ne = energy_vs_field(1, b, 0.0, g_s=0.0)  # g_s=0 -> orbital only\n"
-                 "plt.plot(b, e*1e3); plt.xlabel('B (T)'); plt.ylabel('E (meV)'); plt.show()\n"
-                 "print('spacing per tesla (eV):', (e[-1,-1]-e[-1,0])/2/10, ' mu_B:', MU_B_EV)"),
-    ],
-    "02_anomalous_zeeman_lab.ipynb": [
-        ("markdown", "# Level 2: Anomalous Zeeman effect\nSet zeta from sodium and check Lande g-factors."),
-        ("code", HEAD + "from src.validation import zeta_from_fine_structure\nfrom src.hamiltonians import landé_g\n"
-                 "zeta = zeta_from_fine_structure(17.196, l=1)\nprint('zeta (eV):', zeta)\n"
-                 "print('g(2P1/2), g(2P3/2):', landé_g(1, 0.5), landé_g(1, 1.5))"),
-    ],
-    "03_paschen_back_transition_lab.ipynb": [
-        ("markdown", "# Level 3: Weak field to Paschen-Back"),
-        ("code", HEAD + "from src.animation import plot_energy_levels, b_scale_tesla\nfrom src.validation import zeta_from_fine_structure\n"
-                 "zeta = zeta_from_fine_structure(17.196, l=1)\nplot_energy_levels(1, 5*b_scale_tesla(zeta), zeta, show=True)"),
-    ],
-    "04_tensor_operators_torch.ipynb": [
-        ("markdown", "# Level 4: Tensor operators and PyTorch fitting (planned)\nRequires `pip install torch`."),
-        ("code", HEAD + "from src.solvers import energy_vs_field\nfrom src.torch_engine import fit_zeta\n"
-                 "true_zeta = 1.42e-3\nb = np.linspace(0, 3, 8)\ndata = energy_vs_field(1, b, true_zeta)\n"
-                 "print('fitted zeta:', fit_zeta(1, b, data, zeta0=1e-3), 'true:', true_zeta)"),
-    ],
+    "01_normal_zeeman_lab.ipynb": NB1,
+    "02_anomalous_zeeman_lab.ipynb": NB2,
+    "03_paschen_back_transition_lab.ipynb": NB3,
+    "04_tensor_operators_torch.ipynb": NB4,
 }
 
 for name, cells in NOTEBOOKS.items():

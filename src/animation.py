@@ -57,6 +57,29 @@ def animate_splitting(l: int, b_max: float, zeta_ev: float, n_frames: int = 120,
     return anim
 
 
+POL_COLORS = {"pi": "tab:blue", "sigma+": "tab:red", "sigma-": "tab:green"}
+
+
+def plot_stick_spectrum(df, centre_cm1: float, ax=None, title: str = ""):
+    """Stick spectrum of Zeeman components: x = shift from the zero-field line, height = intensity.
+
+    df is the output of transitions.zeeman_lines (already restricted to one spectral line).
+    Colours show the polarisation (pi = blue, sigma = red/green).
+    """
+    if ax is None:
+        _, ax = plt.subplots(figsize=(7, 3.5))
+    for pol, color in POL_COLORS.items():
+        sub = df[df["polarisation"] == pol]
+        ax.vlines(sub["wavenumber_cm1"] - centre_cm1, 0, sub["intensity"], color=color, lw=3, label=pol)
+    ax.set_xlabel(r"Shift from zero-field line (cm$^{-1}$)")
+    ax.set_ylabel("Relative intensity")
+    ax.set_title(title)
+    ax.set_ylim(0, 1.35 * df["intensity"].max())
+    ax.grid(alpha=0.3)
+    ax.legend(loc="upper center", ncol=3, fontsize=8, frameon=False)
+    return ax
+
+
 def b_scale_tesla(zeta_ev: float) -> float:
     """Field at which mu_B*B equals zeta: marks the weak-to-strong field crossover."""
     return zeta_ev / MU_B_EV
