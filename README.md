@@ -26,6 +26,14 @@ Paschen-Back. Levels with different m_j cross; levels with the same m_j repel.*
 polarisation (colour) and relative intensity (height). Nothing here is typed in by hand; it comes
 from diagonalising the Hamiltonian and applying the dipole operator.*
 
+<p align="center">
+  <img src="docs/figures/hydrogen_n2_levels.png" width="520" alt="Hydrogen n=2 levels versus magnetic field with the 2S-2P crossing marked">
+</p>
+
+*Hydrogen n = 2 (2S in red, 2P₁/₂ in blue, 2P₃/₂ in green). The dotted line is the predicted
+2S₁/₂ / 2P₁/₂ crossing at 573 G. A magnetic field never mixes 2s with 2p, so these levels cross
+instead of repelling.*
+
 ## Why decompose a problem?
 
 1. **Understand** the phenomenon, the math and the physics behind it, one layer at a time.
@@ -42,6 +50,10 @@ from diagonalising the Hamiltonian and applying the dipole operator.*
 | 4 | Wigner-Eckart, selection rules, intensities, fitting | full line spectrum with polarisation | `transitions.py`, `fitting.py` | `docs/level_4_tensors.tex` |
 
 All four levels are implemented and tested. Each has a notebook in `notebooks/` with saved output.
+
+**Extension A: hydrogen n = 2** (`hydrogen.py`, notebook 5, `docs/ext_hydrogen_n2.tex`) puts the 2s and
+2p levels in one Hamiltonian, adds the Lamb shift, and predicts the 2S-2P level-crossing field
+(573 G, against "about 570 G" in the literature).
 
 ## The model
 
@@ -67,6 +79,8 @@ eigenvectors.
 | D2 shifts (units of μ_B B) | ±0.33 (π), ±1.00, ±1.67 (σ) | ±1/3, ±1, ±5/3 | weak field |
 | D2 : D1 intensity ratio | 2.000 | 2 | statistical weights 4 : 2 |
 | ζ recovered from synthetic data (1 µeV noise) | about 0.01 % error | known input | `src/fitting.py`, Notebook 4 |
+| H 2S₁/₂(−½) × 2P₁/₂(+½) crossing | 573.4 G | about 570 G | literature includes hyperfine structure; Lamb shift is the only input |
+| H 2P₃/₂ − 2P₁/₂ from Dirac theory vs measured | 10949 MHz | 10969 MHz | 0.2 % apart (QED); the measured value is not yet source-checked |
 
 Reference values live in `data/experimental_reference.csv`. Please verify them against
 [NIST ASD](https://physics.nist.gov/asd) before citing them.
@@ -77,7 +91,7 @@ Reference values live in `data/experimental_reference.csv`. Please verify them a
 git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
-python -m pytest -q                       # 39 tests
+python -m pytest -q                       # 47 tests
 python scripts/make_figures.py --gif      # figures and animation into docs/figures/
 python scripts/execute_notebooks.py       # run the notebooks and save their output
 cd docs && latexmk -pdf main.tex          # build the PDF report
@@ -103,10 +117,10 @@ print(lines[["polarisation", "wavenumber_cm1", "intensity"]])
 ## Project layout
 
 ```
-src/            constants, hamiltonians, solvers, transitions, fitting, validation, animation, torch_engine
-tests/          39 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting
+src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, validation, animation, torch_engine
+tests/          47 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2
 data/           experimental reference values
-notebooks/      one lab per level, with explanations and saved output
+notebooks/      one lab per level plus hydrogen, with explanations and saved output
 docs/           LaTeX report (main.tex + one file per level), figures, and CODE_GUIDE.md
 scripts/        make_figures.py, make_notebooks.py, execute_notebooks.py
 .github/        CI: tests, notebook execution and PDF build on every push
@@ -117,7 +131,8 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 ## Roadmap
 
 - [x] Levels 1 to 4: Zeeman physics, spectra, selection rules, fitting
-- [ ] Add hydrogen n = 2 (2s and 2p levels together)
+- [x] Add hydrogen n = 2 (2s and 2p levels together, Lamb shift)
+- [ ] Add an electric field to mix 2s with 2p (Lamb-Retherford quenching, anticrossings)
 - [ ] Add a two-electron system (e.g. helium or calcium) with LS-coupling mixing
 - [ ] Compare full spectra with published high-field measurements
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits

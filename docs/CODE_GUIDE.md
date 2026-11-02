@@ -7,7 +7,8 @@ the code. Energies are in **eV**, fields in **tesla**, and angular momentum oper
 
 ```
 constants.py ──► hamiltonians.py ──► solvers.py ──► animation.py / validation.py
-                                 └──► transitions.py (Level 4) ──► fitting.py
+                                 ├──► transitions.py (Level 4) ──► fitting.py
+                                 └──► hydrogen.py (Extension A: n = 2, 2s + 2p)
 ```
 
 1. **Build** the Hamiltonian as a matrix (`hamiltonians.py`).
@@ -51,9 +52,13 @@ The basis is |m_l⟩ ⊗ |m_s⟩ with m_l descending (outer) and m_s = +½, −�
 - **`solve(l, B, ζ)`** diagonalises one Hamiltonian with `numpy.linalg.eigh` and returns eigenvalues and eigenvectors.
   `eigh` is used because H is Hermitian, which makes it fast and keeps the energies exactly real.
 - **`energy_vs_field(l, B_values, ζ)`** loops over fields and returns only the eigenvalues, always sorted.
-- **`track_levels(...)`** solves the *crossing problem*. Sorted eigenvalues swap identity when two
-  levels cross, so plots look wrong. Here, after each field step, the new eigenvector with the biggest
-  overlap with each old eigenvector is the "same" level. That gives smooth physical curves.
+- **`track_from_builder(build, B_values)`** solves the *crossing problem* for **any** Hamiltonian
+  (`build(B)` returns the matrix). Sorted eigenvalues swap identity when two levels cross, so plots look
+  wrong. Here, after each field step, the new eigenvector with the biggest overlap with each old eigenvector
+  is the "same" level. That gives smooth physical curves. It can also return the eigenvectors.
+- **`track_levels(l, B_values, ζ)`** is the single-electron version: it calls `track_from_builder` with `h_total`.
+- **`find_crossings(B, y_i, y_j)`** finds the field values where two tracked curves cross (sign change of the
+  difference, with linear interpolation).
 - **`zeeman_transitions(...)`** is a small helper returning all energy differences between two level sets.
 
 ## `src/transitions.py`: Level 4, spectra
@@ -82,11 +87,28 @@ The basis is |m_l⟩ ⊗ |m_s⟩ with m_l descending (outer) and m_s = +½, −�
   until the computed levels match the measured ones. Parameters are rescaled to O(1) so the optimiser behaves.
   The tests recover ζ to better than 1 % from noisy synthetic data.
 
+## `src/hydrogen.py`: Extension A, hydrogen n = 2
+
+Puts **two different orbital levels** (2s and 2p) in one Hamiltonian. Energies are measured from 2P₁/₂ at zero field.
+
+- **Constants:** `LAMB_SHIFT_MHZ` (1057.864) and `FINE_2P_MHZ` (10969.04) are the two numbers taken from experiment.
+  `mhz_to_ev` / `ev_to_mhz` convert between a frequency (what atomic physicists quote) and an energy.
+- **`dirac_fine_structure_mhz()`** gives the pure-theory value α²·Ry/16 (about 10949 MHz). It differs from the measured
+  interval by 0.2 % (QED), so it is an independent sanity check on `FINE_2P_MHZ`.
+- **`h_n2(B)`** builds the 8×8 Hamiltonian as two blocks glued with `scipy.linalg.block_diag`: the l = 0 block (2S₁/₂, raised by the
+  Lamb shift) and the l = 1 block (spin-orbit + Zeeman, ζ set from the 2P interval). Both terms conserve l, so the blocks never mix.
+- **`label_states(vectors)`** names each eigenvector: which block (2s or 2p), m_j from ⟨J_z⟩ (exact), and j from ⟨J²⟩.
+  The labels are *measured from the eigenvectors*, not typed in.
+- **`track_n2(B_values, ...)`** returns tracked energies, labels and eigenvectors for a sweep. The first field must be small but non-zero,
+  because at exactly B = 0 degenerate levels have arbitrary eigenvectors.
+- **`level_index(labels, term, mj)`** looks up a level's column, e.g. `level_index(labels, "2S1/2", -0.5)`.
+
 ## `src/animation.py`: plots and animation
 
 - **`plot_energy_levels(...)`** static energy-versus-field diagram built on `track_levels`.
 - **`animate_splitting(...)`** the same curves drawn progressively with `FuncAnimation`. Saved as a GIF with `save_path`.
 - **`plot_stick_spectrum(...)`** a stick spectrum (position = shift, height = intensity, colour = polarisation).
+- **`plot_n2_levels(...)`** hydrogen n = 2 levels versus field, coloured by term, with optional dotted lines at chosen fields.
 - **`b_scale_tesla(ζ)`** returns B* = ζ/μ_B, the field where weak-field behaviour turns into Paschen-Back.
 
 ## `src/torch_engine.py` (optional)
@@ -104,6 +126,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_physical_constants.py` | Bohr magneton value; Landé g-factors; weak-field slopes = g_J·m_j; Paschen-Back limit; exact stretched states. |
 | `test_transitions.py` | 3-j values; selection rules; parity forbids s→s; Na D1/D2 have 4/6 components at the textbook positions and intensities; D2:D1 = 2. |
 | `test_fitting.py` | Known ζ and g_s are recovered from synthetic data. |
+| `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
 
 Run them all with `python -m pytest -q`.
 
@@ -117,11 +140,12 @@ Run them all with `python -m pytest -q`.
 
 One lab per level, each with theory in markdown, code, and saved output.
 1. Normal Zeeman and the Lorentz triplet · 2. Spin-orbit, Landé g and ζ from sodium ·
-3. Weak field to Paschen-Back, with tracked levels · 4. Selection rules, line intensities and fitting.
+3. Weak field to Paschen-Back, with tracked levels · 4. Selection rules, line intensities and fitting ·
+5. Hydrogen n = 2: Lamb shift, level crossings, and why B never mixes 2s with 2p.
 
 ## `docs/` and `.github/`
 
-- `docs/main.tex` includes one `.tex` file per level; build with `cd docs && latexmk -pdf main.tex`.
+- `docs/main.tex` includes one `.tex` file per level plus `ext_hydrogen_n2.tex`; build with `cd docs && latexmk -pdf main.tex`.
 - `.github/workflows/latex.yml` runs the tests, executes the notebooks and builds the PDF on every push.
 
 ---

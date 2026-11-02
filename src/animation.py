@@ -80,6 +80,33 @@ def plot_stick_spectrum(df, centre_cm1: float, ax=None, title: str = ""):
     return ax
 
 
+TERM_COLORS = {"2S1/2": "tab:red", "2P1/2": "tab:blue", "2P3/2": "tab:green"}
+
+
+def plot_n2_levels(b, energies_ev, labels, ax=None, mark_fields_gauss=(), title: str = ""):
+    """Hydrogen n = 2 levels versus B. Colour = term, energy in GHz above 2P1/2 at zero field.
+
+    b, energies_ev, labels come from hydrogen.track_n2. mark_fields_gauss draws dotted vertical lines.
+    """
+    from .hydrogen import ev_to_mhz
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=(7.5, 5))
+    seen = set()
+    for _, row in labels.iterrows():
+        name = row.term if row.term not in seen else None
+        seen.add(row.term)
+        ax.plot(b, ev_to_mhz(energies_ev[:, int(row.level)]) / 1e3, color=TERM_COLORS[row.term], lw=1.5, label=name)
+    for g in mark_fields_gauss:
+        ax.axvline(g * 1e-4, color="k", ls=":", lw=1)
+    ax.set_xlabel("Magnetic field B (T)")
+    ax.set_ylabel("Energy above 2P1/2 at B = 0 (GHz)")
+    ax.set_title(title or "Hydrogen n = 2 (fine structure + Lamb shift)")
+    ax.grid(alpha=0.3)
+    ax.legend(loc="upper left", fontsize=9)
+    return ax
+
+
 def b_scale_tesla(zeta_ev: float) -> float:
     """Field at which mu_B*B equals zeta: marks the weak-to-strong field crossover."""
     return zeta_ev / MU_B_EV

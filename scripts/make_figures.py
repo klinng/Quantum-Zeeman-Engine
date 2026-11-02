@@ -43,6 +43,22 @@ fig.tight_layout()
 fig.savefig(FIG / "na_d_lines_zeeman.pdf")
 fig.savefig(FIG / "na_d_lines_zeeman.png", dpi=150)
 plt.close(fig)
+# --- Extension A: hydrogen n = 2 ------------------------------------------------------------
+import numpy as np  # noqa: E402
+
+from src.animation import plot_n2_levels  # noqa: E402
+from src.hydrogen import level_index, track_n2  # noqa: E402
+from src.solvers import find_crossings  # noqa: E402
+
+b_h, e_h, lab_h, _ = track_n2(np.linspace(1e-6, 0.5, 2500))
+i_s, i_p = level_index(lab_h, "2S1/2", -0.5), level_index(lab_h, "2P1/2", 0.5)
+b_cross = find_crossings(b_h, e_h[:, i_s], e_h[:, i_p])[0]
+print(f"hydrogen 2S1/2(-1/2) x 2P1/2(+1/2) crossing: {b_cross * 1e4:.1f} G (literature: about 570 G)")
+ax = plot_n2_levels(b_h, e_h, lab_h, mark_fields_gauss=[b_cross * 1e4])
+ax.figure.tight_layout()
+ax.figure.savefig(FIG / "hydrogen_n2_levels.pdf")
+ax.figure.savefig(FIG / "hydrogen_n2_levels.png", dpi=150)
+plt.close(ax.figure)
 print("saved figures to", FIG)
 
 if "--gif" in sys.argv:

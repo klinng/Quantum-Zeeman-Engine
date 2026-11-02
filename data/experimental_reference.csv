@@ -8,3 +8,6 @@ Landé g (2P1/2),0.6666667,dimensionless,LS coupling with g_s = 2
 Landé g (2P3/2),1.3333333,dimensionless,LS coupling with g_s = 2
 Landé g (2S1/2),2.0023193,dimensionless,free-electron g-factor
 Bohr magneton,5.7883818060e-5,eV/T,CODATA
+Hydrogen Lamb shift E(2S1/2)-E(2P1/2),1057.864,MHz,"quoted in UCSD PH130A lecture notes; another paper measures 1057(1) MHz"
+Hydrogen E(2P3/2)-E(2P1/2),10969.04,MHz,"NOT confirmed from a source in this project: verify. Dirac theory alone gives about 10949 MHz"
+Hydrogen 2S1/2(mj=-1/2) x 2P1/2(mj=+1/2) crossing,570,gauss,"'about 570 G' in arXiv:1104.4421 (hyperfine structure included there; our model neglects it)"
