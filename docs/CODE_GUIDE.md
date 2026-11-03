@@ -153,6 +153,22 @@ high-resolution stage.**
 `animate_filter_scan` (a colour filter sweeping across the lamp spectrum), `animate_zeeman_field_ramp`,
 `animate_polariser_rotation` (Malus's law) and `animate_view_angle` (π fades out, σ becomes circular).
 
+## `src/hydrogen_spectrum.py`: Extension C, hydrogen H-alpha
+
+Hydrogen n = 3 to n = 2 gives a real spectrum (the red Balmer line, 656 nm). The Hamiltonian of a shell is block-diagonal in l.
+
+- `radial_function(n, l, r)`: hydrogen radial wavefunction (generalised Laguerre polynomials), in Bohr radii.
+- `radial_integral(n_up, l_up, n_low, l_low)`: the radial part of the dipole matrix element, by numerical integration (cached).
+- `einstein_a(...)`: spontaneous decay rate in 1/s; used as a check against literature values.
+- `dirac_energy_cm1(n, j)` and `lamb_shift_cm1(n)`: fine structure and the (scaled) Lamb shift.
+- `zero_field_block_ev(n, l)`: chooses a constant and a spin-orbit constant so each l block has the two Dirac energies.
+- `manifold_hamiltonian(n, b_tesla)`: all states of shell n, block by block, with the Zeeman term.
+- `full_dipole(n_up, n_low)`: angular part (Wigner-Eckart, from `transitions.py`) times radial integral, for q = -1, 0, +1.
+- `balmer_components(b_tesla, n_up=3, n_low=2)`: the line list, same columns as the sodium one, so every filter in `optics/` works on it.
+- `doppler_fwhm_pm(...)`: thermal line width, about 8.1 pm at 300 K.
+
+**`optics/hydrogen_figures.py`**: `fig_halpha_regimes` (three field strengths times three filters, with Doppler blur) and `fig_halpha_fan` (components against field).
+
 ## `src/animation.py`: plots and animation
 
 - **`plot_energy_levels(...)`** static energy-versus-field diagram built on `track_levels`.
@@ -179,6 +195,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
 | `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
+| `test_hydrogen_spectrum.py` | Radial functions normalised; exact Lyman-alpha integral; decay rates vs literature; fine structure = alpha^2 Ry/16; Lamb shift; level counts; equal total emission per polarisation; strong-field sigma shift = 20.11 pm/T; polariser keeps only pi; Doppler width. |
 
 Run them all with `python -m pytest -q`.
 
@@ -187,7 +204,7 @@ Run them all with `python -m pytest -q`.
 - **`make_figures.py`** regenerates every figure in `docs/figures/` (add `--gif` for the animation).
 - **`make_optics_figures.py`** renders the virtual-spectrometer figures and, with `--gif`, its four animations.
 - **`run_all.py`** one command for everything (tests, figures, notebooks, PDF). Options: `--fast` (no GIFs), `--no-pdf`.
-- **`make_notebooks.py`** writes the six notebooks from their source text.
+- **`make_notebooks.py`** writes the seven notebooks from their source text.
 - **`execute_notebooks.py`** runs all notebook cells and saves the printed output and plots inside the `.ipynb` files.
 
 ## `notebooks/`
@@ -196,11 +213,12 @@ One lab per level, each with theory in markdown, code, and saved output.
 1. Normal Zeeman and the Lorentz triplet · 2. Spin-orbit, Landé g and ζ from sodium ·
 3. Weak field to Paschen-Back, with tracked levels · 4. Selection rules, line intensities and fitting ·
 5. Hydrogen n = 2: Lamb shift, level crossings, and why B never mixes 2s with 2p ·
-6. The virtual spectrometer: colours, prism, polarisation filters, and which instrument can resolve the Zeeman pattern.
+6. The virtual spectrometer: colours, prism, polarisation filters, and which instrument can resolve the Zeeman pattern ·
+7. Hydrogen H-alpha: a real spectrum with polarisation filters, from weak field to Paschen-Back.
 
 ## `docs/` and `.github/`
 
-- `docs/main.tex` includes one `.tex` file per level plus `ext_hydrogen_n2.tex` and `ext_optics.tex`; build with `cd docs && latexmk -pdf main.tex`.
+- `docs/main.tex` includes one `.tex` file per level plus `ext_hydrogen_n2.tex`, `ext_optics.tex` and `ext_hydrogen_halpha.tex`; build with `cd docs && latexmk -pdf main.tex`.
 - `.github/workflows/latex.yml` runs the tests, executes the notebooks and builds the PDF on every push.
 
 ---

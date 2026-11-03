@@ -1,0 +1,46 @@
+\section{Extension C: Hydrogen H$\alpha$ in a magnetic field}
+Extension A gives hydrogen $n=2$ levels but no spectrum, because $2s$ and $2p$ share one shell and no dipole jump connects them.
+Here atoms jump from $n=3$ (18 states with spin) to $n=2$ (8 states), producing the red Balmer line H$\alpha$ at $656\ \si{nm}$.
+The code is \texttt{src/hydrogen\_spectrum.py}.
+
+\subsection{Model}
+Each shell is block-diagonal in $l$, because a magnetic field along $z$ never mixes different $l$. For each $l$ the
+Dirac energies
+\begin{equation}
+  E_{nj} = -\frac{R_H}{n^2} - \frac{R_H\alpha^2}{n^3}\Bigl(\frac{1}{j+\tfrac12}-\frac{3}{4n}\Bigr)
+\end{equation}
+are imposed by choosing a constant $a_l$ and a spin--orbit constant $\zeta_l$ such that $a_l+\zeta_l\,\vb{L}\!\cdot\!\vb{S}$ has the two
+eigenvalues $E_{n,l+1/2}$ and $E_{n,l-1/2}$. The $ns$ levels are raised by the Lamb shift ($1057.864\ \si{MHz}$ at $n=2$, scaled as $1/n^3$,
+an approximation). The Zeeman term $\mu_B B(L_z+g_sS_z)$ is the same as in the other levels.
+
+\subsection{Strengths of the jumps}
+The dipole operator between shells is $D_q = R_{n'l',nl}\times(\text{angular part})$, where the angular part comes from the Wigner--Eckart theorem
+(Level~4) and the radial integral
+\begin{equation}
+  R_{n'l',nl}=\int_0^\infty R_{n'l'}(r)\,r\,R_{nl}(r)\,r^2\,\dd r
+\end{equation}
+is computed numerically from the hydrogen wavefunctions. The squared matrix elements between exact eigenstates give the intensities and
+polarisations ($q=0$: $\pi$; $q=\pm1$: $\sigma^\pm$). The same table feeds the Jones-matrix filters of Extension~B.
+
+\subsection{Checks}
+\begin{itemize}
+  \item $\langle 2p|r|1s\rangle = 128\sqrt6/243\,a_0$ is reproduced to eight digits.
+  \item Decay rates $A(3s\to2p)$, $A(3p\to2s)$, $A(3d\to2p)$ and Lyman-$\alpha$ agree with the literature to about $0.2\%$ (reference values quoted from memory; check against NIST).
+  \item At $20\ \si{T}$ the $\sigma$ components sit at $\pm20.11\ \si{pm/T}\times B$, the normal Zeeman value, to $0.02\%$.
+  \item Total emission is equal for $q=-1,0,+1$, as isotropy requires.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{halpha_regimes.pdf}
+\caption{H$\alpha$ at $0.05$, $1$ and $6\ \si{T}$ through no filter, a polariser parallel to $\vb{B}$ and one perpendicular to it.
+Grey: thermal Doppler width at $300\ \si{K}$ ($8.1\ \si{pm}$).}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{halpha_fan.pdf}
+\caption{Component positions against field; dot area is proportional to the emission rate.}
+\end{figure}
+
+\subsection{Limits}
+Hyperfine structure, the diamagnetic term (about $0.02\ \si{cm^{-1}}$ at $20\ \si{T}$) and the exact $n=3$ Lamb shift are not modelled.

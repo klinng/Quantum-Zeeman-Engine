@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 import matplotlib.pyplot as plt  # noqa: E402
 
 from src.optics import figures as F  # noqa: E402
+from src.optics.hydrogen_figures import fig_halpha_fan, fig_halpha_regimes  # noqa: E402
 from src.optics.instruments import fig_instrument_ladder  # noqa: E402
 
 FIG = ROOT / "docs" / "figures"
@@ -25,6 +26,8 @@ STATIC = {
     "optics_polarisation_filters": F.fig_polarisation_filters,
     "optics_polarisation_ellipses": F.fig_polarisation_ellipses,
     "optics_instrument_ladder": fig_instrument_ladder,
+    "halpha_regimes": fig_halpha_regimes,
+    "halpha_fan": fig_halpha_fan,
 }
 ANIMATIONS = {
     "optics_filter_scan": F.animate_filter_scan,
