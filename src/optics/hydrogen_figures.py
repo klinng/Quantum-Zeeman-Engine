@@ -73,3 +73,41 @@ def fig_halpha_fan(b_max: float = 8.0, n_points: int = 60):
     ax.legend(fontsize=8, loc="upper left")
     fig.tight_layout()
     return fig
+
+
+def animate_halpha_field_ramp(save_path=None, b_max: float = 8.0, frames: int = 60, temperature_k: float = 300.0):
+    """GIF: B rises from near zero to b_max; three panels (no filter, polariser parallel / perpendicular to B).
+    Sticks are coloured by polarisation, the grey curve is the Doppler-blurred line."""
+    from matplotlib.animation import FuncAnimation, PillowWriter
+    fwhm = doppler_fwhm_pm(temperature_k=temperature_k)
+    bs = np.linspace(0.02, b_max, frames)
+    xlim = 20.11 * b_max * 1.2
+    grid = np.linspace(-xlim, xlim, 1600)
+    fig, axes = plt.subplots(3, 1, figsize=(8, 7.4), sharex=True)
+    ymax = 6.5
+
+    def draw(k):
+        b = bs[k]
+        comps = balmer_components(b)
+        for ax, (name, m) in zip(axes, FILTERS):
+            ax.clear()
+            d = _visible(observe(comps, 90.0, m), "observed", 0.003)
+            blur = gaussian_spectrum(grid, d.shift_pm.to_numpy(), d.observed.to_numpy(), fwhm)
+            ax.fill_between(grid, blur / max(blur.max(), 1e-12) * min(d.observed.max(), ymax), color="0.85", lw=0)
+            for pol, col in POL_COLORS.items():
+                s = d[d.polarisation == pol]
+                ax.vlines(s.shift_pm, 0, s.observed, color=col, lw=2.2, label=POL_LABEL[pol])
+            ax.set_xlim(-xlim, xlim)
+            ax.set_ylim(0, ymax)
+            ax.set_ylabel(name)
+        axes[0].set_title(f"Hα in a magnetic field: B = {b:.2f} T   (grey: {temperature_k:g} K Doppler width, {fwhm:.1f} pm)")
+        axes[0].legend(loc="upper left", fontsize=8, ncol=3)
+        axes[2].set_xlabel("shift from the Bohr line (pm)")
+        return []
+
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.93, bottom=0.08)
+    anim = FuncAnimation(fig, draw, frames=frames, interval=90, blit=False)
+    if save_path:
+        anim.save(save_path, writer=PillowWriter(fps=11))
+    return anim

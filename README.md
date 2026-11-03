@@ -77,6 +77,7 @@ Along the field there is no pi light, and a circular analyser separates sigma+ (
 | ![polariser](docs/figures/optics_polariser_rotation.gif) | **Rotating polariser** (Malus's law): pi and sigma lines trade places |
 | ![view angle](docs/figures/optics_view_angle.gif) | **Tilting the line of sight**: pi fades out, sigma becomes circular |
 | ![field ramp](docs/figures/optics_zeeman_field_ramp.gif) | **Field ramp**: the Zeeman components of Na D1 and D2 fan out |
+| ![H-alpha ramp](docs/figures/halpha_field_ramp.gif) | **Hydrogen H-alpha field ramp**: through no filter, a parallel and a perpendicular polariser, from weak field to Paschen-Back |
 
 **An honest scale note.** The outermost sodium D2 component moves only about 27 pm per tesla, and every component is the same yellow.
 A prism cannot separate them: the closest components need a resolving power of about 55 000 at 1 T, while a 5 cm glass prism offers about 2 000.
@@ -192,7 +193,8 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Hydrogen n = 2 (2s and 2p together, Lamb shift)
 - [x] Virtual spectrometer: colours, prism, polarisation filters, instrument ladder
 - [x] Hydrogen H-alpha: a real hydrogen spectrum with polarisation filters
-- [ ] Animate the H-alpha field ramp and push it through the prism and instrument ladder
+- [x] Animate the H-alpha field ramp through the polarisation filters
+- [ ] Push H-alpha through the prism and the instrument ladder
 - [ ] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
 - [ ] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
 - [ ] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)

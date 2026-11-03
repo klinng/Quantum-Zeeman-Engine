@@ -167,7 +167,7 @@ Hydrogen n = 3 to n = 2 gives a real spectrum (the red Balmer line, 656 nm). The
 - `balmer_components(b_tesla, n_up=3, n_low=2)`: the line list, same columns as the sodium one, so every filter in `optics/` works on it.
 - `doppler_fwhm_pm(...)`: thermal line width, about 8.1 pm at 300 K.
 
-**`optics/hydrogen_figures.py`**: `fig_halpha_regimes` (three field strengths times three filters, with Doppler blur) and `fig_halpha_fan` (components against field).
+**`optics/hydrogen_figures.py`**: `fig_halpha_regimes` (three field strengths times three filters, with Doppler blur) and `fig_halpha_fan` (components against field) and `animate_halpha_field_ramp` (GIF: B rises, three filter views update together).
 
 ## `src/animation.py`: plots and animation
 
@@ -202,7 +202,7 @@ Run them all with `python -m pytest -q`.
 ## `scripts/`
 
 - **`make_figures.py`** regenerates every figure in `docs/figures/` (add `--gif` for the animation).
-- **`make_optics_figures.py`** renders the virtual-spectrometer figures and, with `--gif`, its four animations.
+- **`make_optics_figures.py`** renders the virtual-spectrometer figures and, with `--gif`, its five animations.
 - **`run_all.py`** one command for everything (tests, figures, notebooks, PDF). Options: `--fast` (no GIFs), `--no-pdf`.
 - **`make_notebooks.py`** writes the seven notebooks from their source text.
 - **`execute_notebooks.py`** runs all notebook cells and saves the printed output and plots inside the `.ipynb` files.

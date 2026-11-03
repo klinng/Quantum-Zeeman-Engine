@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 import matplotlib.pyplot as plt  # noqa: E402
 
 from src.optics import figures as F  # noqa: E402
-from src.optics.hydrogen_figures import fig_halpha_fan, fig_halpha_regimes  # noqa: E402
+from src.optics.hydrogen_figures import animate_halpha_field_ramp, fig_halpha_fan, fig_halpha_regimes  # noqa: E402
 from src.optics.instruments import fig_instrument_ladder  # noqa: E402
 
 FIG = ROOT / "docs" / "figures"
@@ -34,6 +34,7 @@ ANIMATIONS = {
     "optics_zeeman_field_ramp": F.animate_zeeman_field_ramp,
     "optics_polariser_rotation": F.animate_polariser_rotation,
     "optics_view_angle": F.animate_view_angle,
+    "halpha_field_ramp": animate_halpha_field_ramp,
 }
 
 for name, make in STATIC.items():
