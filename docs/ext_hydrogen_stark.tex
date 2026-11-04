@@ -1,0 +1,38 @@
+\section{Extension D: Hydrogen $n=2$ in an electric field (Lamb--Retherford anticrossing)}
+A magnetic field never mixes $2s$ with $2p$ (Extension~A): the levels cross. An electric field does, because $e\vb{E}\!\cdot\!\vb{r}$ connects
+states of opposite parity. The code is \texttt{src/stark.py}.
+
+\subsection{Model}
+The $8\times8$ Hamiltonian of Extension~A gets one more term,
+\begin{equation}
+  H = H_{n=2}(B) + eE\,(\cos\vartheta\,z + \sin\vartheta\,x),
+\end{equation}
+where $\vartheta$ is the angle between $\vb{E}$ and $\vb{B}$. The matrix elements come from the Wigner--Eckart theorem and the radial integral
+of Extension~C: $\langle 2s|z|2p,m{=}0\rangle=-3a_0$ and $|\langle 2s|x|2p,m{=}\pm1\rangle|=3a_0/\sqrt2$.
+For one Bohr radius of dipole, $1\ \si{V/cm}$ corresponds to $1.28\ \si{MHz}$.
+
+\subsection{What the field does}
+\begin{itemize}
+  \item $\vb{E}\parallel\vb{B}$ conserves $m_j$: $2S_{1/2}$ and $2P_{1/2}$ with the same $m_j$ repel (Figure~\ref{fig:stark}). At weak field the
+        $2S$ shift is quadratic, $3x^2/\Delta_{L}+6x^2/(\Delta_{L}-\Delta_{FS})$ with $x=ea_0E$, which the numbers reproduce (0.365\,MHz at $10\ \si{V/cm}$).
+  \item $\vb{E}\perp\vb{B}$ also couples states whose $m_j$ differ by one. The $573\ \si{G}$ crossing of $2S_{1/2}(m_j{=}-\tfrac12)$ and
+        $2P_{1/2}(m_j{=}+\tfrac12)$ becomes an \emph{anticrossing} with a gap $2\sqrt3\,ea_0E$, proportional to $E$ (Figure~\ref{fig:anti}). An atom flying
+        through a magnet sees a motional field $\vb{v}\times\vb{B}$ of this kind, which is why the effect shows up in the Lamb--Retherford experiment.
+  \item Mixing in some $2P$ gives the metastable $2S$ state an $E1$ decay path at the $2P$ rate ($6.3\times10^8\ \si{s^{-1}}$): the lifetime
+        drops from $0.12\ \si{s}$ towards nanoseconds (quenching).
+\end{itemize}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{hydrogen_stark_fan.pdf}
+\caption{Left: $n=2$ levels against $E$ ($E\parallel B$), coloured by $2s$ content. Right: lifetime of the $2S$-like state.}
+\label{fig:stark}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{hydrogen_anticrossing.pdf}
+\caption{The $573\ \si{G}$ crossing opens into an anticrossing for $\vb{E}\perp\vb{B}$; the gap grows linearly with $E$.}
+\label{fig:anti}
+\end{figure}
+
+\subsection{Limits}
+Hyperfine structure is not modelled and shifts the exact anticrossing positions. The two-photon decay rate of pure $2S$ ($8.2\ \si{s^{-1}}$) is quoted from memory.

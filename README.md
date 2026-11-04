@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-106%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-116%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -24,7 +24,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 106 tests
+python -m pytest -q                  # 116 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -35,7 +35,7 @@ Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/m
 | System | Energy levels vs B | Line spectrum | Polarisation filters | Prism / instruments | Notebook | Report section |
 |---|:-:|:-:|:-:|:-:|:-:|---|
 | **Sodium** (3p to 3s, D lines) | yes | yes | yes | yes | 1 to 4, 6 | Levels 1 to 4, Extension B |
-| **Hydrogen n = 2** (Lamb shift, 2s and 2p) | yes, with crossings | no (no jump between 2s and 2p) | no | no | 5 | Extension A |
+| **Hydrogen n = 2** (Lamb shift, 2s and 2p) | yes, with crossings; with an electric field, anticrossings and quenching | no (no jump between 2s and 2p) | no | no | 5 | Extension A |
 | **Hydrogen H-alpha** (n = 3 to 2, 656 nm) | yes | yes | yes | yes | 7 | Extension C |
 
 A spectrum needs a jump between two shells. That is why hydrogen n = 2 alone has levels but no light, and why H-alpha was added.
@@ -68,6 +68,13 @@ Grey is the 300 K Doppler width (8.1 pm). At 6 T the line has become the normal 
 </p>
 
 *Hydrogen n = 2. The dotted line is the predicted 2S1/2 / 2P1/2 crossing at 573 G. A magnetic field never mixes 2s with 2p, so these levels cross instead of repelling.*
+
+<p align="center">
+  <img src="docs/figures/hydrogen_anticrossing.png" width="780" alt="The 573 G crossing of hydrogen levels becomes an anticrossing in a perpendicular electric field">
+</p>
+
+*Electric field on hydrogen n = 2. Across B, the 573 G crossing opens into an anticrossing whose gap grows in proportion to E (the Lamb-Retherford effect).
+Along B, 2S and 2P with the same m_j repel, and the metastable 2S state is quenched from 0.12 s towards nanoseconds (figure `hydrogen_stark_fan.png`).*
 
 ### The virtual spectrometer: colours, a prism, polarisation filters
 
@@ -128,6 +135,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Level 4 | Wigner-Eckart, selection rules, intensities, fitting | full line spectrum with polarisation | `transitions.py`, `fitting.py` | `level_4_tensors.tex` |
 | Extension A | Hydrogen n = 2: Lamb shift, 2S-2P crossing | 573 G, against "about 570 G" in the literature | `hydrogen.py` | `ext_hydrogen_n2.tex` |
 | Extension B | Colours, prism, polarisation filters, instrument ladder | four animations, required resolving power | `src/optics/` | `ext_optics.tex` |
+| Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
 | Extension C | Hydrogen H-alpha (n = 3 to 2) with radial integrals, Dirac fine structure | spectrum from weak field to Paschen-Back | `hydrogen_spectrum.py` | `ext_hydrogen_halpha.tex` |
 
 Every part has a test file; notebooks 1 to 7 show the same ideas with explanations and saved output.
@@ -168,6 +176,8 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | ⟨2p\|r\|1s⟩ | 1.290266 a₀ | 128√6/243 a₀ | exact |
 | A(2p to 1s), A(3p to 2s), A(3d to 2p) | 6.258e8, 2.242e7, 6.458e7 s⁻¹ | 6.265e8, 2.245e7, 6.465e7 s⁻¹ | about 0.1 %; reference values quoted from memory |
 | H-alpha sigma shift at 20 T | 402.27 pm | 20.11 pm/T × B = 402.20 pm | normal Zeeman limit |
+| 2S Stark shift at 10 V/cm (E along B) | 0.3650 MHz | 0.3652 MHz | second-order perturbation theory |
+| Anticrossing gap at 573 G | 4.54 MHz per V/cm | 2√3 e a₀ = 4.43 MHz per V/cm | 2.5 % apart (mixing with 2P3/2) |
 | H-alpha thermal Doppler width, 300 K | 8.1 pm | 8.1 pm | compare with 20.1 pm/T Zeeman shift |
 
 Reference values live in `data/experimental_reference.csv`.
@@ -201,9 +211,9 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 ## Project layout
 
 ```
-src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, validation, animation, torch_engine
+src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, validation, animation, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          106 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Fabry-Perot, optics
+tests/          116 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
@@ -223,7 +233,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Push H-alpha through the prism and the instrument ladder (with the Doppler floor)
 - [x] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
 - [x] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
-- [ ] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)
+- [x] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)
 - [ ] A two-electron system (helium or calcium) with LS-coupling mixing
 - [ ] Compare full spectra with published high-field measurements
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits

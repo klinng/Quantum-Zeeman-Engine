@@ -175,6 +175,16 @@ high-resolution stage.**
 `animate_filter_scan` (a colour filter sweeping across the lamp spectrum), `animate_zeeman_field_ramp`,
 `animate_polariser_rotation` (Malus's law) and `animate_view_angle` (π fades out, σ becomes circular).
 
+## `src/stark.py`: hydrogen n = 2 in an electric field
+
+- `dipole_operators()`: the x and z position operators of the n = 2 manifold in Bohr radii (from `hydrogen_spectrum.full_dipole`).
+- `h_n2_stark(B, E, angle)`: the 8x8 Hamiltonian of `hydrogen.py` plus the electric term; angle 0 = E along B, 90 = across.
+- `track_stark(...)`: level energies along a field sweep. `s_weights(...)`: how much 2s each eigenvector contains.
+- `quenching_rate(B, E)` and `lifetime_s(rate)`: the 2P admixture times the 2P decay rate, and the resulting lifetime.
+- `perturbative_s_shift_mhz(E)`: the textbook second-order shift, used as an independent check.
+- `anticrossing_gap_mhz(E)`: the smallest gap near 573 G, and where it occurs.
+- `stark_figures.py`: `fig_stark_fan()` (levels and lifetime against E) and `fig_anticrossing()` (the opening gap).
+
 ## `src/hydrogen_spectrum.py`: Extension C, hydrogen H-alpha
 
 Hydrogen n = 3 to n = 2 gives a real spectrum (the red Balmer line, 656 nm). The Hamiltonian of a shell is block-diagonal in l.
@@ -217,6 +227,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
 | `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
+| `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |
 | `test_fabry_perot.py` | Finesse formula; Airy peak and gap; one ring at zero field; six resolved peaks at 0.3 T; polarisers leave 4 sigma or 2 pi peaks; heights near 4 : 3 : 1. |
