@@ -36,3 +36,18 @@ def test_figure_builds():
     import matplotlib
     matplotlib.use("Agg")
     assert fig_literature_comparison() is not None
+
+
+def test_model_p_state_g_factors_agree_with_measurements_within_one_sigma():
+    from src.literature import g_factor_comparison
+    t = g_factor_comparison().set_index("level")
+    assert abs(t.loc["3P1/2", "sigmas"]) < 1.0
+    assert abs(t.loc["3P3/2", "sigmas"]) < 1.0
+
+
+def test_ground_state_g_differs_by_the_size_of_bound_state_corrections():
+    # the model uses the free-electron g_s = 2.0023193; the measured 3S1/2 value is 2.0022960 (relativistic bound-state
+    # correction, about alpha^2 / 3 x g_s, which the model does not contain). This documents a known limit, not a match.
+    from src.literature import g_factor_comparison
+    t = g_factor_comparison().set_index("level")
+    assert 1e-5 < t.loc["3S1/2", "difference"] < 4e-5

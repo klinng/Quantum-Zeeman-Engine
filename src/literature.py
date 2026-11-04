@@ -88,3 +88,36 @@ def fig_literature_comparison(b_tesla: float = B_TEST_T):
     ax.grid(alpha=0.3, axis="x")
     fig.tight_layout()
     return fig
+
+
+# ---------------------------------------------------------------- measured Lande g-factors of sodium
+# Values tabulated in D. A. Steck, "Sodium D Line Data" (Table 6), who cites a measurement for them (his ref. [16]).
+# Quoted via a web-page summary: check against the PDF before citing. (value, uncertainty in the last digits)
+MEASURED_G_J = pd.DataFrame([
+    ("3S1/2", 2.0022960, 7e-7),
+    ("3P1/2", 0.66581, 1.2e-4),
+    ("3P3/2", 1.3342, 2e-4),
+], columns=["level", "measured", "uncertainty"])
+
+
+def model_g_j_from_diagonalisation(b_tesla: float = 1e-4) -> dict[str, float]:
+    """g_J from the model's own eigenvalues at a tiny field (neighbouring-level spacing / mu_B B), nothing assumed."""
+    from .constants import MU_B_EV
+    from .hamiltonians import h_total
+    zeta = zeta_from_fine_structure(FINE_CM1, l=1)
+    es = np.linalg.eigvalsh(h_total(0, b_tesla, 0.0))
+    g_s_level = (es[1] - es[0]) / (MU_B_EV * b_tesla)
+    ep = np.linalg.eigvalsh(h_total(1, b_tesla, zeta))
+    return {"3S1/2": float(g_s_level),
+            "3P1/2": float((ep[1] - ep[0]) / (MU_B_EV * b_tesla)),
+            "3P3/2": float((ep[5] - ep[4]) / (MU_B_EV * b_tesla))}
+
+
+def g_factor_comparison() -> pd.DataFrame:
+    """Model g_J against the measured values, with the difference in units of the measurement's uncertainty."""
+    t = MEASURED_G_J.copy()
+    model = model_g_j_from_diagonalisation()
+    t["model"] = t.level.map(model)
+    t["difference"] = t.model - t.measured
+    t["sigmas"] = t.difference / t.uncertainty
+    return t

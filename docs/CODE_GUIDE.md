@@ -180,6 +180,7 @@ high-resolution stage.**
 - `PAPER_AT_0P9T`: the reference table typed in from arXiv:2104.14896 (five group spacings, formula and numerical values, with how each was obtained).
 - `model_group_spacings_ghz(B)`: the same spacings measured from our model's lines.
 - `comparison_table()`: model against paper, with percentage differences; `fig_literature_comparison()` plots them.
+- `MEASURED_G_J`, `model_g_j_from_diagonalisation()` and `g_factor_comparison()`: measured sodium Landé factors (Steck's table) against g_J read from the model's own eigenvalues at a tiny field.
 - Because the paper includes hyperfine structure and ours does not, only the spacings between groups are compared.
 
 ## `src/stark.py`: hydrogen n = 2 in an electric field
@@ -234,7 +235,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
 | `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
-| `test_literature.py` | Reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
+| `test_literature.py` | Measured g_J of the P states within 1 sigma, S state off by the bound-state size; reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |

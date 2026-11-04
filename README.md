@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-122%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-124%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -24,7 +24,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 122 tests
+python -m pytest -q                  # 124 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -167,6 +167,8 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | 3p fine-structure splitting | 17.196 cm⁻¹ | 17.196 cm⁻¹ | input, used to set ζ |
 | g_J (²P₁/₂) | 0.6659 | 2/3 = 0.6667 | difference is g_s = 2.0023 instead of 2 |
 | g_J (²P₃/₂) | 1.3341 | 4/3 = 1.3333 | same reason |
+| g_J (²P₁/₂), (²P₃/₂) vs measured | 0.66589, 1.33411 | 0.66581(12), 1.3342(2) | within 1σ; values from Steck's Sodium D Line Data (check the PDF) |
+| g_J (²S₁/₂) vs measured | 2.0023193 | 2.0022960(7) | model lacks the bound-state correction (2.3e-5); a known limit |
 | D1 / D2 Zeeman components | 4 / 6 | 4 / 6 | textbook pattern |
 | D2 : D1 intensity ratio | 2.000 | 2 | statistical weights 4 : 2 |
 | D1 components across B | 4 equal | 4 equal | classic result |
@@ -194,6 +196,7 @@ Reference values live in `data/experimental_reference.csv`.
 
 - **Not modelled:** hyperfine structure, the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
+- **Source conflict, unresolved:** one summary of Steck's Sodium D Line Data implied a D1 to D2 interval of 17.220 cm⁻¹, while the model uses the NIST-style value 17.196 cm⁻¹ (ζ is fitted to it). I did not change the input. The difference is 0.14 %, too small to affect the group-spacing comparison, but please check both against NIST ASD.
 - **Unchecked inputs:** the measured 2P fine structure (10969.04 MHz) and the decay-rate reference values were typed from memory. Check them against [NIST ASD](https://physics.nist.gov/asd) before citing.
 - **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was already in the repository when I joined this work and I don't know where it came from. Review it before relying on it. `instruments.py` and the H-alpha figures were written here.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.
@@ -221,7 +224,7 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 ```
 src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, literature, validation, animation, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          122 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, literature check, Fabry-Perot, optics
+tests/          124 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, literature check, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
