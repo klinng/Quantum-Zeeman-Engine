@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-99%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-106%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -24,7 +24,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 99 tests
+python -m pytest -q                  # 106 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -36,7 +36,7 @@ Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/m
 |---|:-:|:-:|:-:|:-:|:-:|---|
 | **Sodium** (3p to 3s, D lines) | yes | yes | yes | yes | 1 to 4, 6 | Levels 1 to 4, Extension B |
 | **Hydrogen n = 2** (Lamb shift, 2s and 2p) | yes, with crossings | no (no jump between 2s and 2p) | no | no | 5 | Extension A |
-| **Hydrogen H-alpha** (n = 3 to 2, 656 nm) | yes | yes | yes | not yet | 7 | Extension C |
+| **Hydrogen H-alpha** (n = 3 to 2, 656 nm) | yes | yes | yes | yes | 7 | Extension C |
 
 A spectrum needs a jump between two shells. That is why hydrogen n = 2 alone has levels but no light, and why H-alpha was added.
 
@@ -55,6 +55,13 @@ Everything comes from diagonalising the Hamiltonian and applying the dipole oper
 
 *Hydrogen H-alpha at 0.05, 1 and 6 T. Rows: no filter, polariser parallel to B (keeps pi), polariser perpendicular to B (keeps sigma).
 Grey is the 300 K Doppler width (8.1 pm). At 6 T the line has become the normal three-group Zeeman pattern.*
+
+<p align="center">
+  <img src="docs/figures/halpha_instrument_ladder.png" width="780" alt="Which instrument can separate the H-alpha sigma and pi groups, with the Doppler floor">
+</p>
+
+*Which instrument can separate the H-alpha groups? A 5 cm glass prism needs 6 to 21 T, a 10 cm grating about 0.4 T. For hydrogen, thermal motion
+(8.1 pm at 300 K) blurs the line so much that a Fabry-Perot gains nothing over the big grating: the Doppler floor is the limit, not the instrument.*
 
 <p align="center">
   <img src="docs/figures/hydrogen_n2_levels.png" width="520" alt="Hydrogen n=2 levels versus magnetic field with the 2S-2P crossing marked">
@@ -195,8 +202,8 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 
 ```
 src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, validation, animation, torch_engine
-src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, figures, hydrogen_figures
-tests/          99 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Fabry-Perot, optics
+src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
+tests/          106 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
@@ -213,7 +220,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Virtual spectrometer: colours, prism, polarisation filters, instrument ladder
 - [x] Hydrogen H-alpha: a real hydrogen spectrum with polarisation filters
 - [x] Animate the H-alpha field ramp through the polarisation filters
-- [ ] Push H-alpha through the prism and the instrument ladder
+- [x] Push H-alpha through the prism and the instrument ladder (with the Doppler floor)
 - [x] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
 - [x] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
 - [ ] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)

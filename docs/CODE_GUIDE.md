@@ -118,6 +118,14 @@ Puts **two different orbital levels** (2s and 2p) in one Hamiltonian. Energies a
 - `fig_sodium_paschen_back_fan()`: positions against field up to 60 T, with the crossover field B* marked.
 - `animate_sodium_paschen_back()`: GIF of the collapse through three polariser views.
 
+## `src/optics/halpha_instruments.py`: can an instrument separate the H-alpha groups?
+
+- `halpha_instrument_ladder()`: ideal resolving powers of prisms, gratings and a Fabry-Perot at 656 nm.
+- `required_power_halpha(B)` and `weakest_field_halpha(R)`: R needed to separate the sigma groups (+-20.11 pm/T x B) from the pi group, and its inverse.
+- `doppler_limited_power(T)`: the resolving power (about 81 000 at 300 K) beyond which thermal motion, not the instrument, sets the sharpness.
+- `prism_zeeman_deflection_urad(B, glass)`: how far apart (in microradians) a prism sends the two sigma groups.
+- `fig_halpha_instrument_ladder()`: the figure, with the Doppler floor drawn.
+
 ## `src/optics/`: Extension B, the virtual spectrometer
 
 A package with one file per idea. It takes the Zeeman components from `transitions.zeeman_lines` and puts
@@ -209,6 +217,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
 | `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
+| `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |
 | `test_fabry_perot.py` | Finesse formula; Airy peak and gap; one ring at zero field; six resolved peaks at 0.3 T; polarisers leave 4 sigma or 2 pi peaks; heights near 4 : 3 : 1. |
 | `test_hydrogen_spectrum.py` | Radial functions normalised; exact Lyman-alpha integral; decay rates vs literature; fine structure = alpha^2 Ry/16; Lamb shift; level counts; equal total emission per polarisation; strong-field sigma shift = 20.11 pm/T; polariser keeps only pi; Doppler width. |
