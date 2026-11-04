@@ -59,9 +59,11 @@ ax.figure.tight_layout()
 ax.figure.savefig(FIG / "hydrogen_n2_levels.pdf")
 ax.figure.savefig(FIG / "hydrogen_n2_levels.png", dpi=150)
 plt.close(ax.figure)
+from src.literature import fig_literature_comparison  # noqa: E402
 from src.stark_figures import fig_anticrossing, fig_stark_fan  # noqa: E402
 
-for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing", fig_anticrossing)):
+for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing", fig_anticrossing),
+                 ("literature_sodium_groups", fig_literature_comparison)):
     f = fn()
     f.savefig(FIG / f"{name}.pdf")
     f.savefig(FIG / f"{name}.png", dpi=150)

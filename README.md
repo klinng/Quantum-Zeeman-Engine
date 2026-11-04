@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-116%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-122%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -24,7 +24,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 116 tests
+python -m pytest -q                  # 122 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -119,6 +119,13 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
   <img src="docs/figures/optics_sodium_paschen_back_fan.png" width="620" alt="Sodium D line components against field from weak field to 60 tesla">
 </p>
 
+**Checked against a published calculation.** At 0.9 T the five sodium line-group spacings of the model agree with those of arXiv:2104.14896
+(a theory study that includes hyperfine structure) to within 0.5 %. That is agreement with another calculation, not with laboratory data.
+
+<p align="center">
+  <img src="docs/figures/literature_sodium_groups.png" width="640" alt="Difference between our sodium line-group spacings and the published values at 0.9 tesla">
+</p>
+
 ## Why decompose a problem?
 
 1. **Understand** the phenomenon, the math and the physics behind it, one layer at a time.
@@ -165,6 +172,7 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | D1 components across B | 4 equal | 4 equal | classic result |
 | D2 components across B (pi : inner sigma : outer sigma) | 4.00 : 2.99 : 1.00 | 4 : 3 : 1 | classic result |
 | ζ recovered from synthetic data (1 µeV noise) | about 0.01 % error | known input | `fitting.py`, notebook 4 |
+| D1 / D2 group spacings at 0.9 T (5 groups) | within 0.5 % | arXiv:2104.14896 (published theory, includes hyperfine) | `literature.py`; agreement with another calculation, not laboratory data |
 | Resolving power to separate components at 1 T | about 55 000 | prism 2 000, grating 1.2×10⁵ | a prism cannot show the pattern |
 
 ### Hydrogen
@@ -211,9 +219,9 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 ## Project layout
 
 ```
-src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, validation, animation, torch_engine
+src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, literature, validation, animation, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          116 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, Fabry-Perot, optics
+tests/          122 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, literature check, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
@@ -235,13 +243,15 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
 - [x] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)
 - [ ] A two-electron system (helium or calcium) with LS-coupling mixing
-- [ ] Compare full spectra with published high-field measurements
+- [x] Cross-check line-group spacings against a published calculation (arXiv:2104.14896)
+- [ ] Compare full spectra with laboratory measurements of the Zeeman effect (the paper above is theory; look for its experimental companions)
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits
 
 ## Sources
 
 - Zeeman and Paschen-Back theory: standard quantum mechanics texts and the UCSD PH130A notes.
 - Hydrogen level crossings and the Lamb shift: arXiv:1104.4421.
+- Sodium D lines at high field, including hyperfine structure: arXiv:2104.14896 (used for the cross-check).
 - Glass dispersion: Sellmeier coefficients from the Schott catalogue.
 
 ## License
