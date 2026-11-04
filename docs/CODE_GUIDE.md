@@ -104,6 +104,20 @@ Puts **two different orbital levels** (2s and 2p) in one Hamiltonian. Energies a
   because at exactly B = 0 degenerate levels have arbitrary eigenvectors.
 - **`level_index(labels, term, mj)`** looks up a level's column, e.g. `level_index(labels, "2S1/2", -0.5)`.
 
+## `src/optics/fabry_perot.py`: the instrument that resolves the pattern
+
+- `reflectivity_for_finesse(F)`: mirror reflectivity that gives finesse F (solved exactly).
+- `airy(theta, wavelength, gap, R)`: transmission of the etalon for one wavelength.
+- `ring_angle(n, gap)`: angle of the n-th ring.
+- `radial_profile(theta, components, gap, R)`: sum of the Airy patterns of all components, weighted by observed intensity.
+- `fig_fabry_perot_rings()` (ring images at three fields, with and without a polariser) and `fig_fabry_perot_profile()` (six resolved peaks).
+
+## `src/optics/sodium_paschen_back.py`: the sodium doublet at very high field
+
+- `components_vs_cog(B)`: the sodium D components with shifts measured from the doublet's centre of gravity (needed because D1 and D2 cross over above about 25 T).
+- `fig_sodium_paschen_back_fan()`: positions against field up to 60 T, with the crossover field B* marked.
+- `animate_sodium_paschen_back()`: GIF of the collapse through three polariser views.
+
 ## `src/optics/`: Extension B, the virtual spectrometer
 
 A package with one file per idea. It takes the Zeeman components from `transitions.zeeman_lines` and puts
@@ -195,6 +209,8 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
 | `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
+| `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |
+| `test_fabry_perot.py` | Finesse formula; Airy peak and gap; one ring at zero field; six resolved peaks at 0.3 T; polarisers leave 4 sigma or 2 pi peaks; heights near 4 : 3 : 1. |
 | `test_hydrogen_spectrum.py` | Radial functions normalised; exact Lyman-alpha integral; decay rates vs literature; fine structure = alpha^2 Ry/16; Lamb shift; level counts; equal total emission per polarisation; strong-field sigma shift = 20.11 pm/T; polariser keeps only pi; Doppler width. |
 
 Run them all with `python -m pytest -q`.
@@ -202,7 +218,7 @@ Run them all with `python -m pytest -q`.
 ## `scripts/`
 
 - **`make_figures.py`** regenerates every figure in `docs/figures/` (add `--gif` for the animation).
-- **`make_optics_figures.py`** renders the virtual-spectrometer figures and, with `--gif`, its five animations.
+- **`make_optics_figures.py`** renders the virtual-spectrometer figures and, with `--gif`, its six animations.
 - **`run_all.py`** one command for everything (tests, figures, notebooks, PDF). Options: `--fast` (no GIFs), `--no-pdf`.
 - **`make_notebooks.py`** writes the seven notebooks from their source text.
 - **`execute_notebooks.py`** runs all notebook cells and saves the printed output and plots inside the `.ipynb` files.

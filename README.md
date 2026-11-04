@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-84%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-99%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -24,7 +24,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 84 tests
+python -m pytest -q                  # 99 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -77,6 +77,7 @@ Along the field there is no pi light, and a circular analyser separates sigma+ (
 | ![polariser](docs/figures/optics_polariser_rotation.gif) | **Rotating polariser** (Malus's law): pi and sigma lines trade places |
 | ![view angle](docs/figures/optics_view_angle.gif) | **Tilting the line of sight**: pi fades out, sigma becomes circular |
 | ![field ramp](docs/figures/optics_zeeman_field_ramp.gif) | **Field ramp**: the Zeeman components of Na D1 and D2 fan out |
+| ![sodium to Paschen-Back](docs/figures/optics_sodium_paschen_back.gif) | **Sodium D lines up to 60 T**: two anomalous patterns collapse towards the normal Zeeman triplet (above B* = 24.6 T the field beats spin-orbit coupling) |
 | ![H-alpha ramp](docs/figures/halpha_field_ramp.gif) | **Hydrogen H-alpha field ramp**: through no filter, a parallel and a perpendicular polariser, from weak field to Paschen-Back |
 
 **An honest scale note.** The outermost sodium D2 component moves only about 27 pm per tesla, and every component is the same yellow.
@@ -84,6 +85,24 @@ A prism cannot separate them: the closest components need a resolving power of a
 
 <p align="center">
   <img src="docs/figures/optics_instrument_ladder.png" width="780" alt="Resolving power of prisms, gratings and a Fabry-Perot against what the Zeeman pattern needs">
+</p>
+
+**The instrument that can.** A Fabry-Perot etalon (5 mm gap, finesse 30) turns each wavelength into a ring. At 0.3 T the sodium D2 ring splits
+into six: two pi (blue) and four sigma (red and green), with peak heights close to the classic 4 : 3 : 1. A perpendicular polariser removes the pi pair.
+
+<p align="center">
+  <img src="docs/figures/optics_fabry_perot_rings.png" width="640" alt="Fabry-Perot ring images of sodium D2 at three fields, with and without a polariser">
+</p>
+<p align="center">
+  <img src="docs/figures/optics_fabry_perot_profile.png" width="560" alt="Ring brightness against angle: six resolved Zeeman components coloured by polarisation">
+</p>
+
+**Strong field.** Above B* = ζ/μ_B ≈ 24.6 T the field overpowers the spin-orbit coupling and the sodium D doublet collapses towards the normal Zeeman
+triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's centre of gravity. A built-in check: the intensity-weighted mean σ shift is
+±16.2 pm/T at every field from 1 to 120 T, whatever the pattern looks like.
+
+<p align="center">
+  <img src="docs/figures/optics_sodium_paschen_back_fan.png" width="620" alt="Sodium D line components against field from weak field to 60 tesla">
 </p>
 
 ## Why decompose a problem?
@@ -176,8 +195,8 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 
 ```
 src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, validation, animation, torch_engine
-src/optics/     color, prism, polarization, spectrometer, instruments, figures, hydrogen_figures
-tests/          84 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, optics
+src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, figures, hydrogen_figures
+tests/          99 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
@@ -195,8 +214,8 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Hydrogen H-alpha: a real hydrogen spectrum with polarisation filters
 - [x] Animate the H-alpha field ramp through the polarisation filters
 - [ ] Push H-alpha through the prism and the instrument ladder
-- [ ] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
-- [ ] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
+- [x] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
+- [x] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
 - [ ] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)
 - [ ] A two-electron system (helium or calcium) with LS-coupling mixing
 - [ ] Compare full spectra with published high-field measurements
