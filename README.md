@@ -178,8 +178,9 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | D2 components across B (pi : inner sigma : outer sigma) | 4.00 : 2.99 : 1.00 | 4 : 3 : 1 | classic result |
 | ζ recovered from synthetic data (1 µeV noise) | about 0.01 % error | known input | `fitting.py`, notebook 4 |
 | D1 / D2 group spacings at 0.9 T (5 groups) | within 0.5 % | arXiv:2104.14896 (published theory, includes hyperfine) | `literature.py`; agreement with another calculation, not laboratory data |
-| Ca 4s4p ³P₁ lifetime (intercombination line, 657 nm) | 0.22 ms | 0.39 ms | order of magnitude only (factor 1.8); the ¹P₁ rate and the term energies were typed from memory |
-| Ca 4s4p Landé interval rule (³P₂−³P₁ : ³P₁−³P₀) | holds to 0.08 cm⁻¹ | 2 : 1 | term energies typed from memory, unverified |
+| Ca 4s4p ³P₁ lifetime (intercombination line, 657 nm) | 0.22 ms | 0.39 ms (410 Hz) and 0.42 ms (375 Hz) in two papers | order of magnitude only (factor 1.8 to 1.9); the ¹P₁ rate was typed from memory |
+| Ca 4s4p ³P₁ energy | 15210.0638 cm⁻¹ (used as input) | 455 986 240 494 135.8 Hz measured, divided by c | verified from [a frequency measurement](https://tf.nist.gov/general/pdf/2197.pdf) |
+| Ca 4s4p Landé interval rule (³P₂−³P₁ : ³P₁−³P₀) | holds to 0.09 cm⁻¹ | 2 : 1 | the other three term energies are typed from memory, unverified |
 | Resolving power to separate components at 1 T | about 55 000 | prism 2 000, grating 1.2×10⁵ | a prism cannot show the pattern |
 
 ### Hydrogen
@@ -202,7 +203,7 @@ Reference values live in `data/experimental_reference.csv`.
 - **Not modelled:** hyperfine structure, the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
 - **Source conflict, unresolved:** one summary of Steck's Sodium D Line Data implied a D1 to D2 interval of 17.220 cm⁻¹, while the model uses the NIST-style value 17.196 cm⁻¹ (ζ is fitted to it). I did not change the input. The difference is 0.14 %, too small to affect the group-spacing comparison, but please check both against NIST ASD.
-- **Calcium inputs are unverified:** the four 4s4p term energies and the ¹P₁ decay rate (2.18e8 per second) were typed from memory because the NIST pages could not be fetched here. Spin-spin interaction is not modelled, so helium is out of reach of this model.
+- **Calcium inputs are partly unverified:** the ³P₁ energy is checked against a measured frequency, but the ³P₀, ³P₂ and ¹P₁ energies and the ¹P₁ decay rate (2.18e8 per second) were typed from memory because the NIST level tables could not be fetched here. Spin-spin interaction is not modelled, so helium is out of reach of this model.
 - **Unchecked inputs:** the measured 2P fine structure (10969.04 MHz) and the decay-rate reference values were typed from memory. Check them against [NIST ASD](https://physics.nist.gov/asd) before citing.
 - **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was already in the repository when I joined this work and I don't know where it came from. Review it before relying on it. `instruments.py` and the H-alpha figures were written here.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.

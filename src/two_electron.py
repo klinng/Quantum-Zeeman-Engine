@@ -121,5 +121,8 @@ def intercombination_rate(eps2: float, a_singlet_per_s: float, lambda_singlet_nm
     return eps2 * a_singlet_per_s * (lambda_singlet_nm / lambda_triplet_nm) ** 3
 
 
-# Calcium 4s4p term energies (cm^-1), typed from memory: UNVERIFIED, check against NIST ASD before citing.
-CA_LEVELS_CM1 = {"3P0": 15157.91, "3P1": 15210.06, "3P2": 15315.94, "1P1": 23652.04}
+# Calcium 4s4p term energies (cm^-1).
+# 3P1 is VERIFIED: the measured 1S0-3P1 frequency 455 986 240 494 135.8 (3.4) Hz (tf.nist.gov/general/pdf/2197.pdf) divided by c
+# gives 15210.0638 cm^-1. The other three are typed from memory and UNVERIFIED: check against NIST ASD before citing.
+CA_3P1_MEASURED_HZ = 455_986_240_494_135.8
+CA_LEVELS_CM1 = {"3P0": 15157.91, "3P1": 15210.0638, "3P2": 15315.94, "1P1": 23652.04}

@@ -64,6 +64,11 @@ def test_calcium_levels_fit_consistently():
     assert np.abs(res).max() < 0.15                    # cm^-1; the inputs are typed from memory, so this tests nothing absolute
 
 
+def test_calcium_3p1_energy_matches_the_measured_frequency():
+    from src.two_electron import CA_3P1_MEASURED_HZ
+    assert CA_LEVELS_CM1["3P1"] == pytest.approx(CA_3P1_MEASURED_HZ / 299792458.0 / 100.0, abs=1e-4)
+
+
 def test_figure_builds():
     import matplotlib
     matplotlib.use("Agg")
