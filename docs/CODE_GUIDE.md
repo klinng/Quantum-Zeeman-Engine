@@ -112,6 +112,12 @@ Puts **two different orbital levels** (2s and 2p) in one Hamiltonian. Energies a
 - `radial_profile(theta, components, gap, R)`: sum of the Airy patterns of all components, weighted by observed intensity.
 - `fig_fabry_perot_rings()` (ring images at three fields, with and without a polariser) and `fig_fabry_perot_profile()` (six resolved peaks).
 
+## `src/optics/grotrian.py`: level diagram with transition arrows
+
+- `grotrian_data(B)`: upper and lower levels (energies from each manifold's centre, quantum number M = ⟨J_z⟩) and the table of drawable arrows from `transitions.zeeman_lines`; transitions with a vanishing matrix element are dropped.
+- `draw_grotrian(ax_up, ax_low, data)`: draws one frame; arrow colour = polarisation, arrow width = intensity.
+- `fig_grotrian(b_values)` (static, three fields) and `animate_grotrian(path)` (GIF as B rises to 60 T).
+
 ## `src/optics/sodium_paschen_back.py`: the sodium doublet at very high field
 
 - `components_vs_cog(B)`: the sodium D components with shifts measured from the doublet's centre of gravity (needed because D1 and D2 cross over above about 25 T).
@@ -249,6 +255,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_literature.py` | Measured g_J of the P states within 1 sigma, S state off by the bound-state size; reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
+| `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |
 | `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |
 | `test_fabry_perot.py` | Finesse formula; Airy peak and gap; one ring at zero field; six resolved peaks at 0.3 T; polarisers leave 4 sigma or 2 pi peaks; heights near 4 : 3 : 1. |
 | `test_hydrogen_spectrum.py` | Radial functions normalised; exact Lyman-alpha integral; decay rates vs literature; fine structure = alpha^2 Ry/16; Lamb shift; level counts; equal total emission per polarisation; strong-field sigma shift = 20.11 pm/T; polariser keeps only pi; Doppler width. |

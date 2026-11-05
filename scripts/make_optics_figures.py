@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from src.optics import figures as F  # noqa: E402
 from src.optics.fabry_perot import fig_fabry_perot_profile, fig_fabry_perot_rings  # noqa: E402
 from src.optics.sodium_paschen_back import animate_sodium_paschen_back, fig_sodium_paschen_back_fan  # noqa: E402
+from src.optics.grotrian import animate_grotrian, fig_grotrian  # noqa: E402
 from src.optics.halpha_instruments import fig_halpha_instrument_ladder  # noqa: E402
 from src.optics.hydrogen_figures import animate_halpha_field_ramp, fig_halpha_fan, fig_halpha_regimes  # noqa: E402
 from src.optics.instruments import fig_instrument_ladder  # noqa: E402
@@ -33,6 +34,7 @@ STATIC = {
     "optics_fabry_perot_profile": fig_fabry_perot_profile,
     "optics_sodium_paschen_back_fan": fig_sodium_paschen_back_fan,
     "halpha_instrument_ladder": fig_halpha_instrument_ladder,
+    "optics_grotrian": fig_grotrian,
     "halpha_regimes": fig_halpha_regimes,
     "halpha_fan": fig_halpha_fan,
 }
@@ -42,6 +44,7 @@ ANIMATIONS = {
     "optics_polariser_rotation": F.animate_polariser_rotation,
     "optics_view_angle": F.animate_view_angle,
     "halpha_field_ramp": animate_halpha_field_ramp,
+    "optics_grotrian_ramp": animate_grotrian,
     "optics_sodium_paschen_back": animate_sodium_paschen_back,
 }
 

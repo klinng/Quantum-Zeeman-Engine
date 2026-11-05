@@ -93,8 +93,15 @@ Along the field there is no pi light, and a circular analyser separates sigma+ (
 | ![polariser](docs/figures/optics_polariser_rotation.gif) | **Rotating polariser** (Malus's law): pi and sigma lines trade places |
 | ![view angle](docs/figures/optics_view_angle.gif) | **Tilting the line of sight**: pi fades out, sigma becomes circular |
 | ![field ramp](docs/figures/optics_zeeman_field_ramp.gif) | **Field ramp**: the Zeeman components of Na D1 and D2 fan out |
+| ![level diagram](docs/figures/optics_grotrian_ramp.gif) | **Level diagram with arrows** (Grotrian): one arrow per allowed transition, colour = polarisation, width = intensity; spin-flip arrows fade as B grows to 60 T |
 | ![sodium to Paschen-Back](docs/figures/optics_sodium_paschen_back.gif) | **Sodium D lines up to 60 T**: two anomalous patterns collapse towards the normal Zeeman triplet (above B* = 24.6 T the field beats spin-orbit coupling) |
 | ![H-alpha ramp](docs/figures/halpha_field_ramp.gif) | **Hydrogen H-alpha field ramp**: through no filter, a parallel and a perpendicular polariser, from weak field to Paschen-Back |
+
+<p align="center">
+  <img src="docs/figures/optics_grotrian.png" width="860" alt="Sodium D lines as a level diagram with polarisation-coloured arrows at 0.1, 5 and 60 tesla">
+</p>
+
+*The same lines drawn as a level diagram. Levels sit at M = m_l + m_s (always conserved), arrows exist only where the transition is allowed, and at 60 T only 6 of the 10 arrows stay strong.*
 
 **An honest scale note.** The outermost sodium D2 component moves only about 27 pm per tesla, and every component is the same yellow.
 A prism cannot separate them: the closest components need a resolving power of about 55 000 at 1 T, while a 5 cm glass prism offers about 2 000.
@@ -230,7 +237,7 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 
 ```
 src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, two_electron, two_electron_figures, literature, validation, animation, torch_engine
-src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
+src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
 tests/          135 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, two-electron atom, literature check, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
@@ -255,6 +262,13 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] A two-electron system with LS-coupling mixing (calcium 4s4p levels; spectrum and source-checked energies still to do)
 - [x] Cross-check line-group spacings against a published calculation (arXiv:2104.14896)
 - [ ] Compare full spectra with laboratory measurements of the Zeeman effect (the paper above is theory; look for its experimental companions)
+- [x] Level diagram (Grotrian) with polarisation-coloured, intensity-weighted arrows
+- [ ] Hyperfine structure (I·J) so the hydrogen 573 G crossing and the full sodium sub-structure can be compared with experiment
+- [ ] Hydrogen / deuterium isotope shift (reduced mass)
+- [ ] Voigt line profiles (Doppler + natural + pressure broadening)
+- [ ] Uncertainty propagation: error bars and bands from the uncertainties of the inputs (Monte Carlo)
+- [ ] Estimate of the diamagnetic term at 60 T
+- [ ] Optional: photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits
 
 ## Sources
