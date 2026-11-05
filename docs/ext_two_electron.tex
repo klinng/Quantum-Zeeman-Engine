@@ -1,0 +1,33 @@
+\section{Extension E: Two valence electrons (calcium $4s4p$)}
+All earlier levels have one active electron. Alkaline-earth atoms such as calcium have two: an $s$ electron and a $p$ electron. They can combine into a triplet
+($S=1$, levels $^3P_{0,1,2}$) or a singlet ($S=0$, level $^1P_1$). The code is \texttt{src/two\_electron.py}.
+
+\subsection{Model}
+The basis is $\ket{m_l}\otimes\ket{m_{s1}}\otimes\ket{m_{s2}}$ (12 states) and
+\begin{equation}
+  H = E_t + \Delta\,(\tfrac14 - \vb{s}_1\!\cdot\!\vb{s}_2) + \zeta\,\vb{l}\!\cdot\!\vb{s}_2 + \mu_B B\,(L_z + g_s(S_{1z}+S_{2z})).
+\end{equation}
+The second term is the exchange splitting: zero for the triplet and $\Delta$ for the singlet. The third is the spin--orbit coupling of the $p$ electron.
+Within the triplet it gives the Land\'e interval rule, $E(^3P_2)-E(^3P_1) : E(^3P_1)-E(^3P_0) = 2:1$. It is \emph{not} diagonal in $S$,
+so it mixes a little $^1P_1$ into $^3P_1$. The three parameters are fitted to the four measured term energies, which leaves one number as a consistency check.
+
+\subsection{Results}
+\begin{itemize}
+  \item With the calcium energies used (typed from memory, see below) the fit reproduces all four levels to $0.08\ \si{cm^{-1}}$: the interval rule holds in calcium.
+        The fitted values are $\zeta=105.3\ \si{cm^{-1}}$ and $\Delta=8388\ \si{cm^{-1}}$.
+  \item The $g_J$ factors come out as $1.5$ for $^3P_1$ and $^3P_2$ and $1$ for $^1P_1$, read from the model's own eigenvalues at a tiny field.
+  \item The $^1P_1$ admixture in $^3P_1$ is $\varepsilon^2 = 7.8\times10^{-5}$, equal to the perturbation-theory value $\bigl(\zeta/\sqrt2\,/\,\Delta E\bigr)^2$.
+  \item That admixture lets $^3P_1$ decay to the ground state, the $657\ \si{nm}$ intercombination line. Scaling the $^1P_1$ decay rate by
+        $\varepsilon^2$ and the cube of the wavelength ratio gives a lifetime of about $0.22\ \si{ms}$, against $0.39\ \si{ms}$ quoted in a NIST-hosted calcium spectroscopy paper:
+        the right order of magnitude and a factor $1.8$ off. The estimate assumes one shared dipole matrix element and uses a $^1P_1$ decay rate typed from memory, so it is a plausibility check, not a precise prediction.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{two_electron_calcium_levels.pdf}
+\caption{Calcium $4s4p$ levels against field. Left: the three triplet levels. Right: Zeeman fans relative to each level's zero-field centre ($^3P_1$, $^3P_2$: $g\approx1.5$; $^1P_1$: $g=1$).}
+\end{figure}
+
+\subsection{Limits}
+The four calcium term energies and the $^1P_1$ decay rate ($2.18\times10^8\ \si{s^{-1}}$) were typed from memory and are \emph{not} source-checked. Spin--spin interaction is not modelled
+(it is large in helium, so this model suits calcium, not helium), nor is configuration mixing with $4s3d$ or hyperfine structure. Only levels are computed, not a line spectrum.

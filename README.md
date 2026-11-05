@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-124%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-135%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -24,7 +24,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 124 tests
+python -m pytest -q                  # 135 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -37,6 +37,8 @@ Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/m
 | **Sodium** (3p to 3s, D lines) | yes | yes | yes | yes | 1 to 4, 6 | Levels 1 to 4, Extension B |
 | **Hydrogen n = 2** (Lamb shift, 2s and 2p) | yes, with crossings; with an electric field, anticrossings and quenching | no (no jump between 2s and 2p) | no | no | 5 | Extension A |
 | **Hydrogen H-alpha** (n = 3 to 2, 656 nm) | yes | yes | yes | yes | 7 | Extension C |
+
+| **Calcium 4s4p** (two electrons: singlet and triplet P terms) | yes | not yet | not yet | not yet | none yet | Extension E |
 
 A spectrum needs a jump between two shells. That is why hydrogen n = 2 alone has levels but no light, and why H-alpha was added.
 
@@ -142,6 +144,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Level 4 | Wigner-Eckart, selection rules, intensities, fitting | full line spectrum with polarisation | `transitions.py`, `fitting.py` | `level_4_tensors.tex` |
 | Extension A | Hydrogen n = 2: Lamb shift, 2S-2P crossing | 573 G, against "about 570 G" in the literature | `hydrogen.py` | `ext_hydrogen_n2.tex` |
 | Extension B | Colours, prism, polarisation filters, instrument ladder | four animations, required resolving power | `src/optics/` | `ext_optics.tex` |
+| Extension E | Two valence electrons (calcium 4s4p): exchange splitting, spin-orbit mixing of singlet and triplet | Landé interval rule to 0.08 cm⁻¹; singlet admixture 7.8e-5 | `two_electron.py` | `ext_two_electron.tex` |
 | Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
 | Extension C | Hydrogen H-alpha (n = 3 to 2) with radial integrals, Dirac fine structure | spectrum from weak field to Paschen-Back | `hydrogen_spectrum.py` | `ext_hydrogen_halpha.tex` |
 
@@ -175,6 +178,8 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | D2 components across B (pi : inner sigma : outer sigma) | 4.00 : 2.99 : 1.00 | 4 : 3 : 1 | classic result |
 | ζ recovered from synthetic data (1 µeV noise) | about 0.01 % error | known input | `fitting.py`, notebook 4 |
 | D1 / D2 group spacings at 0.9 T (5 groups) | within 0.5 % | arXiv:2104.14896 (published theory, includes hyperfine) | `literature.py`; agreement with another calculation, not laboratory data |
+| Ca 4s4p ³P₁ lifetime (intercombination line, 657 nm) | 0.22 ms | 0.39 ms | order of magnitude only (factor 1.8); the ¹P₁ rate and the term energies were typed from memory |
+| Ca 4s4p Landé interval rule (³P₂−³P₁ : ³P₁−³P₀) | holds to 0.08 cm⁻¹ | 2 : 1 | term energies typed from memory, unverified |
 | Resolving power to separate components at 1 T | about 55 000 | prism 2 000, grating 1.2×10⁵ | a prism cannot show the pattern |
 
 ### Hydrogen
@@ -197,6 +202,7 @@ Reference values live in `data/experimental_reference.csv`.
 - **Not modelled:** hyperfine structure, the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
 - **Source conflict, unresolved:** one summary of Steck's Sodium D Line Data implied a D1 to D2 interval of 17.220 cm⁻¹, while the model uses the NIST-style value 17.196 cm⁻¹ (ζ is fitted to it). I did not change the input. The difference is 0.14 %, too small to affect the group-spacing comparison, but please check both against NIST ASD.
+- **Calcium inputs are unverified:** the four 4s4p term energies and the ¹P₁ decay rate (2.18e8 per second) were typed from memory because the NIST pages could not be fetched here. Spin-spin interaction is not modelled, so helium is out of reach of this model.
 - **Unchecked inputs:** the measured 2P fine structure (10969.04 MHz) and the decay-rate reference values were typed from memory. Check them against [NIST ASD](https://physics.nist.gov/asd) before citing.
 - **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was already in the repository when I joined this work and I don't know where it came from. Review it before relying on it. `instruments.py` and the H-alpha figures were written here.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.
@@ -222,9 +228,9 @@ print(seen[seen.observed > 1e-3][["polarisation", "shift_pm", "observed"]])
 ## Project layout
 
 ```
-src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, literature, validation, animation, torch_engine
+src/            constants, hamiltonians, solvers, transitions, fitting, hydrogen, hydrogen_spectrum, stark, two_electron, two_electron_figures, literature, validation, animation, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, fabry_perot, sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          124 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, literature check, Fabry-Perot, optics
+tests/          135 tests: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting, hydrogen n=2, H-alpha, Stark effect, two-electron atom, literature check, Fabry-Perot, optics
 data/           experimental reference values
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
@@ -245,7 +251,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
 - [x] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
 - [x] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)
-- [ ] A two-electron system (helium or calcium) with LS-coupling mixing
+- [x] A two-electron system with LS-coupling mixing (calcium 4s4p levels; spectrum and source-checked energies still to do)
 - [x] Cross-check line-group spacings against a published calculation (arXiv:2104.14896)
 - [ ] Compare full spectra with laboratory measurements of the Zeeman effect (the paper above is theory; look for its experimental companions)
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits

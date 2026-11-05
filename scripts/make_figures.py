@@ -60,6 +60,8 @@ ax.figure.savefig(FIG / "hydrogen_n2_levels.pdf")
 ax.figure.savefig(FIG / "hydrogen_n2_levels.png", dpi=150)
 plt.close(ax.figure)
 from src.literature import fig_literature_comparison  # noqa: E402
+from src.two_electron import fit_to_levels  # noqa: E402
+from src.two_electron_figures import fig_two_electron_levels  # noqa: E402
 from src.stark_figures import fig_anticrossing, fig_stark_fan  # noqa: E402
 
 for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing", fig_anticrossing),
@@ -68,6 +70,11 @@ for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing"
     f.savefig(FIG / f"{name}.pdf")
     f.savefig(FIG / f"{name}.png", dpi=150)
     plt.close(f)
+_z, _d, _et, _ = fit_to_levels(15157.91, 15210.06, 15315.94, 23652.04)      # calcium 4s4p, energies from memory (unverified)
+_f = fig_two_electron_levels(_z, _d, _et)
+_f.savefig(FIG / "two_electron_calcium_levels.pdf")
+_f.savefig(FIG / "two_electron_calcium_levels.png", dpi=150)
+plt.close(_f)
 print("saved figures to", FIG)
 
 if "--gif" in sys.argv:

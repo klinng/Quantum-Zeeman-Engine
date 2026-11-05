@@ -175,6 +175,16 @@ high-resolution stage.**
 `animate_filter_scan` (a colour filter sweeping across the lamp spectrum), `animate_zeeman_field_ramp`,
 `animate_polariser_rotation` (Malus's law) and `animate_view_angle` (π fades out, σ becomes circular).
 
+## `src/two_electron.py`: two valence electrons (calcium 4s4p)
+
+- `operators()` and `h_two_electron(B, zeta, delta, E_t)`: the 12x12 Hamiltonian: exchange splitting, spin-orbit coupling of the p electron, Zeeman term.
+- `classify_states(B, ...)`: eigenstates labelled 3P0, 3P1, 3P2 or 1P1 by their J and singlet weight.
+- `zero_field_levels_cm1(...)` and `fit_to_levels(...)`: term energies from the model, and the fit of the three parameters to four measured energies.
+- `singlet_admixture_in_3p1(...)`: how much 1P1 is mixed into 3P1 (the reason the 657 nm intercombination line is weakly allowed).
+- `g_factor(label, ...)`: g_J from the model's own eigenvalues at a tiny field.
+- `intercombination_rate(...)`: rough decay rate of 3P1 from the admixture. `CA_LEVELS_CM1`: calcium energies typed from memory (unverified).
+- `two_electron_figures.py`: `fig_two_electron_levels(zeta, delta, e_t)` (levels and Zeeman fans against field).
+
 ## `src/literature.py`: cross-check against a published calculation
 
 - `PAPER_AT_0P9T`: the reference table typed in from arXiv:2104.14896 (five group spacings, formula and numerical values, with how each was obtained).
@@ -235,6 +245,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_spectrometer.py` | Zero-field D-line wavelengths; 4 + 6 components; ~27 pm/T shift; D1 components equal and D2 in the ratio 4 : 3 : 1 across B; no π lines along B; polariser ∥ B keeps only π; circular analysers separate σ+ from σ−; the prism cannot resolve Zeeman components at 1 T. |
 | `test_instruments.py` | Grating and Fabry-Perot formulas; ladder ordering; required resolving power ∝ 1/B; field-for-resolving-power is consistent; the instrument-ladder figure builds. |
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
+| `test_two_electron.py` | Algebra and Hermiticity; degeneracies 5, 3, 3, 1; Landé interval rule 2 : 1; g = 1.5 / 1.5 / 1; admixture equals perturbation theory; zero without spin-orbit; fit recovers known parameters; calcium fit consistent; rate scaling. |
 | `test_literature.py` | Measured g_J of the P states within 1 sigma, S state off by the bound-state size; reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
