@@ -18,3 +18,30 @@ Inputs are assumed independent (no correlations).
 \includegraphics[width=\textwidth]{uncertainty.pdf}
 \caption{Sampling (histogram, black curve) agrees with the derivative method (red band). Right: the sampled $\sigma$ converges to the exact value as the number of draws grows (one random sequence).}
 \end{figure}
+
+\subsection*{The global budget}
+\texttt{src/budget.py} puts every system in one table, each row saying where its $\sigma$ comes from: \emph{measured} (a published uncertainty) or \emph{assumed} (an illustrative value to be replaced).
+\begin{table}[h]
+\centering
+\begin{tabular}{llrrl}
+\toprule
+System & Observable & Value & $\sigma$ & $\sigma$ source\\
+\midrule
+Sodium & $3P_{1/2}$ hyperfine splitting (MHz) & 188.88 & 0.26 & measured\\
+Hydrogen $n=2$ & 2S$\times$2P crossing (G) & 573.4 & 0.5 & assumed\\
+H-alpha & Doppler FWHM at 300 K (pm) & 8.11 & 0.13 & assumed ($\pm10$ K)\\
+Calcium 4s4p & Land\'e interval ratio & 2.030 & 0.004 & assumed\\
+Calcium 4s4p & singlet admixture in $^3P_1$ & $7.8\times10^{-5}$ & tiny & assumed\\
+\bottomrule
+\end{tabular}
+\caption{Global budget. Calcium has no hyperfine row because $^{40}$Ca has no nuclear spin; its term energies are unverified.}
+\end{table}
+
+\paragraph{A real finding.} Compared with the measured Land\'e factors, $g_J(3P_{1/2})$ and $g_J(3P_{3/2})$ agree within $0.7\sigma$ and $0.5\sigma$, but $g_J(3S_{1/2})$ differs by $2.3\times10^{-5}$, about $33\sigma$ of the measurement.
+The model uses the free-electron $g_s$, while the measured value is for a bound electron; the model contains no bound-state correction. The gap is small, but it is a genuine, quantified limit of the model.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{uncertainty_budget.pdf}
+\caption{Relative uncertainty of each observable. Green: published $\sigma$; orange: assumed $\sigma$.}
+\end{figure}

@@ -217,6 +217,7 @@ high-resolution stage.**
 - `hydrogen_crossing_gauss(lamb, fine)`: the 573 G crossing as a one-number model (root finding on the 2s and 2p blocks); `sodium_3p12_splitting_mhz(A)`: the 3P1/2 splitting from the full hyperfine matrix.
 - Inputs are treated as independent. The Lamb-shift σ used in the figure is illustrative, not a measured value.
 - `src/uncertainty_figures.py`: `fig_uncertainty()`.
+- `src/budget.py`: the global table. `rows()` lists one `Row` per observable (system, model, inputs with σ, whether σ is measured or assumed, optional reference); `budget_table(n)` runs the Monte Carlo for all rows and adds sodium g_J against measurement; `fig_budget()` plots relative uncertainties. To add a system, append a `Row`.
 
 ## `src/stark.py`: hydrogen n = 2 in an electric field
 
@@ -274,6 +275,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_literature.py` | Measured g_J of the P states within 1 sigma, S state off by the bound-state size; reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
 | `test_hyperfine.py` | Hermitian; Na 3S splitting 1771.626 MHz with 3 + 5 degeneracy; stretched state matches its exact formula; 3P1/2 splitting 2A; H 2S/2P splittings; proton g_I; F_z conserved; the 573 G crossing splits into four with mean 570 to 573 G. |
 | `test_uncertainty.py` | Sampling reproduces the exact σ of a linear model; derivatives match algebra; seed reproducibility; z-score verdicts; crossing 573.4 G with slope about 0.55 G/MHz; sampled σ of the sodium splitting equals 2σ_A. |
+| `test_budget.py` | Every system present; every σ labelled measured/assumed; sodium hyperfine row matches exact σ; no calcium hyperfine row; g_J(3P) consistent and g_J(3S) flagged. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |

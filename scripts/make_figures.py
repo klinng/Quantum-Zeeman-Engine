@@ -65,9 +65,10 @@ from src.two_electron_figures import fig_two_electron_levels  # noqa: E402
 from src.stark_figures import fig_anticrossing, fig_stark_fan  # noqa: E402
 from src.hyperfine_figures import fig_hyperfine  # noqa: E402
 from src.uncertainty_figures import fig_uncertainty  # noqa: E402
+from src.budget import fig_budget  # noqa: E402
 
 for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing", fig_anticrossing),
-                 ("literature_sodium_groups", fig_literature_comparison), ("hyperfine", fig_hyperfine), ("uncertainty", fig_uncertainty)):
+                 ("literature_sodium_groups", fig_literature_comparison), ("hyperfine", fig_hyperfine), ("uncertainty", fig_uncertainty), ("uncertainty_budget", fig_budget)):
     f = fn()
     f.savefig(FIG / f"{name}.pdf")
     f.savefig(FIG / f"{name}.png", dpi=150)
