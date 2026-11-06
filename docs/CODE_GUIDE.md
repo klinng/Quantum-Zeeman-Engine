@@ -199,6 +199,16 @@ high-resolution stage.**
 - `MEASURED_G_J`, `model_g_j_from_diagonalisation()` and `g_factor_comparison()`: measured sodium Landé factors (Steck's table) against g_J read from the model's own eigenvalues at a tiny field.
 - Because the paper includes hyperfine structure and ours does not, only the spacings between groups are compared.
 
+## `src/hyperfine.py`: the nucleus joins in (sodium, hydrogen)
+
+- Basis |l m_l⟩⊗|s m_s⟩⊗|I m_I⟩, so hydrogen n = 2 is 16 states, sodium 3S 8 states and 3P 24 states.
+- `electron_projectors(l)`: projectors onto each J from the eigen-decomposition of J², so each fine-structure level gets its own constant A_J.
+- `h_hyperfine(l, i, a_by_j_ev, B, g_i)`: Σ A_J P_J (I·J) P_J plus the nuclear Zeeman term μ_B g_I I_z B.
+- `h_with_hyperfine`, `h_n2_hyperfine(B)`, `h_na_3s(B)`, `h_na_3p(B, zeta)`: ready-made Hamiltonians.
+- `lamb_crossings_gauss(hyperfine=True/False)`: the 2S × 2P crossing fields near 573 G (one without hyperfine, four with).
+- Constants: sodium from Steck's table; hydrogen 2S measured; hydrogen 2P leading-order theory (marked in the code).
+- `src/hyperfine_figures.py`: `fig_hyperfine()` (sodium 3S Breit-Rabi diagram and the hydrogen crossing splitting).
+
 ## `src/stark.py`: hydrogen n = 2 in an electric field
 
 - `dipole_operators()`: the x and z position operators of the n = 2 manifold in Bohr radii (from `hydrogen_spectrum.full_dipole`).
@@ -253,6 +263,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_hydrogen.py` | Zero-field scheme; Dirac cross-check; labels; Landé slopes for 2S₁/₂, 2P₁/₂, 2P₃/₂; B never mixes 2s with 2p; the 2S–2P crossing near 570 G; Paschen-Back slopes. |
 | `test_two_electron.py` | Algebra and Hermiticity; degeneracies 5, 3, 3, 1; Landé interval rule 2 : 1; g = 1.5 / 1.5 / 1; admixture equals perturbation theory; zero without spin-orbit; fit recovers known parameters; calcium fit consistent; rate scaling. |
 | `test_literature.py` | Measured g_J of the P states within 1 sigma, S state off by the bound-state size; reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
+| `test_hyperfine.py` | Hermitian; Na 3S splitting 1771.626 MHz with 3 + 5 degeneracy; stretched state matches its exact formula; 3P1/2 splitting 2A; H 2S/2P splittings; proton g_I; F_z conserved; the 573 G crossing splits into four with mean 570 to 573 G. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |

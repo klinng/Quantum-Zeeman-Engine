@@ -1,0 +1,21 @@
+\section{Hyperfine structure}
+The nucleus has spin $I$ and a magnetic moment. We add it to the basis (\texttt{src/hyperfine.py}), so states are $|l\,m_l\rangle|s\,m_s\rangle|I\,m_I\rangle$ and
+\begin{equation}
+H = H_\text{fine+Zeeman}\otimes 1_I + \sum_J A_J\, P_J(\mathbf I\cdot\mathbf J)P_J + \mu_B g_I I_z B .
+\end{equation}
+$P_J$ projects onto electronic angular momentum $J$, so each fine-structure level has its own constant $A_J$. At zero field the levels split into $F=J+I,\dots,|J-I|$.
+
+\paragraph{Inputs.} Sodium ($I=3/2$): $A(3S_{1/2})=885.8130644$, $A(3P_{1/2})=94.44$, $A(3P_{3/2})=18.534$ MHz (Steck's table). Hydrogen ($I=1/2$): the 2S splitting
+$177.556860$ MHz is a measured value (arXiv:physics/0608192); the 2P splittings use the leading-order theory ratios $\nu_F/24$ and $\nu_F/60$ of the 1S splitting $\nu_F=1420.405752$ MHz, which are theory, not measurements.
+The sodium electric-quadrupole term is not modelled; $^{40}$Ca has $I=0$.
+
+\paragraph{Checks.} The model reproduces the sodium ground splitting $2A=1771.6261$ MHz, the stretched state energy exactly, and the hydrogen 2S and 2P splittings that were put in.
+
+\paragraph{Result.} Without hyperfine the 2S--2P crossing of hydrogen sits at $573.4$ G. With the proton spin it splits into four crossings at $538.1$, $552.2$, $591.0$ and $605.0$ G; their mean, $571.6$ G, moves towards the commonly quoted value of about $570$ G
+(that number has not been source-checked here, and the four individual positions have not been compared with a measurement).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{hyperfine.pdf}
+\caption{Left: sodium $3S_{1/2}$ hyperfine levels against field. Right: the hydrogen crossing near 573 G; dashed lines have no hyperfine structure.}
+\end{figure}

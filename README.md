@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-135%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-155%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -153,6 +153,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension B | Colours, prism, polarisation filters, instrument ladder | four animations, required resolving power | `src/optics/` | `ext_optics.tex` |
 | Extension E | Two valence electrons (calcium 4s4p): exchange splitting, spin-orbit mixing of singlet and triplet | Landé interval rule to 0.08 cm⁻¹; singlet admixture 7.8e-5 | `two_electron.py` | `ext_two_electron.tex` |
 | Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
+| Extension E | Nuclear spin: hyperfine structure of sodium and hydrogen n = 2; the 573 G crossing splits into four | Na 3S splitting 1771.626 MHz; mean crossing 571.6 G | `hyperfine.py` | `ext_hyperfine.tex` |
 | Extension C | Hydrogen H-alpha (n = 3 to 2) with radial integrals, Dirac fine structure | spectrum from weak field to Paschen-Back | `hydrogen_spectrum.py` | `ext_hydrogen_halpha.tex` |
 
 Every part has a test file; notebooks 1 to 7 show the same ideas with explanations and saved output.
@@ -194,7 +195,10 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 
 | Quantity | Model | Reference | Note |
 |---|---|---|---|
-| 2S₁/₂(−½) × 2P₁/₂(+½) crossing | 573.4 G | about 570 G | literature includes hyperfine structure |
+| 2S × 2P crossing near 573 G, no hyperfine | 573.4 G | about 570 G (quoted, unchecked) | single crossing |
+| Same crossing with proton hyperfine | four crossings at 538.1, 552.2, 591.0, 605.0 G; mean 571.6 G | about 570 G | the mean moves towards the quoted value; the four positions are not yet compared with a source |
+| H 2S hyperfine splitting | 177.55686 MHz | 177.556860(16) MHz, measured (arXiv:physics/0608192) | an input, not a prediction |
+| Na 3S₁/₂ hyperfine splitting | 1771.6261 MHz | Steck table | an input (A), reproduced as 2A |
 | 2P₃/₂ − 2P₁/₂ (Dirac vs measured) | 10949 MHz | 10969 MHz | 0.2 % apart (QED); measured value not yet source-checked |
 | ⟨2p\|r\|1s⟩ | 1.290266 a₀ | 128√6/243 a₀ | exact |
 | A(2p to 1s), A(3p to 2s), A(3d to 2p) | 6.258e8, 2.242e7, 6.458e7 s⁻¹ | 6.265e8, 2.245e7, 6.465e7 s⁻¹ | about 0.1 %; reference values quoted from memory |
@@ -207,7 +211,8 @@ Reference values live in `data/experimental_reference.csv`.
 
 ## Limits and honesty notes
 
-- **Not modelled:** hyperfine structure, the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
+- **Hyperfine (new):** `src/hyperfine.py` covers sodium (I = 3/2) and hydrogen n = 2 (I = 1/2). Sodium A constants are from Steck's table; hydrogen 2S is measured; the hydrogen 2P constants are leading-order theory (Fermi/24 and Fermi/60), not measured values. The sodium electric-quadrupole term (2.7 MHz) is not modelled. Ca-40 has no nuclear spin.
+- **Not modelled:** the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
 - **Source conflict, unresolved:** one summary of Steck's Sodium D Line Data implied a D1 to D2 interval of 17.220 cm⁻¹, while the model uses the NIST-style value 17.196 cm⁻¹ (ζ is fitted to it). I did not change the input. The difference is 0.14 %, too small to affect the group-spacing comparison, but please check both against NIST ASD.
 - **Calcium inputs are partly unverified:** the ³P₁ energy is checked against a measured frequency, but the ³P₀, ³P₂ and ¹P₁ energies and the ¹P₁ decay rate (2.18e8 per second) were typed from memory because the NIST level tables could not be fetched here. Spin-spin interaction is not modelled, so helium is out of reach of this model.
@@ -263,7 +268,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Cross-check line-group spacings against a published calculation (arXiv:2104.14896)
 - [ ] Compare full spectra with laboratory measurements of the Zeeman effect (the paper above is theory; look for its experimental companions)
 - [x] Level diagram (Grotrian) with polarisation-coloured, intensity-weighted arrows
-- [ ] Hyperfine structure (I·J) so the hydrogen 573 G crossing and the full sodium sub-structure can be compared with experiment
+- [x] Hyperfine structure (I·J) for sodium and hydrogen n = 2 (still to do: compare the hydrogen crossing positions and the sodium sub-structure with a measured source)
 - [ ] Hydrogen / deuterium isotope shift (reduced mass)
 - [ ] Voigt line profiles (Doppler + natural + pressure broadening)
 - [ ] Uncertainty propagation: error bars and bands from the uncertainties of the inputs (Monte Carlo)
