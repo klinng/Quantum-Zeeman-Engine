@@ -1,8 +1,8 @@
-# Reference values for validation. Sources are listed in docs (Sources section). Rows marked UNCHECKED have not been verified against a source.
+# Reference values for validation. Sources are listed in docs (Sources section). Rows marked UNCHECKED, if any, have not been verified against a source.
 quantity,value,unit,note
-Na 3p 2P fine-structure splitting,17.196,cm^-1,UNCHECKED (a summary of Steck's table implied 17.220); D2 minus D1 (about 16973.37 - 16956.17)
-Na D1 line wavenumber,16956.17,cm^-1,UNCHECKED; 2P1/2 to 2S1/2 (vacuum wavenumber)
-Na D2 line wavenumber,16973.37,cm^-1,UNCHECKED; 2P3/2 to 2S1/2 (vacuum wavenumber)
+Na 3p 2P fine-structure splitting,17.196,cm^-1,NIST Handbook Na I (MZ81): 16973.368 - 16956.172; D2 minus D1
+Na D1 line wavenumber,16956.172,cm^-1,NIST Handbook (MZ81); 2P1/2 to 2S1/2 (vacuum wavenumber)
+Na D2 line wavenumber,16973.368,cm^-1,NIST Handbook (MZ81); 2P3/2 to 2S1/2 (vacuum wavenumber)
 Na D2:D1 intensity ratio,2.0,dimensionless,statistical weights 2j+1 = 4:2
 Landé g (2P1/2),0.6666667,dimensionless,LS coupling with g_s = 2
 Landé g (2P3/2),1.3333333,dimensionless,LS coupling with g_s = 2

@@ -223,9 +223,10 @@ Full list with values and status: the "Sources" section of `docs/main.pdf` (also
 | H decay-rate checks | Wiese and Fuhr, J. Phys. Chem. Ref. Data 38, 565 (2009), Table 6 |
 | H 2S two-photon decay 8.2206 s⁻¹ (theory) | Labzowsky et al. 2005, quoted in arXiv:1711.05533 |
 | Ca 4s4p energies and ¹P₁ rate | NIST Handbook of Basic Atomic Spectroscopic Data (Ca I tables); ³P₁ from the measured frequency at tf.nist.gov/general/pdf/2197.pdf |
+| Sodium 3p levels 16956.172 and 16973.368 cm⁻¹ | NIST Handbook, Na I energy levels (MZ81) |
 | Sodium group-spacing cross-check | arXiv:2104.14896 (published theory) |
 
-Marked **unchecked**: the sodium D1/D2 wavenumbers and the 17.196 cm⁻¹ interval, and the "about 570 G" hydrogen crossing (arXiv:1104.4421 could not be opened). The hydrogen 2P hyperfine constants are leading-order theory. Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was already present when this work began and its origin is unknown.
+Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables, MZ81). Marked **unchecked**: the "about 570 G" hydrogen crossing (arXiv:1104.4421 could not be opened). The hydrogen 2P hyperfine constants are leading-order theory. Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was already present when this work began and its origin is unknown.
 
 ## Limits and honesty notes
 
@@ -233,8 +234,8 @@ Marked **unchecked**: the sodium D1/D2 wavenumbers and the 17.196 cm⁻¹ interv
 - **Hyperfine (new):** `src/hyperfine.py` covers sodium (I = 3/2) and hydrogen n = 2 (I = 1/2). Sodium A constants are from Steck's table; hydrogen 2S is measured; the hydrogen 2P constants are leading-order theory (Fermi/24 and Fermi/60), not measured values. The sodium electric-quadrupole term (2.7 MHz) is not modelled. Ca-40 has no nuclear spin.
 - **Not modelled:** the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
-- **Source conflict, unresolved:** one summary of Steck's Sodium D Line Data implied a D1 to D2 interval of 17.220 cm⁻¹, while the model uses the NIST-style value 17.196 cm⁻¹ (ζ is fitted to it). I did not change the input. The difference is 0.14 %, too small to affect the group-spacing comparison, but please check both against NIST ASD.
-- **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the sodium D-line wavenumbers, and the hydrogen 2P hyperfine constants, which are leading-order theory.
+- **Sodium D1 to D2 interval resolved:** the NIST Handbook (Na I tables, level source MZ81) gives 3p ²P₁/₂ = 16956.172 and ²P₃/₂ = 16973.368 cm⁻¹, so the interval is 17.196 cm⁻¹, which is what the model uses. The 17.220 that a summarising tool once suggested for Steck's table was wrong, not a real source conflict.
+- **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the hydrogen 2P hyperfine constants (leading-order theory) and the "about 570 G" crossing.
 - **Spin-spin interaction is not modelled**, so helium is out of reach of this model.
 - **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was already in the repository when I joined this work and I don't know where it came from. Review it before relying on it. `instruments.py` and the H-alpha figures were written here.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.
