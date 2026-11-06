@@ -209,6 +209,15 @@ high-resolution stage.**
 - Constants: sodium from Steck's table; hydrogen 2S measured; hydrogen 2P leading-order theory (marked in the code).
 - `src/hyperfine_figures.py`: `fig_hyperfine()` (sodium 3S Breit-Rabi diagram and the hydrogen crossing splitting).
 
+## `src/uncertainty.py`: how far can a number be trusted?
+
+- `monte_carlo(model, inputs, n, seed)`: inputs are `{name: (mean, sigma)}`; draws each input from a normal distribution, runs `model(**values)`, returns mean, std and the error of the mean. Same seed gives the same answer.
+- `linear_sensitivity(model, inputs)`: central-difference derivatives, each input's contribution to the final σ, and the total.
+- `sigma_compare(a, sig_a, b, sig_b)`: z-score and a verdict (below 2 consistent, 2 to 3 borderline, above 3 disagreement).
+- `hydrogen_crossing_gauss(lamb, fine)`: the 573 G crossing as a one-number model (root finding on the 2s and 2p blocks); `sodium_3p12_splitting_mhz(A)`: the 3P1/2 splitting from the full hyperfine matrix.
+- Inputs are treated as independent. The Lamb-shift σ used in the figure is illustrative, not a measured value.
+- `src/uncertainty_figures.py`: `fig_uncertainty()`.
+
 ## `src/stark.py`: hydrogen n = 2 in an electric field
 
 - `dipole_operators()`: the x and z position operators of the n = 2 manifold in Bohr radii (from `hydrogen_spectrum.full_dipole`).
@@ -264,6 +273,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_two_electron.py` | Algebra and Hermiticity; degeneracies 5, 3, 3, 1; Landé interval rule 2 : 1; g = 1.5 / 1.5 / 1; admixture equals perturbation theory; zero without spin-orbit; fit recovers known parameters; calcium fit consistent; rate scaling. |
 | `test_literature.py` | Measured g_J of the P states within 1 sigma, S state off by the bound-state size; reference table matches its own formulas; model within 1 % of paper numerics and 0.5 % of its formulas; spacings scale with B; mu_B value. |
 | `test_hyperfine.py` | Hermitian; Na 3S splitting 1771.626 MHz with 3 + 5 degeneracy; stretched state matches its exact formula; 3P1/2 splitting 2A; H 2S/2P splittings; proton g_I; F_z conserved; the 573 G crossing splits into four with mean 570 to 573 G. |
+| `test_uncertainty.py` | Sampling reproduces the exact σ of a linear model; derivatives match algebra; seed reproducibility; z-score verdicts; crossing 573.4 G with slope about 0.55 G/MHz; sampled σ of the sodium splitting equals 2σ_A. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |

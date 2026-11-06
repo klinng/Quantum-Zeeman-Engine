@@ -1,0 +1,20 @@
+\section{Uncertainty: how far can a number be trusted?}
+Every input of the model (a measured energy, a hyperfine constant) carries an uncertainty, so every output does too. \texttt{src/uncertainty.py} propagates it in two independent ways.
+
+\paragraph{Sampling (Monte Carlo).} Draw each input from a normal distribution $(\text{mean},\sigma)$, run the model for each draw, and take the mean and standard deviation of the outputs.
+It needs no algebra and works for eigenvalue problems. The error of the estimated $\sigma$ itself shrinks like $1/\sqrt{2N}$ for $N$ draws.
+
+\paragraph{Derivatives.} $\sigma_\text{out}^2=\sum_i(\partial f/\partial x_i\,\sigma_i)^2$, computed by central differences. It shows which input dominates, and cross-checks the sampling.
+
+\paragraph{Comparing two numbers.} $z=|a-b|/\sqrt{\sigma_a^2+\sigma_b^2}$: below 2 is consistent, above 3 a real disagreement.
+
+\paragraph{Two worked cases.}
+(i) Sodium $3P_{1/2}$ hyperfine splitting from $A=94.44(13)$ MHz (Steck's table): the full matrix model gives $188.87\pm0.26$ MHz by sampling, equal to the exact $2\sigma_A=0.26$ MHz.
+(ii) The hydrogen 2S--2P crossing field depends on the Lamb shift by $0.548$ G per MHz. The $\sigma=1$ MHz used in the figure is an \emph{assumed, illustrative} value, not a measured uncertainty; it gives $573.4\pm0.5$ G.
+Inputs are assumed independent (no correlations).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{uncertainty.pdf}
+\caption{Sampling (histogram, black curve) agrees with the derivative method (red band). Right: the sampled $\sigma$ converges to the exact value as the number of draws grows (one random sequence).}
+\end{figure}

@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-155%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-161%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -37,7 +37,6 @@ Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/m
 | **Sodium** (3p to 3s, D lines) | yes | yes | yes | yes | 1 to 4, 6 | Levels 1 to 4, Extension B |
 | **Hydrogen n = 2** (Lamb shift, 2s and 2p) | yes, with crossings; with an electric field, anticrossings and quenching | no (no jump between 2s and 2p) | no | no | 5 | Extension A |
 | **Hydrogen H-alpha** (n = 3 to 2, 656 nm) | yes | yes | yes | yes | 7 | Extension C |
-
 | **Calcium 4s4p** (two electrons: singlet and triplet P terms) | yes | not yet | not yet | not yet | none yet | Extension E |
 
 A spectrum needs a jump between two shells. That is why hydrogen n = 2 alone has levels but no light, and why H-alpha was added.
@@ -153,7 +152,8 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension B | Colours, prism, polarisation filters, instrument ladder | four animations, required resolving power | `src/optics/` | `ext_optics.tex` |
 | Extension E | Two valence electrons (calcium 4s4p): exchange splitting, spin-orbit mixing of singlet and triplet | Landé interval rule to 0.08 cm⁻¹; singlet admixture 7.8e-5 | `two_electron.py` | `ext_two_electron.tex` |
 | Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
-| Extension E | Nuclear spin: hyperfine structure of sodium and hydrogen n = 2; the 573 G crossing splits into four | Na 3S splitting 1771.626 MHz; mean crossing 571.6 G | `hyperfine.py` | `ext_hyperfine.tex` |
+| Extension F | Nuclear spin: hyperfine structure of sodium and hydrogen n = 2; the 573 G crossing splits into four | Na 3S splitting 1771.626 MHz; mean crossing 571.6 G | `hyperfine.py` | `ext_hyperfine.tex` |
+| Extension G | Uncertainty: Monte Carlo and derivative propagation, z-score comparison | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz) | `uncertainty.py` | `ext_uncertainty.tex` |
 | Extension C | Hydrogen H-alpha (n = 3 to 2) with radial integrals, Dirac fine structure | spectrum from weak field to Paschen-Back | `hydrogen_spectrum.py` | `ext_hydrogen_halpha.tex` |
 
 Every part has a test file; notebooks 1 to 7 show the same ideas with explanations and saved output.
@@ -271,7 +271,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Hyperfine structure (I·J) for sodium and hydrogen n = 2 (still to do: compare the hydrogen crossing positions and the sodium sub-structure with a measured source)
 - [ ] Hydrogen / deuterium isotope shift (reduced mass)
 - [ ] Voigt line profiles (Doppler + natural + pressure broadening)
-- [ ] Uncertainty propagation: error bars and bands from the uncertainties of the inputs (Monte Carlo)
+- [x] Uncertainty propagation: Monte Carlo and derivative methods plus a z-score comparison (`uncertainty.py`); still to do: attach measured uncertainties to every input and show error bands on all spectra
 - [ ] Estimate of the diamagnetic term at 60 T
 - [ ] Optional: photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits
