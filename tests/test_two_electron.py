@@ -61,7 +61,7 @@ def test_fit_recovers_known_parameters():
 def test_calcium_levels_fit_consistently():
     # four numbers, three parameters: the leftover is a genuine check of the model (Lande interval rule for calcium)
     *_, res = fit_to_levels(*(CA_LEVELS_CM1[k] for k in ("3P0", "3P1", "3P2", "1P1")))
-    assert np.abs(res).max() < 0.15                    # cm^-1; the inputs are typed from memory, so this tests nothing absolute
+    assert np.abs(res).max() < 0.15                    # cm^-1; NIST Handbook energies; the fit has 3 parameters for 4 levels
 
 
 def test_calcium_3p1_energy_matches_the_measured_frequency():

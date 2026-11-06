@@ -150,7 +150,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Level 4 | Wigner-Eckart, selection rules, intensities, fitting | full line spectrum with polarisation | `transitions.py`, `fitting.py` | `level_4_tensors.tex` |
 | Extension A | Hydrogen n = 2: Lamb shift, 2S-2P crossing | 573 G, against "about 570 G" in the literature | `hydrogen.py` | `ext_hydrogen_n2.tex` |
 | Extension B | Colours, prism, polarisation filters, instrument ladder | four animations, required resolving power | `src/optics/` | `ext_optics.tex` |
-| Extension E | Two valence electrons (calcium 4s4p): exchange splitting, spin-orbit mixing of singlet and triplet | Landé interval rule to 0.08 cm⁻¹; singlet admixture 7.8e-5 | `two_electron.py` | `ext_two_electron.tex` |
+| Extension E | Two valence electrons (calcium 4s4p): exchange splitting, spin-orbit mixing of singlet and triplet | Landé interval rule to 0.09 cm⁻¹; singlet admixture 7.8e-5 | `two_electron.py` | `ext_two_electron.tex` |
 | Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
 | Extension F | Nuclear spin: hyperfine structure of sodium and hydrogen n = 2; the 573 G crossing splits into four | Na 3S splitting 1771.626 MHz; mean crossing 571.6 G | `hyperfine.py` | `ext_hyperfine.tex` |
 | Extension G | Uncertainty: Monte Carlo and derivative propagation, z-score comparison, and a global budget table covering sodium, hydrogen n = 2, H-alpha and calcium | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz); g_J(3S₁/₂) differs from measurement by 2.3e-5 (free-electron g_s) | `uncertainty.py`, `budget.py` | `ext_uncertainty.tex` |
@@ -186,9 +186,9 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | D2 components across B (pi : inner sigma : outer sigma) | 4.00 : 2.99 : 1.00 | 4 : 3 : 1 | classic result |
 | ζ recovered from synthetic data (1 µeV noise) | about 0.01 % error | known input | `fitting.py`, notebook 4 |
 | D1 / D2 group spacings at 0.9 T (5 groups) | within 0.5 % | arXiv:2104.14896 (published theory, includes hyperfine) | `literature.py`; agreement with another calculation, not laboratory data |
-| Ca 4s4p ³P₁ lifetime (intercombination line, 657 nm) | 0.22 ms | 0.39 ms (410 Hz) and 0.42 ms (375 Hz) in two papers | order of magnitude only (factor 1.8 to 1.9); the ¹P₁ rate was typed from memory |
+| Ca 4s4p ³P₁ lifetime (intercombination line, 657 nm) | 0.22 ms | 0.39 ms (410 Hz) and 0.42 ms (375 Hz) in two papers | order of magnitude only (factor 1.8 to 1.9); ¹P₁ rate 2.20e8 from the NIST Handbook |
 | Ca 4s4p ³P₁ energy | 15210.0638 cm⁻¹ (used as input) | 455 986 240 494 135.8 Hz measured, divided by c | verified from [a frequency measurement](https://tf.nist.gov/general/pdf/2197.pdf) |
-| Ca 4s4p Landé interval rule (³P₂−³P₁ : ³P₁−³P₀) | holds to 0.09 cm⁻¹ | 2 : 1 | the other three term energies are typed from memory, unverified |
+| Ca 4s4p Landé interval rule (³P₂−³P₁ : ³P₁−³P₀) | holds to 0.09 cm⁻¹ | 2 : 1 | term energies from the NIST Handbook (see Sources) |
 | Resolving power to separate components at 1 T | about 55 000 | prism 2 000, grating 1.2×10⁵ | a prism cannot show the pattern |
 
 ### Hydrogen
@@ -199,9 +199,9 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | Same crossing with proton hyperfine | four crossings at 538.1, 552.2, 591.0, 605.0 G; mean 571.6 G | about 570 G | the mean moves towards the quoted value; the four positions are not yet compared with a source |
 | H 2S hyperfine splitting | 177.55686 MHz | 177.556860(16) MHz, measured (arXiv:physics/0608192) | an input, not a prediction |
 | Na 3S₁/₂ hyperfine splitting | 1771.6261 MHz | Steck table | an input (A), reproduced as 2A |
-| 2P₃/₂ − 2P₁/₂ (Dirac vs measured) | 10949 MHz | 10969 MHz | 0.2 % apart (QED); measured value not yet source-checked |
+| 2P₃/₂ − 2P₁/₂ (Dirac vs measured) | 10949 MHz | 10969.13(10) MHz (Baird et al. 1972) | 0.2 % apart (QED) |
 | ⟨2p\|r\|1s⟩ | 1.290266 a₀ | 128√6/243 a₀ | exact |
-| A(2p to 1s), A(3p to 2s), A(3d to 2p) | 6.258e8, 2.242e7, 6.458e7 s⁻¹ | 6.265e8, 2.245e7, 6.465e7 s⁻¹ | about 0.1 %; reference values quoted from memory |
+| A(2p to 1s), A(3p to 2s), A(3d to 2p) | 6.258e8, 2.242e7, 6.458e7 s⁻¹ | 6.265e8, 2.245e7, 6.465e7 s⁻¹ | about 0.1 %; reference values from Wiese and Fuhr 2009, Table 6 |
 | H-alpha sigma shift at 20 T | 402.27 pm | 20.11 pm/T × B = 402.20 pm | normal Zeeman limit |
 | 2S Stark shift at 10 V/cm (E along B) | 0.3650 MHz | 0.3652 MHz | second-order perturbation theory |
 | Anticrossing gap at 573 G | 4.54 MHz per V/cm | 2√3 e a₀ = 4.43 MHz per V/cm | 2.5 % apart (mixing with 2P3/2) |
@@ -209,15 +209,33 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 
 Reference values live in `data/experimental_reference.csv`.
 
+## Sources
+
+Full list with values and status: the "Sources" section of `docs/main.pdf` (also `data/experimental_reference.csv`). In short:
+
+| Input | Source |
+|---|---|
+| Physical constants | CODATA via `scipy.constants` |
+| Sodium hyperfine constants, g_I, measured g_J | D. A. Steck, *Sodium D Line Data* (steck.us/alkalidata) |
+| H Lamb shift 1057.845(9) MHz | Lundeen and Pipkin, as quoted in arXiv:0809.2985 |
+| H 2P₃/₂ − 2P₁/₂ = 10969.13(10) MHz | Baird, Brandenberger, Gondaira, Metcalf, Phys. Rev. A 5, 564 (1972) |
+| H 2S hyperfine 177.556860(16) MHz; 1S Fermi value | arXiv:physics/0608192, arXiv:physics/0305073 |
+| H decay-rate checks | Wiese and Fuhr, J. Phys. Chem. Ref. Data 38, 565 (2009), Table 6 |
+| H 2S two-photon decay 8.2206 s⁻¹ (theory) | Labzowsky et al. 2005, quoted in arXiv:1711.05533 |
+| Ca 4s4p energies and ¹P₁ rate | NIST Handbook of Basic Atomic Spectroscopic Data (Ca I tables); ³P₁ from the measured frequency at tf.nist.gov/general/pdf/2197.pdf |
+| Sodium group-spacing cross-check | arXiv:2104.14896 (published theory) |
+
+Marked **unchecked**: the sodium D1/D2 wavenumbers and the 17.196 cm⁻¹ interval, and the "about 570 G" hydrogen crossing (arXiv:1104.4421 could not be opened). The hydrogen 2P hyperfine constants are leading-order theory. Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was already present when this work began and its origin is unknown.
+
 ## Limits and honesty notes
 
-- **Global budget:** every σ in `budget.py` is labelled measured or assumed; only the sodium hyperfine constant has a published σ so far. The sodium g_J(3S₁/₂) row shows a 2.3e-5 gap to the measurement because the model uses the free-electron g_s.
+- **Global budget:** every σ in `budget.py` is labelled measured or assumed; the sodium hyperfine constant and the hydrogen Lamb shift have published σ; calcium energies only have the NIST table's precision, and the H-alpha temperature σ is an assumption. The sodium g_J(3S₁/₂) row shows a 2.3e-5 gap to the measurement because the model uses the free-electron g_s.
 - **Hyperfine (new):** `src/hyperfine.py` covers sodium (I = 3/2) and hydrogen n = 2 (I = 1/2). Sodium A constants are from Steck's table; hydrogen 2S is measured; the hydrogen 2P constants are leading-order theory (Fermi/24 and Fermi/60), not measured values. The sodium electric-quadrupole term (2.7 MHz) is not modelled. Ca-40 has no nuclear spin.
 - **Not modelled:** the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
 - **Source conflict, unresolved:** one summary of Steck's Sodium D Line Data implied a D1 to D2 interval of 17.220 cm⁻¹, while the model uses the NIST-style value 17.196 cm⁻¹ (ζ is fitted to it). I did not change the input. The difference is 0.14 %, too small to affect the group-spacing comparison, but please check both against NIST ASD.
-- **Calcium inputs are partly unverified:** the ³P₁ energy is checked against a measured frequency, but the ³P₀, ³P₂ and ¹P₁ energies and the ¹P₁ decay rate (2.18e8 per second) were typed from memory because the NIST level tables could not be fetched here. Spin-spin interaction is not modelled, so helium is out of reach of this model.
-- **Unchecked inputs:** the measured 2P fine structure (10969.04 MHz) and the decay-rate reference values were typed from memory. Check them against [NIST ASD](https://physics.nist.gov/asd) before citing.
+- **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the sodium D-line wavenumbers, and the hydrogen 2P hyperfine constants, which are leading-order theory.
+- **Spin-spin interaction is not modelled**, so helium is out of reach of this model.
 - **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was already in the repository when I joined this work and I don't know where it came from. Review it before relying on it. `instruments.py` and the H-alpha figures were written here.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.
 
@@ -265,7 +283,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Show the Zeeman pattern in a simulated Fabry-Perot ring image (the instrument that can actually resolve it)
 - [x] Paschen-Back collapse of the sodium D lines (60 T) in the optics animations
 - [x] Electric field mixing 2s with 2p (Lamb-Retherford quenching, anticrossings)
-- [x] A two-electron system with LS-coupling mixing (calcium 4s4p levels; spectrum and source-checked energies still to do)
+- [x] A two-electron system with LS-coupling mixing (calcium 4s4p levels, energies from the NIST Handbook; the line spectrum is still to do)
 - [x] Cross-check line-group spacings against a published calculation (arXiv:2104.14896)
 - [ ] Compare full spectra with laboratory measurements of the Zeeman effect (the paper above is theory; look for its experimental companions)
 - [x] Level diagram (Grotrian) with polarisation-coloured, intensity-weighted arrows

@@ -18,16 +18,16 @@ def _hist(ax, samples, mean, std, lin_std, xlabel, title):
     ax.legend(fontsize=8)
 
 
-def fig_uncertainty(sigma_lamb_mhz: float = 1.0, n: int = 400):
-    """Left: hydrogen 573 G crossing when the Lamb shift is only known to ±sigma (ASSUMED, illustrative).
+def fig_uncertainty(sigma_lamb_mhz: float = 0.009, n: int = 400):
+    """Left: hydrogen 573 G crossing with the Lamb shift 1057.845(9) MHz (Lundeen and Pipkin, as quoted in arXiv:0809.2985).
     Middle: sodium 3P1/2 hyperfine splitting from A(3P1/2) = 94.44(13) MHz (Steck). Right: how the
     sampling error shrinks with the number of samples (1/sqrt(2N) for a standard deviation)."""
     fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(15, 4.4))
-    inp = {"lamb_mhz": (1057.864, sigma_lamb_mhz)}
+    inp = {"lamb_mhz": (1057.845, sigma_lamb_mhz)}
     r = monte_carlo(hydrogen_crossing_gauss, inp, n)
     l = linear_sensitivity(hydrogen_crossing_gauss, inp)
     _hist(a1, r["samples"], r["mean"], r["std"], l["std"], "crossing field (G)",
-          f"H 2S×2P crossing, Lamb shift ± {sigma_lamb_mhz:g} MHz (assumed)")
+          f"H 2S×2P crossing, Lamb shift ± {sigma_lamb_mhz:g} MHz")
     inp2 = {"a_3p12": (94.44, 0.13)}
     r2 = monte_carlo(sodium_3p12_splitting_mhz, inp2, n)
     l2 = linear_sensitivity(sodium_3p12_splitting_mhz, inp2)

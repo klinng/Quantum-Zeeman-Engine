@@ -13,13 +13,13 @@ so it mixes a little $^1P_1$ into $^3P_1$. The three parameters are fitted to th
 
 \subsection{Results}
 \begin{itemize}
-  \item With the calcium energies used (typed from memory, see below) the fit reproduces all four levels to $0.08\ \si{cm^{-1}}$: the interval rule holds in calcium.
+  \item With the calcium energies from the NIST Handbook \cite{nistca} the fit reproduces all four levels to $0.09\ \si{cm^{-1}}$: the interval rule holds in calcium.
         The fitted values are $\zeta=105.3\ \si{cm^{-1}}$ and $\Delta=8388\ \si{cm^{-1}}$.
   \item The $g_J$ factors come out as $1.5$ for $^3P_1$ and $^3P_2$ and $1$ for $^1P_1$, read from the model's own eigenvalues at a tiny field.
   \item The $^1P_1$ admixture in $^3P_1$ is $\varepsilon^2 = 7.8\times10^{-5}$, equal to the perturbation-theory value $\bigl(\zeta/\sqrt2\,/\,\Delta E\bigr)^2$.
   \item That admixture lets $^3P_1$ decay to the ground state, the $657\ \si{nm}$ intercombination line. Scaling the $^1P_1$ decay rate by
         $\varepsilon^2$ and the cube of the wavelength ratio gives a lifetime of about $0.22\ \si{ms}$, against $0.39\ \si{ms}$ ($410\ \si{Hz}$ linewidth) and $0.42\ \si{ms}$ ($375\ \si{Hz}$) in two NIST-hosted calcium papers:
-        the right order of magnitude and a factor $1.8$ to $1.9$ off. The estimate assumes one shared dipole matrix element and uses a $^1P_1$ decay rate typed from memory, so it is a plausibility check, not a precise prediction.
+        the right order of magnitude and a factor $1.8$ to $1.9$ off. The estimate assumes one shared dipole matrix element and uses the NIST $^1P_1$ decay rate $2.20\times10^8\ \si{s^{-1}}$ \cite{nistca}, so it is a plausibility check, not a precise prediction.
 \end{itemize}
 
 \begin{figure}[h]
@@ -29,5 +29,5 @@ so it mixes a little $^1P_1$ into $^3P_1$. The three parameters are fitted to th
 \end{figure}
 
 \subsection{Limits}
-The $^3P_1$ energy is verified (the measured $^1S_0$--$^3P_1$ frequency $455\,986\,240\,494\,135.8\ \si{Hz}$ gives $15210.0638\ \si{cm^{-1}}$), but the $^3P_0$, $^3P_2$ and $^1P_1$ energies and the $^1P_1$ decay rate ($2.18\times10^8\ \si{s^{-1}}$) were typed from memory and are \emph{not} source-checked. Spin--spin interaction is not modelled
+The $^3P_1$ energy comes from a measured frequency ($455\,986\,240\,494\,135.8\ \si{Hz}$ \cite{cafreq}, giving $15210.0638\ \si{cm^{-1}}$); the other three term energies and the $^1P_1$ decay rate are from the NIST Handbook tables \cite{nistca}, which give no uncertainties. Spin--spin interaction is not modelled
 (it is large in helium, so this model suits calcium, not helium), nor is configuration mixing with $4s3d$ or hyperfine structure. Only levels are computed, not a line spectrum.

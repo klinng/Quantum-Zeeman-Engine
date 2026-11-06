@@ -28,8 +28,8 @@ NA_I = 1.5
 NA_A_MHZ = {"3S1/2": 885.8130644, "3P1/2": 94.44, "3P3/2": 18.534}
 NA_G_I = -0.0008046108
 # Hydrogen, I = 1/2.
-# 1S Fermi splitting 1420.405751768 MHz and 2S splitting 177.556860(16) MHz: Kolachevsky/Fischer et al.
-# (arXiv:physics/0608192, measured). 2P values are leading-order theory (Fermi/24, Fermi/60): see below.
+# 1S Fermi splitting 1420.405751768 MHz and 2S splitting 177.556860(16) MHz: arXiv:physics/0608192;
+# (arXiv:physics/0608192 and arXiv:physics/0305073, measured). 2P values are leading-order theory (Fermi/24, Fermi/60): see below.
 H_I = 0.5
 H_FERMI_1S_MHZ = 1420.405751768
 H_HFS_2S_MHZ = 177.556860                    # measured

@@ -92,7 +92,7 @@ The basis is |m_l⟩ ⊗ |m_s⟩ with m_l descending (outer) and m_s = +½, −�
 
 Puts **two different orbital levels** (2s and 2p) in one Hamiltonian. Energies are measured from 2P₁/₂ at zero field.
 
-- **Constants:** `LAMB_SHIFT_MHZ` (1057.864) and `FINE_2P_MHZ` (10969.04) are the two numbers taken from experiment.
+- **Constants:** `LAMB_SHIFT_MHZ` (1057.845) and `FINE_2P_MHZ` (10969.13) are the two numbers taken from experiment (sources in the PDF's Sources section).
   `mhz_to_ev` / `ev_to_mhz` convert between a frequency (what atomic physicists quote) and an energy.
 - **`dirac_fine_structure_mhz()`** gives the pure-theory value α²·Ry/16 (about 10949 MHz). It differs from the measured
   interval by 0.2 % (QED), so it is an independent sanity check on `FINE_2P_MHZ`.
@@ -188,7 +188,7 @@ high-resolution stage.**
 - `zero_field_levels_cm1(...)` and `fit_to_levels(...)`: term energies from the model, and the fit of the three parameters to four measured energies.
 - `singlet_admixture_in_3p1(...)`: how much 1P1 is mixed into 3P1 (the reason the 657 nm intercombination line is weakly allowed).
 - `g_factor(label, ...)`: g_J from the model's own eigenvalues at a tiny field.
-- `intercombination_rate(...)`: rough decay rate of 3P1 from the admixture. `CA_LEVELS_CM1`: calcium energies typed from memory (unverified).
+- `intercombination_rate(...)`: rough decay rate of 3P1 from the admixture. `CA_LEVELS_CM1`: calcium energies from the NIST Handbook (³P₁ from a measured frequency).
 - `two_electron_figures.py`: `fig_two_electron_levels(zeta, delta, e_t)` (levels and Zeeman fans against field).
 
 ## `src/literature.py`: cross-check against a published calculation

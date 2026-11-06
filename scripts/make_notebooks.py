@@ -598,7 +598,7 @@ for (nu,lu,nl,ll), ref in {(2,1,1,0):6.265e8,(3,0,2,1):6.317e6,(3,1,2,0):2.245e7
 ("markdown", r"""## Check 1: the radial integral and decay rates
 
 The Lyman-alpha integral has an exact value and ours agrees to 8 digits. The decay rates come from the same integrals and
-agree with the literature values quoted from memory (check against NIST before citing).
+agree with the Wiese and Fuhr (2009) values, Table 6.
 """),
 ("code", r"""df = balmer_components(0.001)
 print('components at 1 mT:', len(df), ' distinct wavelengths:', df.wavelength_nm.round(5).nunique())

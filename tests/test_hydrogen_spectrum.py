@@ -22,7 +22,7 @@ def test_lyman_alpha_radial_integral_is_exact():
 
 
 def test_einstein_a_values_match_literature():
-    # literature (NIST-like) values, quoted from memory: check them against NIST before citing
+    # reference values: Wiese and Fuhr, J. Phys. Chem. Ref. Data 38, 565 (2009), Table 6
     assert einstein_a(2, 1, 1, 0) == pytest.approx(6.265e8, rel=0.01)
     assert einstein_a(3, 0, 2, 1) == pytest.approx(6.317e6, rel=0.01)
     assert einstein_a(3, 1, 2, 0) == pytest.approx(2.245e7, rel=0.01)
@@ -44,7 +44,7 @@ def test_zero_field_level_count():
 def test_lamb_shift_n2():
     from src.constants import ev_to_wavenumber
     lamb = manifold_hamiltonian(2, 0.0, True)[0, 0].real - manifold_hamiltonian(2, 0.0, False)[0, 0].real
-    assert ev_to_wavenumber(lamb) / MHZ_TO_CM1 == pytest.approx(1057.864, rel=1e-6)
+    assert ev_to_wavenumber(lamb) / MHZ_TO_CM1 == pytest.approx(1057.845, rel=1e-6)
 
 
 def test_total_rate_is_equal_for_the_three_polarisations():

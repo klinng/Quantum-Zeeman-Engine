@@ -73,7 +73,7 @@ for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing"
     f.savefig(FIG / f"{name}.pdf")
     f.savefig(FIG / f"{name}.png", dpi=150)
     plt.close(f)
-_z, _d, _et, _ = fit_to_levels(15157.91, 15210.06, 15315.94, 23652.04)      # calcium 4s4p, energies from memory (unverified)
+_z, _d, _et, _ = fit_to_levels(15157.901, 15210.0638, 15315.943, 23652.304)      # calcium 4s4p, NIST Handbook (SC85)
 _f = fig_two_electron_levels(_z, _d, _et)
 _f.savefig(FIG / "two_electron_calcium_levels.pdf")
 _f.savefig(FIG / "two_electron_calcium_levels.png", dpi=150)

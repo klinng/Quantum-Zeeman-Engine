@@ -62,7 +62,7 @@ def quenching_rate(b_tesla: float, e_vcm: float, angle_deg: float = 90.0) -> np.
     return (1.0 - s_weights(v)) * A_2P_1S
 
 
-def perturbative_s_shift_mhz(e_vcm: float, lamb_mhz: float = 1057.864, fine_mhz: float = 10969.04) -> float:
+def perturbative_s_shift_mhz(e_vcm: float, lamb_mhz: float = 1057.845, fine_mhz: float = 10969.13) -> float:
     """Second-order Stark shift of 2S1/2 (m_j = 1/2) for E parallel to B = 0, from the standard formulas.
     2S couples to 2P1/2 with 3 x^2 and to 2P3/2 with 6 x^2 (x = e a0 E); used as an independent check."""
     x2 = (MHZ_PER_A0_VCM * e_vcm) ** 2
@@ -79,6 +79,6 @@ def anticrossing_gap_mhz(e_vcm: float, b_window_t=(0.0540, 0.0600), n: int = 241
     return float(gaps[k]), float(bs[k])
 
 
-def lifetime_s(rate_quench_per_s: float, two_photon_per_s: float = 8.2) -> float:
-    """Lifetime of a metastable-2S-like state: 1 / (quenching rate + the two-photon decay of pure 2S, about 8.2 /s)."""
+def lifetime_s(rate_quench_per_s: float, two_photon_per_s: float = 8.2206) -> float:
+    """Lifetime of a metastable-2S-like state: 1 / (quenching rate + the two-photon decay of pure 2S, 8.2206 /s from Labzowsky et al. 2005, quoted in arXiv:1711.05533)."""
     return 1.0 / (rate_quench_per_s + two_photon_per_s)

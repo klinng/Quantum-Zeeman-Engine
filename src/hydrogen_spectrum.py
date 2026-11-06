@@ -9,7 +9,7 @@ Each manifold is block-diagonal in l:   H = sum over l of  [ E_l (+) spin-orbit 
 * Fine structure: the Dirac energy E_nj (leading order in alpha) is imposed on every (n, l, j) level by
   choosing, for each l, a constant a_l and a spin-orbit constant zeta_l such that a_l + zeta_l L.S has the
   two Dirac eigenvalues. So 3p3/2 and 3d3/2 come out exactly degenerate, as in Dirac theory.
-* Lamb shift: ns levels are raised by 1057.864 MHz * 8/n^3 (measured for n = 2, scaled as 1/n^3 for others;
+* Lamb shift: ns levels are raised by 1057.845 MHz * 8/n^3 (measured for n = 2, scaled as 1/n^3 for others;
   an approximation, accurate to a few percent, and tiny next to the Zeeman splitting at the fields used).
 * Zeeman: mu_B B (L_z + g_s S_z), as in the rest of the project.
 * Transition strength: |<u| D_q |k>|^2 between exact eigenstates, with D_q = R_{n'l',nl} * (angular part
@@ -38,7 +38,7 @@ from .transitions import POLARISATION, dipole_matrices
 ALPHA = sc.alpha
 RY_INF_CM1 = sc.physical_constants["Rydberg constant"][0] / 100.0          # infinite nuclear mass
 RY_H_CM1 = RY_INF_CM1 / (1 + sc.m_e / sc.m_p)                              # hydrogen (reduced mass)
-LAMB_2S_MHZ = 1057.864                                                     # measured, E(2S1/2) - E(2P1/2)
+LAMB_2S_MHZ = 1057.845                                                     # measured, E(2S1/2) - E(2P1/2)
 MHZ_TO_CM1 = 1e6 / (sc.c * 100.0)
 RATE_AU_PER_S = 1.0 / sc.physical_constants["atomic unit of time"][0]
 LINE_NAMES = {3: "Halpha", 4: "Hbeta", 5: "Hgamma"}

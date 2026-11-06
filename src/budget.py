@@ -51,19 +51,20 @@ def _halpha_doppler_pm(temperature_k):
 
 def rows() -> list[Row]:
     from .two_electron import CA_LEVELS_CM1
-    ca = {k: (v, 0.05) for k, v in zip(("e3p0", "e3p1", "e3p2", "e1p1"),
+    ca = {k: (v, 0.001) for k, v in zip(("e3p0", "e3p1", "e3p2", "e1p1"),
                                        (CA_LEVELS_CM1["3P0"], CA_LEVELS_CM1["3P1"], CA_LEVELS_CM1["3P2"], CA_LEVELS_CM1["1P1"]))}
     return [
         Row("Sodium", "3P1/2 hyperfine splitting", "MHz", sodium_3p12_splitting_mhz, {"a_3p12": (94.44, 0.13)},
             "measured", note="A(3P1/2) = 94.44(13) MHz, Steck's table; splitting = 2A"),
         Row("Hydrogen n=2", "2S x 2P crossing (no hyperfine)", "G", hydrogen_crossing_gauss,
-            {"lamb_mhz": (1057.864, 1.0)}, "assumed", note="Lamb-shift sigma of 1 MHz is illustrative"),
+            {"lamb_mhz": (1057.845, 0.009)}, "measured",
+            note="Lamb shift 1057.845(9) MHz, Lundeen and Pipkin as quoted in arXiv:0809.2985"),
         Row("Hydrogen H-alpha", "Doppler FWHM at 300 K", "pm", _halpha_doppler_pm, {"temperature_k": (300.0, 10.0)},
             "assumed", note="temperature known to ±10 K is an assumption about the lab"),
         Row("Calcium 4s4p", "Landé interval ratio", "-", _ca_interval_ratio, ca, "assumed",
-            note="term energies unverified; sigma 0.05 cm^-1 assumed; the rule value 2 is an approximation, so no z-score"),
+            note="NIST Handbook energies; sigma 0.001 cm^-1 is only the tabulated precision (assumed); the rule value 2 is an approximation, so no z-score"),
         Row("Calcium 4s4p", "singlet admixture in 3P1", "-", _ca_admixture, ca, "assumed",
-            note="term energies unverified; sigma 0.05 cm^-1 assumed"),
+            note="NIST Handbook energies; sigma 0.001 cm^-1 is only the tabulated precision (assumed)"),
     ]
 
 

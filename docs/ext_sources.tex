@@ -1,0 +1,67 @@
+\section{Sources: where every number comes from}
+Every input of the model is either a physical constant (from \texttt{scipy.constants}, i.e.\ CODATA \cite{codata}), a number from a source listed below, or a \emph{derived} number computed by the code.
+Nothing here is taken from memory. Numbers that I could not check are marked \textbf{unchecked}, and numbers that are theory or a model choice are marked as such.
+
+\subsection{Inputs and their sources}
+\begin{center}
+\small
+\begin{tabular}{p{3.9cm}p{3.4cm}p{6.4cm}}
+\toprule
+Quantity & Value & Source and status\\
+\midrule
+Na $3p$ fine-structure interval & 17.196 \si{\per\centi\metre} & \textbf{unchecked}. A summary of Steck's table \cite{steck} implied 17.220; the difference (0.14\,\%) does not affect any comparison made here\\
+Na $A(3S_{1/2}),A(3P_{1/2}),A(3P_{3/2})$ & 885.8130644, 94.44(13), 18.534(15) MHz & Steck \cite{steck}, measured\\
+Na nuclear $g_I$ & $-0.0008046108(8)$ & Steck \cite{steck}\\
+Na measured $g_J$ ($S$, $P_{1/2}$, $P_{3/2}$) & 2.0022960(7), 0.66581(12), 1.3342(2) & Steck \cite{steck}, who cites a measurement\\
+H Lamb shift $2S_{1/2}-2P_{1/2}$ & 1057.845(9) MHz & Lundeen and Pipkin, as quoted in \cite{arxiv0809}\\
+H $2P_{3/2}-2P_{1/2}$ & 10969.13(10) MHz & Baird, Brandenberger, Gondaira, Metcalf \cite{baird1972}\\
+H $2S$ hyperfine splitting & 177.556860(16) MHz & measured \cite{arxiv0608,arxiv0305}\\
+H $1S$ hyperfine (Fermi) splitting & 1420.405751768 MHz & \cite{arxiv0608}\\
+H $2P_{1/2},2P_{3/2}$ hyperfine & 1/24 and 1/60 of the 1S value & \textbf{theory} (leading order), not measured; no measured source was found\\
+H decay rates $A(2p\to1s)$, $A(3p\to2s)$, $A(3d\to2p)$ & $6.2649\times10^8$, $2.2448\times10^7$, $6.4651\times10^7$ s$^{-1}$ & Wiese and Fuhr \cite{wiese2009}, Table 6 (used only as a check; the model computes its own)\\
+H $2S$ two-photon decay & 8.2206 s$^{-1}$ & theory (Labzowsky et al.\ 2005), quoted in \cite{arxiv1711}\\
+H crossing ``about 570 G'' & 570 G & quoted from arXiv:1104.4421 in earlier notes; \textbf{that paper could not be opened here}\\
+Ca $4s4p$ levels $^3P_0,{}^3P_2,{}^1P_1$ & 15157.901, 15315.943, 23652.304 \si{\per\centi\metre} & NIST Handbook of Basic Atomic Spectroscopic Data \cite{nistca} (code SC85); no uncertainties given\\
+Ca $^3P_1$ level & 15210.0638 \si{\per\centi\metre} & from the measured frequency $455\,986\,240\,494\,135.8(3.4)$ Hz \cite{cafreq}; the NIST table lists 15210.063\\
+Ca $^1P_1$ decay rate & $2.20\times10^8$ s$^{-1}$ & NIST Handbook \cite{nistca}, ref.\ M03\\
+Ca lifetimes $0.39$, $0.42$ ms & (410 Hz, 375 Hz linewidths) & two NIST-hosted calcium papers; their full citations were not recorded\\
+Sodium D-line wavenumbers & 16956.17, 16973.37 \si{\per\centi\metre} & \textbf{unchecked}\\
+Paper spacings at 0.9 T & five group spacings & arXiv:2104.14896 \cite{arxiv2104}, published \emph{theory}, not laboratory data\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Where the figures come from}
+Every figure in this report is drawn by the code of this repository from the inputs above; none is copied from a paper or a website. The scripts \texttt{scripts/make\_figures.py} and \texttt{scripts/make\_optics\_figures.py} regenerate all of them.
+\begin{center}
+\small
+\begin{tabular}{p{5.2cm}p{9cm}}
+\toprule
+Figure file & Produced by\\
+\midrule
+\texttt{p\_orbital\_levels}, \texttt{na\_d\_lines\_zeeman}, \texttt{hydrogen\_n2\_levels} & \texttt{make\_figures.py} with \texttt{src/hamiltonians.py}, \texttt{transitions.py}, \texttt{hydrogen.py}\\
+\texttt{halpha\_regimes}, \texttt{halpha\_fan} & \texttt{src/optics/hydrogen\_figures.py} with \texttt{hydrogen\_spectrum.py}\\
+\texttt{hydrogen\_stark\_fan}, \texttt{hydrogen\_anticrossing} & \texttt{src/stark\_figures.py} with \texttt{stark.py}\\
+\texttt{two\_electron\_calcium\_levels} & \texttt{src/two\_electron\_figures.py} (calcium energies from \cite{nistca,cafreq})\\
+\texttt{literature\_sodium\_groups} & \texttt{src/literature.py}; the reference spacings are typed in from \cite{arxiv2104}\\
+\texttt{hyperfine} & \texttt{src/hyperfine\_figures.py}\\
+\texttt{uncertainty}, \texttt{uncertainty\_budget} & \texttt{src/uncertainty\_figures.py}, \texttt{src/budget.py}\\
+\texttt{optics\_polarisation\_filters}, \texttt{optics\_prism\_setup} & \texttt{src/optics/figures.py}. This package (colour, prism, polarisation, spectrometer) was already in the repository when this work began and \textbf{its origin is unknown}; review it before relying on it\\
+\texttt{optics\_instrument\_ladder} & \texttt{src/optics/instruments.py}, written for this project\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{thebibliography}{99}
+\bibitem{codata} CODATA recommended values of the fundamental physical constants, as packaged in \texttt{scipy.constants}.
+\bibitem{steck} D.\,A. Steck, \emph{Sodium D Line Data}, available online at steck.us/alkalidata (revision date not recorded).
+\bibitem{arxiv2104} \emph{Sub-Doppler spectra of sodium D lines in a wide range of magnetic field: theoretical study}, arXiv:2104.14896 (authors not recorded here).
+\bibitem{arxiv0608} \emph{Precision study of hyperfine structure in simple atoms}, arXiv:physics/0608192 (authors not recorded here).
+\bibitem{arxiv0305} \emph{High-Precision Optical Measurement of the 2S Hyperfine Interval in Atomic Hydrogen}, arXiv:physics/0305073: measured $177\,556\,860(15)$ Hz.
+\bibitem{baird1972} J.\,C. Baird, J. Brandenberger, K.-I. Gondaira and H. Metcalf, Phys.\ Rev.\ A \textbf{5}, 564 (1972): $E(2P_{3/2})-E(2P_{1/2})=10\,969.13(10)$ MHz.
+\bibitem{arxiv0809} \emph{Spectroscopy of atomic hydrogen. How is the Rydberg constant determined?}, arXiv:0809.2985: quotes the direct Lamb-shift measurement of Lundeen and Pipkin, $1057.845(9)$ MHz.
+\bibitem{wiese2009} W.\,L. Wiese and J.\,R. Fuhr, Accurate atomic transition probabilities for hydrogen, helium, and lithium, J.\ Phys.\ Chem.\ Ref.\ Data \textbf{38}, 565 (2009).
+\bibitem{arxiv1711} \emph{Relative contribution of the hydrogen 2S two-photon decay and Lyman-alpha escape channels during the epoch of cosmological recombination}, arXiv:1711.05533: quotes $8.2206$ s$^{-1}$ (Labzowsky et al.\ 2005).
+\bibitem{nistca} NIST Physical Measurement Laboratory, \emph{Handbook of Basic Atomic Spectroscopic Data}, Ca I: ``Energy Levels of Neutral Calcium'' (levels from Sugar and Corliss 1985, code SC85) and ``Persistent Lines of Neutral Calcium'' ($A_{ki}$ from reference M03), physics.nist.gov/PhysRefData/Handbook.
+\bibitem{cafreq} Measured $^1S_0$--$^3P_1$ frequency of calcium, $455\,986\,240\,494\,135.8(3.4)$ Hz, tf.nist.gov/general/pdf/2197.pdf.
+\end{thebibliography}

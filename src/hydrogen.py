@@ -24,8 +24,8 @@ from .hamiltonians import coupled_ops, h_total
 from .solvers import track_from_builder
 
 H_EV_PER_MHZ = sc.h / sc.e * 1e6        # energy of a 1 MHz photon, in eV
-LAMB_SHIFT_MHZ = 1057.864               # E(2S1/2) - E(2P1/2), measured
-FINE_2P_MHZ = 10969.04                  # E(2P3/2) - E(2P1/2), measured (verify against a reference)
+LAMB_SHIFT_MHZ = 1057.845               # E(2S1/2) - E(2P1/2) = 1057.845(9) MHz, Lundeen and Pipkin, quoted in arXiv:0809.2985
+FINE_2P_MHZ = 10969.13                  # E(2P3/2) - E(2P1/2) = 10969.13(10) MHz, Baird et al., Phys. Rev. A 5, 564 (1972)
 
 
 def mhz_to_ev(mhz: float) -> float:

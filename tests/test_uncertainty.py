@@ -31,7 +31,7 @@ def test_sigma_compare_verdicts():
 
 def test_hydrogen_crossing_matches_main_code_and_slope():
     assert hydrogen_crossing_gauss() == pytest.approx(573.4, abs=0.05)
-    inp = {"lamb_mhz": (1057.864, 1.0)}
+    inp = {"lamb_mhz": (1057.845, 1.0)}
     l = linear_sensitivity(hydrogen_crossing_gauss, inp)
     assert 0.5 < l["derivs"]["lamb_mhz"] < 0.6          # about 0.55 G per MHz of Lamb shift
 

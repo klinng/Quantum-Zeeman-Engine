@@ -122,7 +122,9 @@ def intercombination_rate(eps2: float, a_singlet_per_s: float, lambda_singlet_nm
 
 
 # Calcium 4s4p term energies (cm^-1).
-# 3P1 is VERIFIED: the measured 1S0-3P1 frequency 455 986 240 494 135.8 (3.4) Hz (tf.nist.gov/general/pdf/2197.pdf) divided by c
-# gives 15210.0638 cm^-1. The other three are typed from memory and UNVERIFIED: check against NIST ASD before citing.
+# 3P1: the measured 1S0-3P1 frequency 455 986 240 494 135.8 (3.4) Hz (tf.nist.gov/general/pdf/2197.pdf) divided by c
+# gives 15210.0638 cm^-1 (the NIST Handbook table lists 15210.063).
+# 3P0, 3P2, 1P1: NIST Handbook of Basic Atomic Spectroscopic Data, "Energy Levels of Neutral Calcium (Ca I)", whose
+# source code is SC85 (Sugar and Corliss 1985): 15157.901, 15315.943 and 23652.304 cm^-1.
 CA_3P1_MEASURED_HZ = 455_986_240_494_135.8
-CA_LEVELS_CM1 = {"3P0": 15157.91, "3P1": 15210.0638, "3P2": 15315.94, "1P1": 23652.04}
+CA_LEVELS_CM1 = {"3P0": 15157.901, "3P1": 15210.0638, "3P2": 15315.943, "1P1": 23652.304}
