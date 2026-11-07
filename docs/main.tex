@@ -6,8 +6,8 @@
 \usepackage[margin=2.5cm]{geometry}
 \graphicspath{{figures/}}
 
-\title{Quantum Zeeman Engine\\ \large From the normal Zeeman effect to Paschen--Back, level by level}
-\author{}
+\title{Quantum Zeeman Engine\\ \large Level by level: from the normal Zeeman effect to hyperfine structure and uncertainty}
+\author{Mahdi Ben Miled\\ \small with the assistance of Claude (Anthropic)}
 \date{\today}
 
 \begin{document}
@@ -18,7 +18,11 @@
 We decompose the Zeeman effect into successive levels. Each level gets a derivation (this
 report), a numerical model (\texttt{src/}), a plot or animation, and a comparison with
 experimental values. If the numerical result reproduces the measurement, the model underneath is
-correct.
+correct. Four levels of theory (normal Zeeman, spin--orbit, Paschen--Back, selection rules and
+intensities) are followed by extensions: hydrogen (Lamb shift, H-alpha, electric field), a
+two-electron atom (calcium), a virtual spectrometer, hyperfine structure, line shapes, small
+corrections, a photon-operator demonstration, and an uncertainty budget. Every input is traced to a
+source in the last section, or marked as assumed or unchecked.
 \end{abstract}
 
 \input{symbols}
@@ -62,6 +66,9 @@ Na D1 / D2 Zeeman components & 4 / 6 & 4 / 6 \\
 Na D2\,:\,D1 intensity ratio & 2 & 2.000 \\
 H $2S_{1/2}\times2P_{1/2}$ crossing (G) & about 570 & 573.4 \\
 Na D2 intensities across $\vb{B}$ ($\pi$:$\sigma_\text{in}$:$\sigma_\text{out}$) & 4 : 3 : 1 & 4.00 : 2.99 : 1.00 \\
+H crossing with proton hyperfine, mean of four (G) & about 570 & 571.6 \\
+H--D shift of H-alpha (pm) & $-178.6$ (measured, H\'ebrard et al.) & $-178.6$ \\
+Na D2 hyperfine strength fractions, $F=2$ & 1/20, 1/4, 7/10 & 0.050, 0.250, 0.700 \\
 \bottomrule
 \end{tabular}
 \caption{Reference values are in \texttt{data/experimental\_reference.csv}; their sources are listed in the Sources section. The 570 G value is from Westig et al.\ (arXiv:1104.4421).}

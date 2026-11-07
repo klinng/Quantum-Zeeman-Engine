@@ -5,6 +5,20 @@ the code. Energies are in **eV**, fields in **tesla**, and angular momentum oper
 
 ## The big picture
 
+Where to find things (the rest of this guide follows the same order):
+
+| You want | Look in |
+|---|---|
+| The core Hamiltonian, levels, spectra, fitting | `constants`, `hamiltonians`, `solvers`, `transitions`, `fitting`, `validation` |
+| Hydrogen (Lamb shift, H-alpha, electric field) | `hydrogen`, `hydrogen_spectrum`, `stark` |
+| Calcium (two electrons) | `two_electron` |
+| Prism, polarisers, Fabry-Perot, level diagram | `optics/` |
+| Nuclear spin and line shapes | `hyperfine`, `hyperfine_lines`, `line_profiles` |
+| Small corrections, photon operators | `diamagnetic`, `isotope`, `cavity` |
+| How far to trust a number | `uncertainty`, `uncertainty_bands`, `budget` |
+| Comparison with a published calculation | `literature` |
+
+
 ```
 constants.py ──► hamiltonians.py ──► solvers.py ──► animation.py / validation.py
                                  ├──► transitions.py (Level 4) ──► fitting.py
@@ -221,7 +235,7 @@ high-resolution stage.**
 - `linear_sensitivity(model, inputs)`: central-difference derivatives, each input's contribution to the final σ, and the total.
 - `sigma_compare(a, sig_a, b, sig_b)`: z-score and a verdict (below 2 consistent, 2 to 3 borderline, above 3 disagreement).
 - `hydrogen_crossing_gauss(lamb, fine)`: the 573 G crossing as a one-number model (root finding on the 2s and 2p blocks); `sodium_3p12_splitting_mhz(A)`: the 3P1/2 splitting from the full hyperfine matrix.
-- Inputs are treated as independent. The Lamb-shift σ used in the figure is illustrative, not a measured value.
+- Inputs are treated as independent. The Lamb-shift σ in the figure is the published 0.009 MHz (Lundeen and Pipkin); the H-alpha temperature σ in the budget is an assumption.
 - `src/uncertainty_figures.py`: `fig_uncertainty()`.
 - `src/uncertainty.py` also has `curve_band(curve_model, inputs, x, n, seed)`: Monte Carlo band (mean, std at every x) for a whole curve. `src/uncertainty_bands.py`: `fig_error_bands()` draws the hydrogen 2S level band (magnified 1000 times) and the sodium 3P1/2 level uncertainties.
 - `src/budget.py`: the global table. `rows()` lists one `Row` per observable (system, model, inputs with σ, whether σ is measured or assumed, optional reference); `budget_table(n)` runs the Monte Carlo for all rows and adds sodium g_J against measurement; `fig_budget()` plots relative uncertainties. To add a system, append a `Row`.
@@ -316,7 +330,7 @@ One lab per level, each with theory in markdown, code, and saved output.
 
 ## `docs/` and `.github/`
 
-- `docs/main.tex` includes one `.tex` file per level plus `ext_hydrogen_n2.tex`, `ext_optics.tex` and `ext_hydrogen_halpha.tex`; build with `cd docs && latexmk -pdf main.tex`.
+- `docs/main.tex` includes `symbols.tex` (all symbols), one `.tex` file per level, one `ext_*.tex` per extension (hydrogen, optics, H-alpha, Stark, two-electron, literature, hyperfine, Voigt, corrections, cavity, uncertainty), a validation table, and `ext_sources.tex` (every input with its source, figure provenance and the bibliography). Build with `cd docs && latexmk -pdf main.tex`.
 - `.github/workflows/latex.yml` runs the tests, executes the notebooks and builds the PDF on every push.
 
 ---

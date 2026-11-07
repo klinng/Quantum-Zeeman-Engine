@@ -52,3 +52,10 @@ def test_corrections_figure_uses_the_8pm_doppler_width():
     assert doppler_fwhm_pm(temperature_k=300.0) == pytest.approx(8.1, abs=0.05)
     import inspect, src.corrections_figures as m
     assert "doppler_fwhm_pm(300.0)" not in inspect.getsource(m)
+
+
+def test_isotope_shift_matches_the_measured_rest_wavelengths():
+    """Hebrard et al. (arXiv:astro-ph/0002141): H-alpha 6562.796 A and D-alpha 6561.010 A (air), i.e. -1.786 A or -81.6 km/s."""
+    s = isotope_shift()
+    assert -s["wavelength_pm"] == pytest.approx(178.6, abs=0.2)
+    assert sc.c / 1e3 * s["wavelength_pm"] / (s["lambda_h_nm"] * 1e3) == pytest.approx(-81.6, abs=0.2)

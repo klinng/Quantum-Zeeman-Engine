@@ -3,7 +3,9 @@ r"""Isotope shift from the reduced mass: the electron orbits the common centre o
     R_X = R_inf / (1 + m_e / M_X)       (M_X = nuclear mass of isotope X)
 
 Hydrogen (proton) and deuterium (deuteron) therefore differ in every line. Only this mass effect is included;
-the finite nuclear size is not, and is much smaller for hydrogen isotopes. Masses and R_inf are CODATA values
+the finite nuclear size is not (negligible for hydrogen isotopes at this precision).
+Check: Hebrard et al. (arXiv:astro-ph/0002141) give rest wavelengths 6562.796 and 6561.010 Angstrom (air) for H-alpha and
+D-alpha, a shift of -1.786 Angstrom or -81.6 km/s; this module gives -178.6 pm (vacuum), the same to 0.1 pm. Masses and R_inf are CODATA values
 from scipy.constants.
 """
 from __future__ import annotations
