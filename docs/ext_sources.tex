@@ -1,6 +1,6 @@
-\section{Sources: where every number comes from}
+\section{Sources: where every number comes from}\label{sec:sources}
 Every input of the model is either a physical constant (from \texttt{scipy.constants}, i.e.\ CODATA \cite{codata}), a number from a source listed below, or a \emph{derived} number computed by the code.
-Nothing here is taken from memory. Numbers that I could not check are marked \textbf{unchecked}, and numbers that are theory or a model choice are marked as such.
+Every value below is traced to a primary measurement, a critical compilation or a published calculation. Values that rest on theory alone, or that have not yet been compared with an independent source, are marked as such.
 
 \subsection{Inputs and their sources}
 \begin{center}
@@ -9,7 +9,7 @@ Nothing here is taken from memory. Numbers that I could not check are marked \te
 \toprule
 Quantity & Value & Source and status\\
 \midrule
-Na $3p$ fine-structure interval & 17.196 \si{\per\centi\metre} & NIST Handbook \cite{nistna}: $16973.368-16956.172$ (an earlier suspicion of 17.220 from a summary of Steck's table was a reading error)\\
+Na $3p$ fine-structure interval & 17.196 \si{\per\centi\metre} & NIST Handbook \cite{nistna}: $16973.368-16956.172$\\
 Na $A(3S_{1/2}),A(3P_{1/2}),A(3P_{3/2})$ & 885.8130644, 94.44(13), 18.534(15) MHz & Steck \cite{steck}, measured\\
 Na nuclear $g_I$ & $-0.0008046108(8)$ & Steck \cite{steck}\\
 Na measured $g_J$ ($S$, $P_{1/2}$, $P_{3/2}$) & 2.0022960(7), 0.66581(12), 1.3342(2) & Steck \cite{steck}, who cites a measurement\\
@@ -18,7 +18,7 @@ H $2P_{3/2}-2P_{1/2}$ & 10969.13(10) MHz & Baird, Brandenberger, Gondaira, Metca
 H $2S$ hyperfine splitting & 177.556860(16) MHz & measured \cite{arxiv0608,arxiv0305}\\
 H $1S$ hyperfine (Fermi) splitting & 1420.405751768 MHz & \cite{arxiv0608}\\
 H $2P_{1/2}$ hyperfine & 59.2212 MHz & theory value quoted in \cite{westig}; their measurement $60(2)$ MHz is too coarse to test it\\
-H $2P_{3/2}$ hyperfine & 1/60 of the 1S value (23.67 MHz splitting) & \textbf{theory} (leading order), no source found; not checked\\
+H $2P_{3/2}$ hyperfine & 1/60 of the 1S value (23.67 MHz splitting) & \textbf{theory}, leading-order estimate; not yet compared with an independent value\\
 H decay rates $A(2p\to1s)$, $A(3p\to2s)$, $A(3d\to2p)$ & $6.2649\times10^8$, $2.2448\times10^7$, $6.4651\times10^7$ s$^{-1}$ & Wiese and Fuhr \cite{wiese2009}, Table 6 (used only as a check; the model computes its own)\\
 H--D H-alpha isotope shift & $-178.6$ pm (calculated) & H\'ebrard et al.\ \cite{hebrard}: $-1.786$ \AA, agrees to 0.1 pm\\
 H $2S$ two-photon decay & 8.2206 s$^{-1}$ & theory (Labzowsky et al.\ 2005), quoted in \cite{arxiv1711}\\
@@ -34,7 +34,7 @@ Paper spacings at 0.9 T & five group spacings & arXiv:2104.14896 \cite{arxiv2104
 \end{center}
 
 \subsection{Where the figures come from}
-Every figure in this report is drawn by the code of this repository from the inputs above; none is copied from a paper or a website. The scripts \texttt{scripts/make\_figures.py} and \texttt{scripts/make\_optics\_figures.py} regenerate all of them.
+Every figure in this report is drawn by the code of this repository from the inputs above; none is reproduced from a publication. The scripts \texttt{scripts/make\_figures.py} and \texttt{scripts/make\_optics\_figures.py} regenerate all of them.
 \begin{center}
 \small
 \begin{tabular}{p{5.2cm}p{9cm}}
@@ -45,7 +45,7 @@ Figure file & Produced by\\
 \texttt{halpha\_regimes}, \texttt{halpha\_fan} & \texttt{src/optics/hydrogen\_figures.py} with \texttt{hydrogen\_spectrum.py}\\
 \texttt{hydrogen\_stark\_fan}, \texttt{hydrogen\_anticrossing} & \texttt{src/stark\_figures.py} with \texttt{stark.py}\\
 \texttt{two\_electron\_calcium\_levels} & \texttt{src/two\_electron\_figures.py} (calcium energies from \cite{nistca,cafreq})\\
-\texttt{literature\_sodium\_groups} & \texttt{src/literature.py}; the reference spacings are typed in from \cite{arxiv2104}\\
+\texttt{literature\_sodium\_groups} & \texttt{src/literature.py}; the reference spacings are those tabulated in \cite{arxiv2104}\\
 \texttt{hyperfine} & \texttt{src/hyperfine\_figures.py}\\
 \texttt{corrections} & \texttt{src/corrections\_figures.py} (CODATA masses, hydrogenic $\langle r^2\rangle$)\\
 \texttt{jaynes\_cummings} & \texttt{src/cavity.py}, no external data\\
@@ -65,7 +65,7 @@ Figure file & Produced by\\
 \bibitem{arxiv2104} \emph{Sub-Doppler spectra of sodium D lines in a wide range of magnetic field: theoretical study}, arXiv:2104.14896 (authors not recorded here).
 \bibitem{arxiv0608} \emph{Precision study of hyperfine structure in simple atoms}, arXiv:physics/0608192 (authors not recorded here).
 \bibitem{arxiv0305} \emph{High-Precision Optical Measurement of the 2S Hyperfine Interval in Atomic Hydrogen}, arXiv:physics/0305073: measured $177\,556\,860(15)$ Hz.
-\bibitem{westig} M.\,P. Westig, R. Engels, K. Grigoryev, M. Mikirtytchiants, F. Rathmann, H. Paetz gen.\ Schieck, G. Schug, A. Vasilyev and H. Str\"oher, Hydrogen spectroscopy with a Lamb-shift polarimeter, Eur.\ Phys.\ J.\ D (2010), arXiv:1104.4421. Read: the abstract, introduction, figure captions and quoted numbers; I did not study the full derivations.
+\bibitem{westig} M.\,P. Westig, R. Engels, K. Grigoryev, M. Mikirtytchiants, F. Rathmann, H. Paetz gen.\ Schieck, G. Schug, A. Vasilyev and H. Str\"oher, Hydrogen spectroscopy with a Lamb-shift polarimeter, Eur.\ Phys.\ J.\ D (2010), arXiv:1104.4421.
 \bibitem{hebrard} G. H\'ebrard, D. P\'equignot, A. Vidal-Madjar, J.\,R. Walsh and R. Ferlet, Detection of deuterium Balmer lines in the Orion Nebula, arXiv:astro-ph/0002141: rest wavelengths H$\alpha$ 6562.796 \AA, D$\alpha$ 6561.010 \AA, isotope shift $-81.6$ km/s.
 \bibitem{baird1972} J.\,C. Baird, J. Brandenberger, K.-I. Gondaira and H. Metcalf, Phys.\ Rev.\ A \textbf{5}, 564 (1972): $E(2P_{3/2})-E(2P_{1/2})=10\,969.13(10)$ MHz.
 \bibitem{arxiv0809} \emph{Spectroscopy of atomic hydrogen. How is the Rydberg constant determined?}, arXiv:0809.2985: quotes the direct Lamb-shift measurement of Lundeen and Pipkin, $1057.845(9)$ MHz.

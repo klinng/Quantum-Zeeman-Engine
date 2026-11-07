@@ -3,7 +3,7 @@ A real spectral line is not a stick. Three effects broaden it (\texttt{src/line\
 \begin{itemize}
 \item \textbf{Doppler} (thermal motion): a Gaussian whose width grows as $\sqrt{T/M}$. Sodium D2 at 300 K: 1317 MHz.
 \item \textbf{Natural} (finite lifetime): a Lorentzian of FWHM $(A_\text{up}+A_\text{low})/2\pi$. For D2, $A=0.616\times10^8$ s$^{-1}$ (NIST Handbook \cite{nistna}) gives $9.80$ MHz.
-\item \textbf{Pressure} (collisions): also Lorentzian, proportional to pressure. No coefficient is built in because I have no checked value; the code takes the width as an input.
+\item \textbf{Pressure} (collisions): also Lorentzian, proportional to pressure. No coefficient is built in because no checked value is available; the code takes the width as an input.
 \end{itemize}
 The Voigt profile is their convolution (\texttt{scipy.special.voigt\_profile}); every profile has unit area, so a line of strength $S$ keeps area $S$. The width of a Voigt profile is approximated by $0.5346\,f_L+\sqrt{0.2166\,f_L^2+f_G^2}$ (Olivero and Longbothum); the code compares it with the exact numerical width, and they agree within $0.5\,\%$ in the tests.
 

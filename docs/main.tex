@@ -8,7 +8,7 @@
 \graphicspath{{figures/}}
 
 \title{Quantum Zeeman Engine\\ \large Level by level: from the normal Zeeman effect to hyperfine structure and uncertainty}
-\author{Mahdi Ben Miled\\ \small with the assistance of Claude (Anthropic)}
+\author{Mahdi Ben Miled}
 \date{\today}
 
 \begin{document}
@@ -23,7 +23,7 @@ correct. Four levels of theory (normal Zeeman, spin--orbit, Paschen--Back, selec
 intensities) are followed by extensions: hydrogen (Lamb shift, H-alpha, electric field), a
 two-electron atom (calcium), a virtual spectrometer, hyperfine structure, line shapes, small
 corrections, a photon-operator demonstration, and an uncertainty budget. Every input is traced to a
-source in the last section, or marked as assumed or unchecked.
+published source (Section~\ref{sec:sources}), or is marked as an assumption or as not yet verified.
 \end{abstract}
 
 \input{symbols}
@@ -78,5 +78,8 @@ Na D2 hyperfine strength fractions, $F=2$ & 1/20, 1/4, 7/10 & 0.050, 0.250, 0.70
 \end{table}
 
 \input{ext_sources}
+
+\section*{Acknowledgements}
+The code, the derivations and the text of this report were developed with the assistance of Claude (Anthropic). All numerical inputs were checked against the sources cited above, and the test suite (202 tests) and the figure scripts are in the repository.
 
 \end{document}
