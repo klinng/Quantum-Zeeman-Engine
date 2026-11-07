@@ -1,0 +1,18 @@
+\section{Helium $1s2s$ and $1s2p$: exchange, spin--spin and the field}
+\texttt{src/helium.py} keeps electron~1 in $1s$ and puts electron~2 in $2s$ (4 spin states) or $2p$ (12 states $|m_l\rangle|m_{s1}\rangle|m_{s2}\rangle$). The Hamiltonian is assembled in the order below; the field enters last, so everything before it is the zero-field level structure:
+\begin{equation}
+H=E_{\rm dir}\;-\;G^{k}\bigl(\tfrac12+2\,\mathbf s_1\!\cdot\!\mathbf s_2\bigr)\;+\;\zeta_S\,\mathbf L\!\cdot\!\mathbf S+\zeta_A\,\mathbf L\!\cdot\!(\mathbf s_2-\mathbf s_1)\;+\;\rho\Bigl[(\mathbf L\!\cdot\!\mathbf S)^2+\tfrac12\mathbf L\!\cdot\!\mathbf S-\tfrac13L^2S^2\Bigr]\;+\;\mu_BB\,(L_z+g_sS_z).
+\end{equation}
+\paragraph{Where the Slater integrals enter.} $E_{\rm dir}$ contains the direct integral $F^0(1s,nl)$ and the configuration energy, a constant. The exchange term $-G^k(\tfrac12+2\mathbf s_1\!\cdot\!\mathbf s_2)$ is $-G^k$ in the triplet and $+G^k$ in the singlet, so $E(^1\!P_1)-E(^3\!P)=2G^1(1s,2p)$ and $E(2\,^1\!S)-E(2\,^3\!S)=2G^0(1s,2s)$, with
+\begin{equation}
+G^k=\iint R_{1s}(r_1)R_{nl}(r_1)\,\frac{r_<^k}{r_>^{k+1}}\,R_{1s}(r_2)R_{nl}(r_2)\,r_1^2r_2^2\,dr_1dr_2\qquad(k=l).
+\end{equation}
+It equals the $\Delta$ of the calcium model, $\Delta=2G$, up to a constant. \texttt{slater\_integral} evaluates $F^k$ and $G^k$ numerically from hydrogenic orbitals with effective charges (test: $F^0(1s,1s)=5Z/8$ to $10^{-6}$). Those orbitals are a crude model of helium, so the integrals are order-of-magnitude estimates; for a quantitative model $G$ should be taken from the measured singlet--triplet splitting, $G=(E_{\rm singlet}-E_{\rm triplet})/2$.
+
+\paragraph{Coupled basis.} For the triplet, $H$ without the field is diagonal in $|L\,S\,J\,M_J\rangle$:
+\begin{equation}
+E(^3P_J)=E_{\rm dir}-G^1+\zeta_S\,(\mathbf L\!\cdot\!\mathbf S)_J+\rho f_J,\qquad(\mathbf L\!\cdot\!\mathbf S)_J=(1,-1,-2),\ \ f_J=(\tfrac16,-\tfrac56,\tfrac53)\ \text{for}\ J=(2,1,0),
+\end{equation}
+and $E(^1P_1)=E_{\rm dir}+G^1$. The spin--spin term vanishes in singlets and gives the pattern $1:-5:10$; the spin--orbit term alone gives the Land\'e rule $2:1$, so helium's departure from that rule needs $\rho$. The term $\zeta_A$ is the only one that couples singlet to triplet: $|\langle^1P_1|\mathbf L\!\cdot\!(\mathbf s_2-\mathbf s_1)|^3P_1\rangle|=\sqrt2$. The Zeeman term is diagonal in $J$ with $g_J\mu_BBM_J$ and also couples $J$ to $J\pm1$ at equal $M_J$, with matrix elements proportional to $(g_s-1)\mu_BB\langle J M|S_z|J'M\rangle$ (for example $\sqrt{2/3}$ between $^3P_0$ and $^3P_1$ at $M=0$); it never connects $S=0$ with $S=1$.
+
+\paragraph{Parameters.} $\zeta_S$ and $\rho$ are obtained exactly from the two measured $2\,^3P$ intervals by \texttt{fit\_triplet\_p\_intervals} ($E_0-E_1=-\zeta_S+\tfrac52\rho$, $E_1-E_2=-2\zeta_S-\rho$). The solve has no spare equation, so it is not a test of the model. $\zeta_A$, taken as zero by default, and the spin--other-orbit part are effective parameters, not computed from two-electron integrals. No helium energy level is built into the code, so no helium result is compared with a measurement in this report. Not modelled: configuration mixing ($1s3p$, $2s2p$), nuclear spin of $^3$He and QED corrections.

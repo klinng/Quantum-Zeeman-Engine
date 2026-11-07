@@ -12,6 +12,8 @@ Where to find things (the rest of this guide follows the same order):
 | The core Hamiltonian, levels, spectra, fitting | `constants`, `hamiltonians`, `solvers`, `transitions`, `fitting`, `validation` |
 | Hydrogen (Lamb shift, H-alpha, electric field) | `hydrogen`, `hydrogen_spectrum`, `stark` |
 | Calcium (two electrons) | `two_electron`, `calcium_lines` |
+| Helium 1s2s / 1s2p | `helium` |
+| Gradients (PyTorch) | `torch_voigt`, `torch_engine` |
 | Prism, polarisers, Fabry-Perot, level diagram | `optics/` |
 | Nuclear spin and line shapes | `hyperfine`, `hyperfine_lines`, `line_profiles` |
 | Small corrections, photon operators | `diamagnetic`, `isotope`, `cavity` |
@@ -227,6 +229,8 @@ high-resolution stage.**
 - `src/isotope.py`: `rydberg_cm1('H' or 'D')`, `line_wavenumber_cm1`, `isotope_shift()` (D minus H, mass effect only), `zeeman_shift_pm_per_t`.
 - `src/corrections_figures.py`: `fig_corrections()`.
 - `src/calcium_lines.py`: `dipole_state(q)` (singlet with m_l = q), `calcium_lines(B, zeta, delta, e_t)` (DataFrame: label, wavenumber_cm1, wavelength_nm, q, strength; strengths are |<k|d_q 1S0>|², summing to 1 for each q), `term_strength(B, label, ...)`, `fig_calcium_lines(B)`.
+- `src/helium.py`: `h_exchange(G)`, `h_spin_spin(rho)`, `h_helium_1s2p(B, G, zeta_S, rho, zeta_A, e_dir)` (12x12), `h_helium_1s2s(B, G)` (4x4), `triplet_p_levels`, `fit_triplet_p_intervals(e01, e12)`, `classify`, `slater_integral`, `exchange_g_hartree`, `direct_f_hartree`.
+- `src/torch_voigt.py`: `faddeeva(z)`, `voigt(x, sigma, gamma)` (NumPy or torch), `doppler_sigma_hz`, `lorentz_hwhm_hz`, `line_list(B, zeta, backend)`, `zeeman_spectrum(nu, B, T, P, ..., backend)`.
 - `src/cavity.py`: `annihilation(n_max)`, `creation(n_max)`, `jaynes_cummings(n_max, w_c, w_a, g)` (basis: photon number ⊗ atom, index 0 excited), `excitation_number`, `excited_probability(...)` (exact time evolution), `fig_jaynes_cummings()`. Stand-alone, arbitrary units.
 - `src/hyperfine_figures.py`: `fig_hyperfine()` (sodium 3S Breit-Rabi diagram and the hydrogen crossing splitting).
 
@@ -302,6 +306,8 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_line_profiles.py` | Na D2 natural width 9.80 MHz; unit area; Gaussian and Lorentzian limits; approximate width within 0.5 % of exact; Voigt spectrum area equals strength; Gaussian limit equals the Doppler-only spectrum. |
 | `test_corrections.py` | Diamagnetic 1s = B²/4 hartree (atomic units); ⟨r²⟩ formula equals numerical integral for five states; angular average over m is 2/3; shift scales as B²; below 1 % of Zeeman at 60 T; isotope shift sign and size (about 179 pm, D bluer); Zeeman scale equal for H and D; regression for the Doppler-width call. |
 | `test_calcium_lines.py` | Normalised dipole state; sum rule 1 per polarisation; only J = 1 radiates at B = 0; 3P₁ strength = 3ε², 1P₁ = 3(1−ε²); 3P₀ ∝ B² and π only; 657.46 nm; σ± split = 2 g μB B |
+| `test_helium.py` | Hermitian; exchange = ±G (2G gap, 3:9 degeneracy); equals the calcium Δ up to a constant; spin-spin zero in singlets, traceless, 1 : −5 : 10; Landé 2 : 1 without it; closed form = diagonalisation; interval fit round-trips; 1s2s g = g_s; F⁰(1s,1s) = 5Z/8 |
+| `test_torch_voigt.py` | Faddeeva and Voigt equal scipy (NumPy); unit area; widths ∝ √T and + P; line list equals zeeman_lines; torch gradcheck and B, T, P finite differences (skipped without torch) |
 | `test_cavity.py` | [a, a†] = 1 except the last state; number operator; excitation number conserved; resonant levels (N−½)w_c ± g√N; vacuum Rabi cos²(g t); detuned Rabi formula. |
 | `test_uncertainty_bands.py` | Band of a linear model matches algebra; the hydrogen 2S band equals the Lamb-shift σ; sodium level uncertainty is below the natural width and at most about 2σ_A. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |

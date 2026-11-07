@@ -63,3 +63,13 @@ def test_lamb_crossing_splits_into_four():
     assert len(hfs) == 4
     assert 570.0 < np.mean(hfs) < 573.0
     assert max(hfs) - min(hfs) > 50.0
+
+
+def test_leading_order_hydrogen_formula_against_known_levels():
+    from src.hyperfine import (H_FERMI_1S_MHZ, H_HFS_2P12_MHZ, H_HFS_2P32_MHZ, H_HFS_2S_MHZ, hydrogen_hfs_leading_mhz as f)
+    assert f(1, 0, 0.5) == pytest.approx(H_FERMI_1S_MHZ)
+    assert f(2, 0, 0.5) == pytest.approx(H_HFS_2S_MHZ, rel=1e-4)          # measured; relativistic correction about 4e-5
+    assert f(2, 1, 0.5) == pytest.approx(H_HFS_2P12_MHZ, rel=2e-3)        # theory value; correction about 9e-4
+    assert f(2, 1, 1.5) == pytest.approx(H_HFS_2P32_MHZ)                  # the constant used in h_n2_hyperfine
+    assert f(3, 1, 0.5) == pytest.approx(f(3, 0, 0.5) / 3)
+    assert f(3, 0, 0.5) == pytest.approx(H_FERMI_1S_MHZ / 27)

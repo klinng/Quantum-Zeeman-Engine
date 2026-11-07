@@ -3,7 +3,7 @@ r"""The global uncertainty budget: one table for every system in the project.
 Each row is an observable of one system (sodium, hydrogen n = 2, H-alpha, calcium), with
 
 * a model function and its inputs ``{name: (mean, sigma)}``,
-* where each sigma comes from: ``measured`` (a published uncertainty) or ``assumed`` (my illustrative choice; replace it
+* where each sigma comes from: ``measured`` (a published uncertainty) or ``assumed`` (an illustrative choice; replace it
   when a real value is found),
 * optionally a reference value with its own sigma, so the row gets a z-score.
 

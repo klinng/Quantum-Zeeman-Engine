@@ -39,6 +39,17 @@ H_G_I = -sc.physical_constants["proton g factor"][0] * sc.physical_constants["nu
     / sc.physical_constants["Bohr magneton"][0]
 
 
+def hydrogen_hfs_leading_mhz(n: int, l: int, j: float) -> float:
+    """Total hyperfine splitting (MHz) of hydrogen nlj at leading order (non-relativistic Fermi-Breit magnetic dipole), I = 1/2.
+
+    A(nlj) = (3/8) nu_1S / (n^3 j (j+1) (l + 1/2)) in the convention H = A I.J, and the total splitting is A (I + j). It reproduces
+    nS = nu_1S / n^3 and nP1/2 = nS / 3 exactly. Relativistic and radiative corrections, not included, change the S levels by
+    about 1e-4 and the P1/2 level by about 1e-3 (see tests: 2S and 2P1/2 against the quoted values). The electric quadrupole
+    constant B is exactly zero for hydrogen because the proton has spin 1/2. Not a measured or published table value."""
+    a = 0.375 * H_FERMI_1S_MHZ / (n ** 3 * j * (j + 1) * (l + 0.5))
+    return a * (H_I + j)
+
+
 def a_from_splitting_mhz(total_splitting_mhz: float, j: float, i: float) -> float:
     """A from the zero-field splitting between F = J+I and F = J+I-1: Delta = A (J + I) ... = A*(F_max)."""
     return total_splitting_mhz / (j + i)

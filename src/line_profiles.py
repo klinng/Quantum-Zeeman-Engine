@@ -3,7 +3,7 @@ r"""Line shapes: Doppler (Gaussian) + natural and pressure (Lorentzian) = Voigt.
 * Doppler width from the thermal motion of the atoms: Gaussian, FWHM ~ sqrt(T / mass).
 * Natural width from the finite lifetime: Lorentzian, FWHM = (A_upper + A_lower) / (2 pi), with A the total decay rates.
 * Pressure (collision) width: Lorentzian, proportional to the pressure. No coefficient is built in: you pass the width
-  you want to explore, because I have no checked collision coefficients.
+  you want to explore, because no checked collision coefficients are available.
 * Voigt profile = their convolution, ``scipy.special.voigt_profile``. Every profile has unit area.
 """
 from __future__ import annotations
