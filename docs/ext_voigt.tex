@@ -1,0 +1,16 @@
+\section{Line shapes: Doppler, natural and pressure widths (Voigt)}
+A real spectral line is not a stick. Three effects broaden it (\texttt{src/line\_profiles.py}).
+\begin{itemize}
+\item \textbf{Doppler} (thermal motion): a Gaussian whose width grows as $\sqrt{T/M}$. Sodium D2 at 300 K: 1317 MHz.
+\item \textbf{Natural} (finite lifetime): a Lorentzian of FWHM $(A_\text{up}+A_\text{low})/2\pi$. For D2, $A=0.616\times10^8$ s$^{-1}$ (NIST Handbook \cite{nistna}) gives $9.80$ MHz.
+\item \textbf{Pressure} (collisions): also Lorentzian, proportional to pressure. No coefficient is built in because I have no checked value; the code takes the width as an input.
+\end{itemize}
+The Voigt profile is their convolution (\texttt{scipy.special.voigt\_profile}); every profile has unit area, so a line of strength $S$ keeps area $S$. The width of a Voigt profile is approximated by $0.5346\,f_L+\sqrt{0.2166\,f_L^2+f_G^2}$ (Olivero and Longbothum); the code compares it with the exact numerical width, and they agree within $0.5\,\%$ in the tests.
+
+\paragraph{What it shows.} At 300 K the Doppler width (1317 MHz) is 130 times the natural width, so the Voigt shape is almost a pure Gaussian and the six D2 hyperfine lines blend into two humps. Cooling to 1 K gives a Doppler width of 76 MHz and the groups separate; at 1 mK (2.4 MHz) the hyperfine lines are resolved and the natural width (9.8 MHz) sets the width of each line.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{voigt.pdf}
+\caption{Left: sodium D2 hyperfine lines at three temperatures with the natural width included. Right: Voigt width against the Lorentzian width for three Gaussian widths; coloured lines are exact, dotted black lines the approximation. The 50 MHz mark is an example pressure width, not a measurement.}
+\end{figure}

@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-173%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-179%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -154,6 +154,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
 | Extension F | Nuclear spin: hyperfine structure of sodium and hydrogen n = 2, and the sodium D lines with hyperfine (6 D2 lines, 4 D1 lines); the 573 G crossing splits into four | Na 3S splitting 1771.626 MHz; mean crossing 571.6 G | `hyperfine.py` | `ext_hyperfine.tex` |
 | Extension G | Uncertainty: Monte Carlo and derivative propagation, z-score comparison, and a global budget table covering sodium, hydrogen n = 2, H-alpha and calcium | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz); g_J(3S₁/₂) differs from measurement by 2.3e-5 (free-electron g_s) | `uncertainty.py`, `budget.py` | `ext_uncertainty.tex` |
+| Extension H | Line shapes: Doppler, natural and pressure widths as Voigt profiles; sodium D2 resolved only when cold | Na D2 natural width 9.80 MHz (from NIST A) | `line_profiles.py` | `ext_voigt.tex` |
 | Extension C | Hydrogen H-alpha (n = 3 to 2) with radial integrals, Dirac fine structure | spectrum from weak field to Paschen-Back | `hydrogen_spectrum.py` | `ext_hydrogen_halpha.tex` |
 
 Every part has a test file; notebooks 1 to 7 show the same ideas with explanations and saved output.
@@ -292,7 +293,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Level diagram (Grotrian) with polarisation-coloured, intensity-weighted arrows
 - [x] Hyperfine structure (I·J) for sodium and hydrogen n = 2 (still to do: compare the hydrogen crossing positions and the sodium sub-structure with a measured source)
 - [ ] Hydrogen / deuterium isotope shift (reduced mass)
-- [ ] Voigt line profiles (Doppler + natural + pressure broadening)
+- [x] Voigt line profiles (sodium D2; pressure width is an input, no collision coefficient built in) (Doppler + natural + pressure broadening)
 - [x] Uncertainty propagation: Monte Carlo and derivative methods plus a z-score comparison (`uncertainty.py`); still to do: attach measured uncertainties to every input and show error bands on all spectra
 - [ ] Estimate of the diamagnetic term at 60 T
 - [ ] Optional: photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo
