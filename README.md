@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-202%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-210%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -43,7 +43,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 202 tests
+python -m pytest -q                  # 210 tests
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -204,6 +204,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension H | Small corrections: diamagnetic term, H/D isotope shift | H-alpha diamagnetic shift 9.7 pm at 60 T; D bluer than H by 178.6 pm (measured: 178.6) | `diamagnetic.py`, `isotope.py` | `ext_corrections.tex` |
 | Extension I | Photon operators a, a† and the Jaynes-Cummings atom-in-a-cavity demo | vacuum Rabi cos²(g t) and splitting g√N reproduced exactly | `cavity.py` | `ext_cavity.tex` |
 | Extension J | Uncertainty: Monte Carlo and derivative propagation, z-scores, error bands, global budget | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz); g_J(3S₁/₂) differs from measurement by 2.3e-5 | `uncertainty.py`, `uncertainty_bands.py`, `budget.py` | `ext_uncertainty.tex` |
+| Extension K | Calcium Zeeman line spectrum 4s² ¹S₀ → 4s4p: 657 nm intercombination line, field-induced ³P₀ line | ³P₁ strength = 3ε² (ε² = 7.8e-5); ³P₀ strength ∝ B² | `calcium_lines.py` | `ext_calcium_lines.tex` |
 
 The report also contains a **Symbols and conventions** table (start) and a **Sources** section with the bibliography (end).
 Every part has a test file; notebooks 1 to 7 show the same ideas with explanations and saved output.
@@ -342,12 +343,13 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 two_electron, two_electron_figures                         (calcium)
                 hyperfine, hyperfine_lines, hyperfine_figures              (nuclear spin)
                 line_profiles, diamagnetic, isotope, corrections_figures   (line shapes, small corrections)
+                calcium_lines                                              (calcium line spectrum)
                 cavity                                                     (photon operators, Jaynes-Cummings)
                 uncertainty, uncertainty_bands, uncertainty_figures, budget (uncertainty)
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          202 tests, one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          210 tests, one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values
@@ -366,7 +368,7 @@ Done:
 - [x] Hydrogen n = 2 (2s and 2p together, Lamb shift) and H-alpha (a real hydrogen spectrum with polarisation filters, field-ramp animation, prism and instrument ladder with the Doppler floor)
 - [x] Virtual spectrometer: colours, prism, polarisation filters, Fabry-Perot rings, Paschen-Back collapse to 60 T, Grotrian level diagram
 - [x] Electric field on hydrogen n = 2 (Lamb-Retherford quenching, anticrossings)
-- [x] Two-electron system with LS-coupling mixing (calcium 4s4p levels from the NIST Handbook)
+- [x] Two-electron system with LS-coupling mixing (calcium 4s4p levels from the NIST Handbook) and its Zeeman line spectrum, including the field-induced 3P0 line
 - [x] Cross-check of sodium line-group spacings against a published calculation (arXiv:2104.14896)
 - [x] Hyperfine structure for sodium and hydrogen n = 2; sodium D lines with hyperfine; hydrogen crossings compared with arXiv:1104.4421
 - [x] Voigt line profiles (Doppler, natural; pressure width as an input)
@@ -379,7 +381,6 @@ Open, and what each needs from outside (if you can supply any of these, the item
 - [ ] **Spin-spin interaction (helium):** a different Hamiltonian; the current model is one- or two-electron s-p only.
 - [ ] **Hydrogen 2P₃/₂ and n = 3 hyperfine constants:** need a measured or checked theory source (a paper table or the Westig et al. reference list may have one); then add hyperfine to the H-alpha spectrum.
 - [ ] **Laboratory Zeeman spectra:** compare full spectra with measurements (the arXiv:2104.14896 paper is theory; look for experimental companions).
-- [ ] **Calcium line spectrum** (levels exist, spectrum not yet).
 - [ ] **PyTorch engine:** run `pip install torch` and then `python -m pytest -q` on a computer that has it, and report the result; then use it for many-parameter fits.
 
 ## Credits

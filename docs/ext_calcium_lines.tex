@@ -1,0 +1,16 @@
+\section{Calcium: the Zeeman line spectrum}
+Section~\ref{sec:two-electron} gave the levels of the $4s4p$ configuration. \texttt{src/calcium\_lines.py} turns them into a line spectrum. The ground state $4s^2\,{}^1S_0$ has $J=0$, so it does not shift in a field: every Zeeman effect comes from the excited level. The electric-dipole operator turns one $s$ electron into a $p$ electron and leaves the spin alone, so acting on the singlet ground state it produces the spin-singlet state with the $p$ electron in $m_l=q$ ($q=-1,0,+1$ for $\sigma^-,\pi,\sigma^+$). The strength of the line to an eigenstate $k$ of the $12\times12$ Hamiltonian is
+\begin{equation}
+S_k(q)=\bigl|\langle k\,|\,m_l=q,\ \text{singlet}\rangle\bigr|^2,\qquad \sum_k S_k(q)=1 .
+\end{equation}
+Checks made in the tests: (i) at $B=0$ only $J=1$ radiates, with strength $3(1-\epsilon^2)$ for ${}^1P_1$ and $3\epsilon^2$ for ${}^3P_1$, where $\epsilon^2=7.8\times10^{-5}$ is the singlet admixture of Section~\ref{sec:two-electron} (this is the intercombination line at 657.46~nm, whose energy is the measured one \cite{cafreq}); (ii) the two $\sigma$ components of ${}^3P_1$ are $2g_J\mu_BB$ apart; (iii) ${}^3P_0$ and ${}^3P_2$ are dark at $B=0$.
+
+\paragraph{A field-induced line.} A magnetic field mixes ${}^3P_0$ with ${}^3P_1$ (both $M=0$), so ${}^3P_0$ becomes weakly visible, in $\pi$ light only, with a strength growing as $B^2$ (the test checks the ratio 4.00 for a doubled field). At $1~\si{T}$ the model gives it $1.8\times10^{-5}$ of the ${}^3P_1$ strength. This is the mechanism by which the clock transition of alkaline-earth atoms is opened in a magnetic field; here it is a model prediction for calcium, not compared with a measurement.
+
+\paragraph{Limits.} Only relative strengths are computed (absolute rates need the ${}^1P_1$ rate, see \texttt{intercombination\_rate}). Mixing with $4s3d$ and with other configurations, which changes the real ${}^3P_1$ rate, and hyperfine structure are not included.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{calcium_lines.pdf}
+\caption{Left: the $657~\si{nm}$ group at $1~\si{T}$, coloured by polarisation. Right: strength of the dark ${}^3P_0$ line against $B$; the dashed line is $\propto B^2$.}
+\end{figure}

@@ -21,7 +21,7 @@ report), a numerical model (\texttt{src/}), a plot or animation, and a compariso
 experimental values. If the numerical result reproduces the measurement, the model underneath is
 correct. Four levels of theory (normal Zeeman, spin--orbit, Paschen--Back, selection rules and
 intensities) are followed by extensions: hydrogen (Lamb shift, H-alpha, electric field), a
-two-electron atom (calcium), a virtual spectrometer, hyperfine structure, line shapes, small
+two-electron atom (calcium, with its Zeeman line spectrum), a virtual spectrometer, hyperfine structure, line shapes, small
 corrections, a photon-operator demonstration, and an uncertainty budget. Every input is traced to a
 published source (Section~\ref{sec:sources}), or is marked as an assumption or as not yet verified.
 \end{abstract}
@@ -46,6 +46,7 @@ fine-structure splitting, then everything else is a prediction.
 \input{ext_hydrogen_halpha}
 \input{ext_hydrogen_stark}
 \input{ext_two_electron}
+\input{ext_calcium_lines}
 \input{ext_literature}
 \input{ext_hyperfine}
 \input{ext_voigt}
@@ -80,6 +81,6 @@ Na D2 hyperfine strength fractions, $F=2$ & 1/20, 1/4, 7/10 & 0.050, 0.250, 0.70
 \input{ext_sources}
 
 \section*{Acknowledgements}
-The code, the derivations and the text of this report were developed with the assistance of Claude (Anthropic). All numerical inputs were checked against the sources cited above, and the test suite (202 tests) and the figure scripts are in the repository.
+The code, the derivations and the text of this report were developed with the assistance of Claude (Anthropic). All numerical inputs were checked against the sources cited above, and the test suite (210 tests) and the figure scripts are in the repository.
 
 \end{document}
