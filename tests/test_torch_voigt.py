@@ -64,7 +64,10 @@ def test_torch_voigt_agrees_with_numpy_and_gradients_are_correct():
 
 def test_torch_gradients_wrt_b_t_p_match_finite_differences():
     torch = pytest.importorskip("torch")
-    nu = torch.linspace(-30e9, 30e9, 7, dtype=torch.float64)
+    # Frequencies on the core of a line: far in the wings the temperature dependence is a tiny signal on a large background
+    # and the finite difference is dominated by rounding noise (it changed in the 4th digit with the step).
+    centre = float(np.sort(line_list(0.5, ZETA)[0])[4])
+    nu = torch.as_tensor(centre + np.linspace(-1.5e9, 1.5e9, 7), dtype=torch.float64)
     base = dict(B=0.5, T=400.0, P=50.0)
 
     def f(b, t, p, backend="torch"):
@@ -73,7 +76,7 @@ def test_torch_gradients_wrt_b_t_p_match_finite_differences():
     b, t, p = (torch.tensor(base[k], dtype=torch.float64, requires_grad=True) for k in ("B", "T", "P"))
     out = f(b, t, p)
     assert np.allclose(out.detach().numpy(), f(0.5, 400.0, 50.0, "numpy"), rtol=1e-8)
-    for name, var, step in (("B", b, 1e-5), ("T", t, 1e-3), ("P", p, 1e-3)):
+    for name, var, step in (("B", b, 1e-5), ("T", t, 1e-1), ("P", p, 1.0)):
         g = torch.autograd.grad(out.sum(), var, retain_graph=True)[0].item()
         hi = dict(base); hi[name] += step
         lo = dict(base); lo[name] -= step
