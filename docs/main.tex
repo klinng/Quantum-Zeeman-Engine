@@ -4,6 +4,7 @@
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb,physics,siunitx,graphicx,booktabs,hyperref}
 \usepackage[margin=2.5cm]{geometry}
+\setlength{\emergencystretch}{3em}
 \graphicspath{{figures/}}
 
 \title{Quantum Zeeman Engine\\ \large Level by level: from the normal Zeeman effect to hyperfine structure and uncertainty}
@@ -52,10 +53,12 @@ fine-structure splitting, then everything else is a prediction.
 \input{ext_cavity}
 \input{ext_uncertainty}
 
+\clearpage
 \section{Validation against experiment}
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
-\begin{tabular}{lrr}
+\small
+\begin{tabular}{@{}p{6.2cm}p{4.6cm}p{3.6cm}@{}}
 \toprule
 Quantity & Reference & Model \\
 \midrule
