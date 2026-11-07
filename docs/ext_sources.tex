@@ -17,10 +17,11 @@ H Lamb shift $2S_{1/2}-2P_{1/2}$ & 1057.845(9) MHz & Lundeen and Pipkin, as quot
 H $2P_{3/2}-2P_{1/2}$ & 10969.13(10) MHz & Baird, Brandenberger, Gondaira, Metcalf \cite{baird1972}\\
 H $2S$ hyperfine splitting & 177.556860(16) MHz & measured \cite{arxiv0608,arxiv0305}\\
 H $1S$ hyperfine (Fermi) splitting & 1420.405751768 MHz & \cite{arxiv0608}\\
-H $2P_{1/2},2P_{3/2}$ hyperfine & 1/24 and 1/60 of the 1S value & \textbf{theory} (leading order), not measured; no measured source was found\\
+H $2P_{1/2}$ hyperfine & 59.2212 MHz & theory value quoted in \cite{westig}; their measurement $60(2)$ MHz is too coarse to test it\\
+H $2P_{3/2}$ hyperfine & 1/60 of the 1S value (23.67 MHz splitting) & \textbf{theory} (leading order), no source found; not checked\\
 H decay rates $A(2p\to1s)$, $A(3p\to2s)$, $A(3d\to2p)$ & $6.2649\times10^8$, $2.2448\times10^7$, $6.4651\times10^7$ s$^{-1}$ & Wiese and Fuhr \cite{wiese2009}, Table 6 (used only as a check; the model computes its own)\\
 H $2S$ two-photon decay & 8.2206 s$^{-1}$ & theory (Labzowsky et al.\ 2005), quoted in \cite{arxiv1711}\\
-H crossing ``about 570 G'' & 570 G & quoted from arXiv:1104.4421 in earlier notes; \textbf{that paper could not be opened here}\\
+H crossing ``about 570 G''; spin-filter fields 535 and 605 G (H-alpha) & 570 G & Westig et al.\ \cite{westig}, introduction and Fig.~2 caption\\
 Ca $4s4p$ levels $^3P_0,{}^3P_2,{}^1P_1$ & 15157.901, 15315.943, 23652.304 \si{\per\centi\metre} & NIST Handbook of Basic Atomic Spectroscopic Data \cite{nistca} (code SC85); no uncertainties given\\
 Ca $^3P_1$ level & 15210.0638 \si{\per\centi\metre} & from the measured frequency $455\,986\,240\,494\,135.8(3.4)$ Hz \cite{cafreq}; the NIST table lists 15210.063\\
 Ca $^1P_1$ decay rate & $2.20\times10^8$ s$^{-1}$ & NIST Handbook \cite{nistca}, ref.\ M03\\
@@ -49,6 +50,7 @@ Figure file & Produced by\\
 \texttt{jaynes\_cummings} & \texttt{src/cavity.py}, no external data\\
 \texttt{voigt} & \texttt{src/line\_profiles.py}; $A_{ki}$ from \cite{nistna}\\
 \texttt{hyperfine\_lines} & \texttt{src/hyperfine\_lines.py} with the Steck constants\\
+\texttt{error\_bands} & \texttt{src/uncertainty\_bands.py}\\
 \texttt{uncertainty}, \texttt{uncertainty\_budget} & \texttt{src/uncertainty\_figures.py}, \texttt{src/budget.py}\\
 \texttt{optics\_polarisation\_filters}, \texttt{optics\_prism\_setup} & \texttt{src/optics/figures.py}. This package (colour, prism, polarisation, spectrometer) was written earlier in this project by the repository owner; it computes every spectrum from this repository's own Hamiltonians and dipole matrices and uses no external spectral data. It was not rewritten in the later sessions, so review it before relying on it\\
 \texttt{optics\_instrument\_ladder} & \texttt{src/optics/instruments.py}, written for this project\\
@@ -62,6 +64,7 @@ Figure file & Produced by\\
 \bibitem{arxiv2104} \emph{Sub-Doppler spectra of sodium D lines in a wide range of magnetic field: theoretical study}, arXiv:2104.14896 (authors not recorded here).
 \bibitem{arxiv0608} \emph{Precision study of hyperfine structure in simple atoms}, arXiv:physics/0608192 (authors not recorded here).
 \bibitem{arxiv0305} \emph{High-Precision Optical Measurement of the 2S Hyperfine Interval in Atomic Hydrogen}, arXiv:physics/0305073: measured $177\,556\,860(15)$ Hz.
+\bibitem{westig} M.\,P. Westig, R. Engels, K. Grigoryev, M. Mikirtytchiants, F. Rathmann, H. Paetz gen.\ Schieck, G. Schug, A. Vasilyev and H. Str\"oher, Hydrogen spectroscopy with a Lamb-shift polarimeter, Eur.\ Phys.\ J.\ D (2010), arXiv:1104.4421. Read: the abstract, introduction, figure captions and quoted numbers; I did not study the full derivations.
 \bibitem{baird1972} J.\,C. Baird, J. Brandenberger, K.-I. Gondaira and H. Metcalf, Phys.\ Rev.\ A \textbf{5}, 564 (1972): $E(2P_{3/2})-E(2P_{1/2})=10\,969.13(10)$ MHz.
 \bibitem{arxiv0809} \emph{Spectroscopy of atomic hydrogen. How is the Rydberg constant determined?}, arXiv:0809.2985: quotes the direct Lamb-shift measurement of Lundeen and Pipkin, $1057.845(9)$ MHz.
 \bibitem{wiese2009} W.\,L. Wiese and J.\,R. Fuhr, Accurate atomic transition probabilities for hydrogen, helium, and lithium, J.\ Phys.\ Chem.\ Ref.\ Data \textbf{38}, 565 (2009).

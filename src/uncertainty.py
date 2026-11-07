@@ -81,3 +81,14 @@ def sodium_3p12_splitting_mhz(a_3p12: float) -> float:
     zeta = 0.002
     w = np.sort(np.linalg.eigvalsh(h_with_hyperfine(1, NA_I, a, 0.0, NA_G_I, zeta, e0_ev=zeta)))
     return float(ev_to_mhz(w[:8].max() - w[:8].min()))
+
+
+def curve_band(curve_model, inputs: dict, x, n: int = 200, seed: int = 0) -> dict:
+    """Error band of a whole curve: ``curve_model(x, **values)`` returns an array over x.
+
+    Returns dict(mean, std): the mean curve and the 1-sigma spread at every x, from Monte Carlo sampling of the inputs.
+    """
+    rng = np.random.default_rng(seed)
+    draws = {k: rng.normal(m, s, n) for k, (m, s) in inputs.items()}
+    curves = np.array([curve_model(x, **{k: v[i] for k, v in draws.items()}) for i in range(n)], dtype=float)
+    return {"mean": curves.mean(0), "std": curves.std(0, ddof=1), "curves": curves}

@@ -10,4 +10,4 @@ Landé g (2S1/2),2.0023193,dimensionless,free-electron g-factor
 Bohr magneton,5.7883818060e-5,eV/T,CODATA
 Hydrogen Lamb shift E(2S1/2)-E(2P1/2),1057.845,MHz,"1057.845(9) Lundeen and Pipkin, quoted in arXiv:0809.2985"
 Hydrogen E(2P3/2)-E(2P1/2),10969.13,MHz,"10969.13(10) Baird et al. Phys. Rev. A 5, 564 (1972); Dirac theory alone gives about 10949 MHz"
-Hydrogen 2S1/2(mj=-1/2) x 2P1/2(mj=+1/2) crossing,570,gauss,"'about 570 G' in arXiv:1104.4421 (hyperfine structure included there; our model neglects it)"
+Hydrogen 2S1/2(mj=-1/2) x 2P1/2(mj=+1/2) crossing,570,gauss,"'about 570 G' in Westig et al. arXiv:1104.4421 introduction; our no-hyperfine model gives 573.4 G, with hyperfine four crossings (mean 571.6 G)"

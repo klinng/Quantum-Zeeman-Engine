@@ -53,7 +53,7 @@ from src.solvers import find_crossings  # noqa: E402
 b_h, e_h, lab_h, _ = track_n2(np.linspace(1e-6, 0.5, 2500))
 i_s, i_p = level_index(lab_h, "2S1/2", -0.5), level_index(lab_h, "2P1/2", 0.5)
 b_cross = find_crossings(b_h, e_h[:, i_s], e_h[:, i_p])[0]
-print(f"hydrogen 2S1/2(-1/2) x 2P1/2(+1/2) crossing: {b_cross * 1e4:.1f} G (literature: about 570 G)")
+print(f"hydrogen 2S1/2(-1/2) x 2P1/2(+1/2) crossing: {b_cross * 1e4:.1f} G (Westig et al.: about 570 G)")
 ax = plot_n2_levels(b_h, e_h, lab_h, mark_fields_gauss=[b_cross * 1e4])
 ax.figure.tight_layout()
 ax.figure.savefig(FIG / "hydrogen_n2_levels.pdf")
@@ -70,9 +70,10 @@ from src.hyperfine_lines import fig_na_d2_hyperfine  # noqa: E402
 from src.line_profiles import fig_voigt  # noqa: E402
 from src.corrections_figures import fig_corrections  # noqa: E402
 from src.cavity import fig_jaynes_cummings  # noqa: E402
+from src.uncertainty_bands import fig_error_bands  # noqa: E402
 
 for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing", fig_anticrossing),
-                 ("literature_sodium_groups", fig_literature_comparison), ("hyperfine", fig_hyperfine), ("uncertainty", fig_uncertainty), ("uncertainty_budget", fig_budget), ("hyperfine_lines", fig_na_d2_hyperfine), ("voigt", fig_voigt), ("corrections", fig_corrections), ("jaynes_cummings", fig_jaynes_cummings)):
+                 ("literature_sodium_groups", fig_literature_comparison), ("hyperfine", fig_hyperfine), ("uncertainty", fig_uncertainty), ("uncertainty_budget", fig_budget), ("hyperfine_lines", fig_na_d2_hyperfine), ("voigt", fig_voigt), ("corrections", fig_corrections), ("jaynes_cummings", fig_jaynes_cummings), ("error_bands", fig_error_bands)):
     f = fn()
     f.savefig(FIG / f"{name}.pdf")
     f.savefig(FIG / f"{name}.png", dpi=150)

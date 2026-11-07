@@ -19,6 +19,14 @@ Inputs are assumed independent (no correlations).
 \caption{Sampling (histogram, black curve) agrees with the derivative method (red band). Right: the sampled $\sigma$ converges to the exact value as the number of draws grows (one random sequence).}
 \end{figure}
 
+\subsection*{Error bands on curves}
+\texttt{curve\_band} propagates the same way for a whole curve, giving a mean and a $1\sigma$ band at every point (\texttt{src/uncertainty\_bands.py}). With the published inputs the bands are far narrower than the lines: the measured Lamb-shift uncertainty ($9$ kHz) moves the hydrogen 2S level by 9 kHz, against line widths of 45 to 110 MHz in the experiment of Westig et al.\ \cite{westig}, and the sodium $3P_{1/2}$ hyperfine levels carry tenths of a MHz against a 9.8 MHz natural width. So the limit on agreement is the model (what it leaves out), not the input numbers.
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{error_bands.pdf}
+\caption{Left: the hydrogen 2S level near the crossing, with its $1\sigma$ band magnified 1000 times so that it can be seen. Right: $1\sigma$ uncertainty of the lowest and highest sodium $3P_{1/2}$ hyperfine levels against field.}
+\end{figure}
+
 \subsection*{The global budget}
 \texttt{src/budget.py} puts every system in one table, each row saying where its $\sigma$ comes from: \emph{measured} (a published uncertainty) or \emph{assumed} (an illustrative value, or only the precision of a table, to be replaced).
 \begin{table}[h]

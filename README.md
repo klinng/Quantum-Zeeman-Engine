@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-198%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-201%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -197,8 +197,9 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 
 | Quantity | Model | Reference | Note |
 |---|---|---|---|
-| 2S × 2P crossing near 573 G, no hyperfine | 573.4 G | about 570 G (quoted, unchecked) | single crossing |
-| Same crossing with proton hyperfine | four crossings at 538.1, 552.2, 591.0, 605.0 G; mean 571.6 G | about 570 G | the mean moves towards the quoted value; the four positions are not yet compared with a source |
+| 2S × 2P crossing near 573 G, no hyperfine | 573.4 G | "about 570 G" (Westig et al., arXiv:1104.4421, introduction) | single crossing |
+| Same crossing with proton hyperfine | four crossings at 538.1, 552.2, 591.0, 605.0 G; mean 571.6 G | spin-filter fields quoted in the same paper (Fig. 2 caption): 535 G and 605 G for H-alpha | 605 G matches; the lower one differs by 3 G (535 against 538.1), which I cannot explain from the abstract and caption alone (the quoted fields are selection settings, possibly rounded); the mean is close to "about 570 G" |
+| H 2P₁/₂ hyperfine splitting | 59.2212 MHz (input) | theory 59221.2 kHz and measured 60(2) MHz, same paper | the measurement is too coarse to test the model; Lamb shift there 1057(1) MHz agrees with the value used |
 | H 2S hyperfine splitting | 177.55686 MHz | 177.556860(16) MHz, measured (arXiv:physics/0608192) | an input, not a prediction |
 | Na 3S₁/₂ hyperfine splitting | 1771.6261 MHz | Steck table | an input (A), reproduced as 2A |
 | Na D2 hyperfine line strengths | 1/20, 1/4, 7/10 (F=2) and 1/6, 5/12, 5/12 (F=1) | standard angular-momentum (Racah) values | not an input: the model produces them from the dipole matrices |
@@ -226,21 +227,22 @@ Full list with values and status: the "Sources" section of `docs/main.pdf` (also
 | H decay-rate checks | Wiese and Fuhr, J. Phys. Chem. Ref. Data 38, 565 (2009), Table 6 |
 | H 2S two-photon decay 8.2206 s⁻¹ (theory) | Labzowsky et al. 2005, quoted in arXiv:1711.05533 |
 | Ca 4s4p energies and ¹P₁ rate | NIST Handbook of Basic Atomic Spectroscopic Data (Ca I tables); ³P₁ from the measured frequency at tf.nist.gov/general/pdf/2197.pdf |
+| H crossings, 2P₁/₂ hyperfine theory value | M. P. Westig et al., "Hydrogen spectroscopy with a Lamb-shift polarimeter", Eur. Phys. J. D (2010), arXiv:1104.4421 |
 | Sodium 3p levels 16956.172 and 16973.368 cm⁻¹ | NIST Handbook, Na I energy levels (MZ81) |
 | Sodium group-spacing cross-check | arXiv:2104.14896 (published theory) |
 
-Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables, MZ81). Marked **unchecked**: the "about 570 G" hydrogen crossing (arXiv:1104.4421 could not be opened). The hydrogen 2P hyperfine constants are leading-order theory. Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was written earlier in this project by the repository owner; it computes every spectrum from this repository's own Hamiltonians.
+Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables, MZ81). The hydrogen 2P₁/₂ hyperfine value (theory) and the "about 570 G" crossing: Westig et al., arXiv:1104.4421. Still unchecked: the hydrogen 2P₃/₂ hyperfine constant (leading-order theory, Fermi/60). Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was written earlier in this project by the repository owner; it computes every spectrum from this repository's own Hamiltonians.
 
 ## Limits and honesty notes
 
 - **Global budget:** every σ in `budget.py` is labelled measured or assumed; the sodium hyperfine constant and the hydrogen Lamb shift have published σ; calcium energies only have the NIST table's precision, and the H-alpha temperature σ is an assumption. The sodium g_J(3S₁/₂) row shows a 2.3e-5 gap to the measurement because the model uses the free-electron g_s.
 - **Hyperfine in line spectra:** only the sodium D lines (`src/hyperfine_lines.py`). Hydrogen H-alpha is left out because I have no checked n = 3 hyperfine constants and the splittings are far below the 7 GHz Doppler width.
-- **Hyperfine (new):** `src/hyperfine.py` covers sodium (I = 3/2) and hydrogen n = 2 (I = 1/2). Sodium A constants are from Steck's table; hydrogen 2S is measured; the hydrogen 2P constants are leading-order theory (Fermi/24 and Fermi/60), not measured values. The sodium electric-quadrupole term (2.7 MHz) is not modelled. Ca-40 has no nuclear spin.
+- **Hyperfine (new):** `src/hyperfine.py` covers sodium (I = 3/2) and hydrogen n = 2 (I = 1/2). Sodium A constants are from Steck's table; hydrogen 2S is measured; the hydrogen 2P₁/₂ value is a theory number quoted in Westig et al. (arXiv:1104.4421; their measurement, 60(2) MHz, is too coarse to test it) and 2P₃/₂ is leading-order theory (Fermi/60), not a measured value. The sodium electric-quadrupole term (2.7 MHz) is not modelled. Ca-40 has no nuclear spin.
 - **Diamagnetic term:** estimated, not added to the Hamiltonians (`src/diamagnetic.py`). For H-alpha the largest shift is 1.1 pm at 20 T and 9.7 pm at 60 T: below 1 % of the Zeeman shift but comparable to the 8.1 pm Doppler width at 60 T. Electron-electron effects are not modelled (one-electron model).
 - **Isotope shift:** H/D from the reduced mass only (`src/isotope.py`): 178.6 pm at H-alpha. No measured value was checked; finite nuclear size is not included.
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
 - **Sodium D1 to D2 interval resolved:** the NIST Handbook (Na I tables, level source MZ81) gives 3p ²P₁/₂ = 16956.172 and ²P₃/₂ = 16973.368 cm⁻¹, so the interval is 17.196 cm⁻¹, which is what the model uses. The 17.220 that a summarising tool once suggested for Steck's table was wrong, not a real source conflict.
-- **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the hydrogen 2P hyperfine constants (leading-order theory) and the "about 570 G" crossing.
+- **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the hydrogen 2P₃/₂ hyperfine constant (leading-order theory).
 - **Spin-spin interaction is not modelled**, so helium is out of reach of this model.
 - **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was written earlier in this project by the repository owner (with an AI assistant in an earlier session). It computes every spectrum from this repository's own Hamiltonians and dipole matrices (`hamiltonians.py`, `transitions.py`); it imports only numpy, scipy, pandas and matplotlib, no external spectral data. The recent extension sessions did not rewrite it, only added `instruments.py`, the H-alpha figures and the Grotrian diagram, so review the older modules before relying on them.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.
@@ -296,7 +298,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Hyperfine structure (I·J) for sodium and hydrogen n = 2 (still to do: compare the hydrogen crossing positions and the sodium sub-structure with a measured source)
 - [x] Hydrogen / deuterium isotope shift (reduced mass only; no measured value checked)
 - [x] Voigt line profiles (sodium D2; pressure width is an input, no collision coefficient built in) (Doppler + natural + pressure broadening)
-- [x] Uncertainty propagation: Monte Carlo and derivative methods plus a z-score comparison (`uncertainty.py`); still to do: attach measured uncertainties to every input and show error bands on all spectra
+- [x] Uncertainty propagation: Monte Carlo and derivative methods plus a z-score comparison (`uncertainty.py`); error bands for curves (`curve_band`, `uncertainty_bands.py`) are shown for hydrogen and sodium; they are narrower than the lines, so the limit is the model, not the inputs
 - [x] Estimate of the diamagnetic term at 60 T (first order; 9.7 pm for H-alpha)
 - [x] Photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo (stand-alone, not tied to a real atom)
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits
