@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-237%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-243%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -43,7 +43,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 237 tests (2 of them need PyTorch and skip without it)
+python -m pytest -q                  # 243 tests (2 of them need PyTorch and skip without it)
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -205,7 +205,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension I | Photon operators a, a† and the Jaynes-Cummings atom-in-a-cavity demo | vacuum Rabi cos²(g t) and splitting g√N reproduced exactly | `cavity.py` | `ext_cavity.tex` |
 | Extension J | Uncertainty: Monte Carlo and derivative propagation, z-scores, error bands, global budget | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz); g_J(3S₁/₂) differs from measurement by 2.3e-5 | `uncertainty.py`, `uncertainty_bands.py`, `budget.py` | `ext_uncertainty.tex` |
 | Extension K | Calcium Zeeman line spectrum 4s² ¹S₀ → 4s4p: 657 nm intercombination line, field-induced ³P₀ line | ³P₁ strength = 3ε² (ε² = 7.8e-5); ³P₀ strength ∝ B² | `calcium_lines.py` | `ext_calcium_lines.tex` |
-| Extension L | Helium 1s2s and 1s2p: exchange from Slater integrals (G¹, G⁰), spin-orbit, spin-spin tensor, Zeeman | exchange splits singlet from triplet by 2G; spin-spin gives 1 : −5 : 10 over ³P₂,₁,₀ and breaks the Landé rule; parameters are inputs (no helium level is built in) | `helium.py` | `ext_helium.tex` |
+| Extension L | Helium 1s2s and 1s2p: exchange from Slater integrals (G¹, G⁰), spin-orbit, spin-spin tensor, Zeeman | exchange splits singlet from triplet by 2G; spin-spin gives 1 : −5 : 10 over ³P₂,₁,₀ and breaks the Landé rule; calibrated to the six NIST n = 2 levels and the Kato et al. interval (6 parameters, 6 levels: a calibration) | `helium.py`, `helium_data.py` | `ext_helium.tex` |
 | Extension M | Differentiable Voigt profile and Zeeman spectrum (Weideman Faddeeva function; gradients in B, T, P with PyTorch) | NumPy side equals scipy to 4e-14; the PyTorch tests skip when torch is absent | `torch_voigt.py` | `ext_differentiable.tex` |
 
 The report also contains a **Symbols and conventions** table (start) and a **Sources** section with the bibliography (end).
@@ -298,7 +298,7 @@ constant (leading-order theory, Fermi/60).
 - The sodium g_J(3S₁/₂) row differs from the measurement by 2.3e-5 because the model uses the free-electron g_s and has no bound-state correction.
 
 **Not modelled**
-- Helium is modelled (Extension L) with effective spin-spin and spin-other-orbit parameters and no built-in helium levels; electron-electron effects beyond the two-electron s-p model, and the sodium electric-quadrupole term (2.7 MHz).
+- Helium is modelled (Extension L) with effective spin-spin and spin-other-orbit parameters, calibrated to NIST levels (`helium_data.py`); electron-electron effects beyond the two-electron s-p model, and the sodium electric-quadrupole term (2.7 MHz).
 - Hyperfine in the H-alpha spectrum: no checked n = 3 constants, and the splittings are far below the 7 GHz Doppler width.
 - Pressure broadening has no built-in collision coefficient: the width is an input you choose.
 - The diamagnetic term is estimated (`diamagnetic.py`), not added to the Hamiltonians: for H-alpha the largest shift is 1.1 pm at 20 T and 9.7 pm at 60 T, below 1 % of the Zeeman shift but comparable to the 8.1 pm Doppler width at 60 T.
@@ -310,7 +310,7 @@ constant (leading-order theory, Fermi/60).
 
 **Provenance and testing**
 - `src/optics/` (colour, prism, polarisation, spectrometer, figures) was written earlier in this project by the repository owner. It computes every spectrum from this repository's own Hamiltonians and dipole matrices and imports only numpy, scipy, pandas and matplotlib. The later extensions added `instruments.py`, the H-alpha figures and the Grotrian diagram; the older modules deserve a review before being relied on.
-- The PyTorch half of `torch_voigt.py` was run by the repository owner (PyTorch 2.15, Windows, Python 3.11): all 237 tests pass. It was not run in the development sandbox, and `torch_engine.py` has no dedicated test.
+- The PyTorch half of `torch_voigt.py` was run by the repository owner (PyTorch 2.15, Windows, Python 3.11): all 243 tests pass. It was not run in the development sandbox, and `torch_engine.py` has no dedicated test.
 
 ## Use it from Python
 
@@ -346,13 +346,13 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 hyperfine, hyperfine_lines, hyperfine_figures              (nuclear spin)
                 line_profiles, diamagnetic, isotope, corrections_figures   (line shapes, small corrections)
                 calcium_lines                                              (calcium line spectrum)
-                helium, torch_voigt                                        (helium, differentiable spectrum)
+                helium, helium_data, torch_voigt                                        (helium, differentiable spectrum)
                 cavity                                                     (photon operators, Jaynes-Cummings)
                 uncertainty, uncertainty_bands, uncertainty_figures, budget (uncertainty)
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          237 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          243 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values
@@ -382,7 +382,8 @@ Done:
 
 Open, and what each needs from outside (if you can supply any of these, the item can be closed):
 - [x] Helium 1s2s/1s2p Hamiltonian with Slater-integral exchange, spin-orbit and spin-spin (Extension L).
-- [ ] **Helium validation:** the model exists; it needs measured 2³S-2¹S, 2³P-2¹P and 2³P fine-structure intervals from a checked source (NIST ASD or a precision paper) to be compared with.
+- [x] Helium model calibrated to the NIST Handbook levels and the Kato et al. 2³P interval (a calibration, not a test).
+- [ ] **Independent helium test:** a measured helium Zeeman splitting or g-factor (not used in the calibration) to compare with the predicted fan.
 - [x] Hydrogen 2P₃/₂ and n = 3 hyperfine: leading-order formula implemented (theory, tested against 2S and 2P₁/₂).
 - [ ] **Published n = 3 hyperfine table** to cross-check the formula, then add hyperfine to the H-alpha spectrum.
 - [ ] **Laboratory Zeeman spectra:** compare full spectra with measurements (the arXiv:2104.14896 paper is theory; look for experimental companions).

@@ -20,7 +20,7 @@ H $1S$ hyperfine (Fermi) splitting & 1420.405751768 MHz & \cite{arxiv0608}\\
 H $2P_{1/2}$ hyperfine & 59.2212 MHz & theory value quoted in \cite{westig}; their measurement $60(2)$ MHz is too coarse to test it\\
 H $2P_{3/2}$ hyperfine & 1/60 of the 1S value (23.67 MHz splitting) & \textbf{theory}, leading-order estimate; not yet compared with an independent value\\
 H $n=3$ hyperfine ($3S_{1/2}$ 52.61, $3P_{1/2}$ 17.54, $3P_{3/2}$ 7.01, $3D_{3/2}$ 4.21, $3D_{5/2}$ 2.71 MHz, total splittings) & $A=\tfrac38\,\nu_{1S}/[n^3 j(j+1)(l+\tfrac12)]$, \texttt{hydrogen\_hfs\_leading\_mhz} & \textbf{theory}, leading-order formula (reproduces 2S to $4\times10^{-5}$ and 2P$_{1/2}$ to $9\times10^{-4}$); not compared with a published $n=3$ table. $B=0$ exactly (proton spin $\tfrac12$)\\
-Helium $1s2s$, $1s2p$ parameters ($G^k$, $\zeta_S$, $\rho$, $\zeta_A$) & inputs & none built in; $G$ from the measured singlet--triplet splitting, $\zeta_S,\rho$ from the two measured $2^3P$ intervals\\
+Helium $n=2$ levels (six) & see Section on helium & NIST Handbook \cite{nisthe} (code M02); $2^3P_2-2^3P_1$ from the measurement \cite{kato}. $G^0,G^1,\zeta_S,\rho$ are derived from them (calibration); $\zeta_A=0$\\
 H decay rates $A(2p\to1s)$, $A(3p\to2s)$, $A(3d\to2p)$ & $6.2649\times10^8$, $2.2448\times10^7$, $6.4651\times10^7$ s$^{-1}$ & Wiese and Fuhr \cite{wiese2009}, Table 6 (used only as a check; the model computes its own)\\
 H--D H-alpha isotope shift & $-178.6$ pm (calculated) & H\'ebrard et al.\ \cite{hebrard}: $-1.786$ \AA, agrees to 0.1 pm\\
 H $2S$ two-photon decay & 8.2206 s$^{-1}$ & theory (Labzowsky et al.\ 2005), quoted in \cite{arxiv1711}\\
@@ -49,6 +49,7 @@ Figure file & Produced by\\
 \texttt{two\_electron\_calcium\_levels} & \texttt{src/two\_electron\_figures.py} (calcium energies from \cite{nistca,cafreq})\\
 \texttt{literature\_sodium\_groups} & \texttt{src/literature.py}; the reference spacings are those tabulated in \cite{arxiv2104}\\
 \texttt{calcium\_lines} & \texttt{src/calcium\_lines.py} with the levels of \cite{nistca,cafreq}\\
+\texttt{helium\_2p\_fan} & \texttt{src/helium\_data.py}, levels from \cite{nisthe,kato}\\
 \texttt{hyperfine} & \texttt{src/hyperfine\_figures.py}\\
 \texttt{corrections} & \texttt{src/corrections\_figures.py} (CODATA masses, hydrogenic $\langle r^2\rangle$)\\
 \texttt{jaynes\_cummings} & \texttt{src/cavity.py}, no external data\\
@@ -77,5 +78,7 @@ Figure file & Produced by\\
 \bibitem{nistca} NIST Physical Measurement Laboratory, \emph{Handbook of Basic Atomic Spectroscopic Data}, Ca I: ``Energy Levels of Neutral Calcium'' (levels from Sugar and Corliss 1985, code SC85) and ``Persistent Lines of Neutral Calcium'' ($A_{ki}$ from reference M03), physics.nist.gov/PhysRefData/Handbook.
 \bibitem{nistna} NIST Physical Measurement Laboratory, \emph{Handbook of Basic Atomic Spectroscopic Data}, Na I: ``Energy Levels of Neutral Sodium'' (level source MZ81) and ``Persistent Lines of Neutral Sodium'' (lines R56, $A_{ki}$ M03), physics.nist.gov/PhysRefData/Handbook.
 \bibitem{weideman} J.\,A.\,C. Weideman, Computation of the complex error function, SIAM J.\ Numer.\ Anal.\ \textbf{31}, 1497 (1994).
+\bibitem{nisthe} NIST Physical Measurement Laboratory, \emph{Handbook of Basic Atomic Spectroscopic Data}, ``Energy Levels of Neutral Helium (He I)'' (reference code M02), physics.nist.gov/PhysRefData/Handbook/Tables/heliumtable5.htm.
+\bibitem{kato} K. Kato, T.\,D.\,G. Skinner and E.\,A. Hessels, Ultrahigh-precision measurement of the $n=2$ triplet P fine structure of atomic helium using frequency-offset separated oscillatory fields, arXiv:1807.07923: $2\,^3P_2\to2\,^3P_1=2\,291\,176\,590(25)$ Hz.
 \bibitem{cafreq} Measured $^1S_0$--$^3P_1$ frequency of calcium, $455\,986\,240\,494\,135.8(3.4)$ Hz, tf.nist.gov/general/pdf/2197.pdf.
 \end{thebibliography}
