@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-235%20passing%20(2%20need%20torch)-brightgreen)
+![Tests](https://img.shields.io/badge/tests-237%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -43,7 +43,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 237 tests (235 run without torch)
+python -m pytest -q                  # 237 tests (2 of them need PyTorch and skip without it)
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -310,7 +310,7 @@ constant (leading-order theory, Fermi/60).
 
 **Provenance and testing**
 - `src/optics/` (colour, prism, polarisation, spectrometer, figures) was written earlier in this project by the repository owner. It computes every spectrum from this repository's own Hamiltonians and dipole matrices and imports only numpy, scipy, pandas and matplotlib. The later extensions added `instruments.py`, the H-alpha figures and the Grotrian diagram; the older modules deserve a review before being relied on.
-- The optional PyTorch code (`torch_engine.py`, and the PyTorch half of `torch_voigt.py`) has not been run: PyTorch is not installed in the development environment. The torch tests skip when it is absent.
+- The PyTorch half of `torch_voigt.py` was run by the repository owner (PyTorch 2.15, Windows, Python 3.11): all 237 tests pass. It was not run in the development sandbox, and `torch_engine.py` has no dedicated test.
 
 ## Use it from Python
 
@@ -352,7 +352,7 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          237 tests (235 run without torch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          237 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values
@@ -387,7 +387,7 @@ Open, and what each needs from outside (if you can supply any of these, the item
 - [ ] **Published n = 3 hyperfine table** to cross-check the formula, then add hyperfine to the H-alpha spectrum.
 - [ ] **Laboratory Zeeman spectra:** compare full spectra with measurements (the arXiv:2104.14896 paper is theory; look for experimental companions).
 - [x] Differentiable Voigt profile and Zeeman spectrum written (NumPy side tested).
-- [ ] **Run the PyTorch tests:** `pip install torch`, then `python -m pytest -q`; the 2 skipped tests should then run (gradcheck, and finite differences in B, T and P).
+- [x] PyTorch tests run and pass (gradcheck; gradients in B, T and P against finite differences).
 
 ## Credits
 
