@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-190%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-198%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -153,6 +153,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension E | Two valence electrons (calcium 4s4p): exchange splitting, spin-orbit mixing of singlet and triplet | Landé interval rule to 0.09 cm⁻¹; singlet admixture 7.8e-5 | `two_electron.py` | `ext_two_electron.tex` |
 | Extension D | Electric field on hydrogen n = 2: Stark mixing, Lamb-Retherford anticrossing, 2S quenching | gap = 2√3 e a₀ E at 573 G | `stark.py` | `ext_hydrogen_stark.tex` |
 | Extension F | Nuclear spin: hyperfine structure of sodium and hydrogen n = 2, and the sodium D lines with hyperfine (6 D2 lines, 4 D1 lines); the 573 G crossing splits into four | Na 3S splitting 1771.626 MHz; mean crossing 571.6 G | `hyperfine.py` | `ext_hyperfine.tex` |
+| Extension I | Photon operators a, a† and the Jaynes-Cummings atom-in-a-cavity demo | vacuum Rabi cos²(g t) and splitting g√N reproduced exactly | `cavity.py` | `ext_cavity.tex` |
 | Extension G | Uncertainty: Monte Carlo and derivative propagation, z-score comparison, and a global budget table covering sodium, hydrogen n = 2, H-alpha and calcium | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz); g_J(3S₁/₂) differs from measurement by 2.3e-5 (free-electron g_s) | `uncertainty.py`, `budget.py` | `ext_uncertainty.tex` |
 | Extension H | Line shapes: Doppler, natural and pressure widths as Voigt profiles; sodium D2 resolved only when cold | Na D2 natural width 9.80 MHz (from NIST A) | `line_profiles.py` | `ext_voigt.tex` |
 | Extension C | Hydrogen H-alpha (n = 3 to 2) with radial integrals, Dirac fine structure | spectrum from weak field to Paschen-Back | `hydrogen_spectrum.py` | `ext_hydrogen_halpha.tex` |
@@ -228,7 +229,7 @@ Full list with values and status: the "Sources" section of `docs/main.pdf` (also
 | Sodium 3p levels 16956.172 and 16973.368 cm⁻¹ | NIST Handbook, Na I energy levels (MZ81) |
 | Sodium group-spacing cross-check | arXiv:2104.14896 (published theory) |
 
-Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables, MZ81). Marked **unchecked**: the "about 570 G" hydrogen crossing (arXiv:1104.4421 could not be opened). The hydrogen 2P hyperfine constants are leading-order theory. Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was already present when this work began and its origin is unknown.
+Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables, MZ81). Marked **unchecked**: the "about 570 G" hydrogen crossing (arXiv:1104.4421 could not be opened). The hydrogen 2P hyperfine constants are leading-order theory. Every figure is drawn by this repository's code; the `src/optics/` package (colour, prism, polarisation, spectrometer) was written earlier in this project by the repository owner; it computes every spectrum from this repository's own Hamiltonians.
 
 ## Limits and honesty notes
 
@@ -241,7 +242,7 @@ Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables,
 - **Sodium D1 to D2 interval resolved:** the NIST Handbook (Na I tables, level source MZ81) gives 3p ²P₁/₂ = 16956.172 and ²P₃/₂ = 16973.368 cm⁻¹, so the interval is 17.196 cm⁻¹, which is what the model uses. The 17.220 that a summarising tool once suggested for Steck's table was wrong, not a real source conflict.
 - **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the hydrogen 2P hyperfine constants (leading-order theory) and the "about 570 G" crossing.
 - **Spin-spin interaction is not modelled**, so helium is out of reach of this model.
-- **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was already in the repository when I joined this work and I don't know where it came from. Review it before relying on it. `instruments.py` and the H-alpha figures were written here.
+- **Optics package:** `src/optics/` (colour, prism, polarisation, spectrometer, figures) was written earlier in this project by the repository owner (with an AI assistant in an earlier session). It computes every spectrum from this repository's own Hamiltonians and dipole matrices (`hamiltonians.py`, `transitions.py`); it imports only numpy, scipy, pandas and matplotlib, no external spectral data. The recent extension sessions did not rewrite it, only added `instruments.py`, the H-alpha figures and the Grotrian diagram, so review the older modules before relying on them.
 - **Optional PyTorch engine** (`torch_engine.py`) has not been tested in this environment.
 
 ## Use it from Python
@@ -297,7 +298,7 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [x] Voigt line profiles (sodium D2; pressure width is an input, no collision coefficient built in) (Doppler + natural + pressure broadening)
 - [x] Uncertainty propagation: Monte Carlo and derivative methods plus a z-score comparison (`uncertainty.py`); still to do: attach measured uncertainties to every input and show error bands on all spectra
 - [x] Estimate of the diamagnetic term at 60 T (first order; 9.7 pm for H-alpha)
-- [ ] Optional: photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo
+- [x] Photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo (stand-alone, not tied to a real atom)
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits
 
 ## Sources

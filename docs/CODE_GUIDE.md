@@ -212,6 +212,7 @@ high-resolution stage.**
 - `src/diamagnetic.py`: `r2_hydrogenic(n, l)`, `sin2_theta_mean(l, m)`, `diamagnetic_shift_ev(n, l, m, B)` (first-order estimate; not added to the Hamiltonians), `balmer_alpha_diamagnetic_shift_cm1(B)`.
 - `src/isotope.py`: `rydberg_cm1('H' or 'D')`, `line_wavenumber_cm1`, `isotope_shift()` (D minus H, mass effect only), `zeeman_shift_pm_per_t`.
 - `src/corrections_figures.py`: `fig_corrections()`.
+- `src/cavity.py`: `annihilation(n_max)`, `creation(n_max)`, `jaynes_cummings(n_max, w_c, w_a, g)` (basis: photon number ⊗ atom, index 0 excited), `excitation_number`, `excited_probability(...)` (exact time evolution), `fig_jaynes_cummings()`. Stand-alone, arbitrary units.
 - `src/hyperfine_figures.py`: `fig_hyperfine()` (sodium 3S Breit-Rabi diagram and the hydrogen crossing splitting).
 
 ## `src/uncertainty.py`: how far can a number be trusted?
@@ -284,6 +285,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_hyperfine_lines.py` | 6 D2 and 4 D1 zero-field lines; Racah strength fractions 1/20, 1/4, 7/10 and 1/6, 5/12, 5/12; D2:D1 = 2; line spacings 3A and 1771.626 MHz; D2 total strength field independent; Doppler width scales as √T; broadened area equals strength. |
 | `test_line_profiles.py` | Na D2 natural width 9.80 MHz; unit area; Gaussian and Lorentzian limits; approximate width within 0.5 % of exact; Voigt spectrum area equals strength; Gaussian limit equals the Doppler-only spectrum. |
 | `test_corrections.py` | Diamagnetic 1s = B²/4 hartree (atomic units); ⟨r²⟩ formula equals numerical integral for five states; angular average over m is 2/3; shift scales as B²; below 1 % of Zeeman at 60 T; isotope shift sign and size (about 179 pm, D bluer); Zeeman scale equal for H and D; regression for the Doppler-width call. |
+| `test_cavity.py` | [a, a†] = 1 except the last state; number operator; excitation number conserved; resonant levels (N−½)w_c ± g√N; vacuum Rabi cos²(g t); detuned Rabi formula. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |

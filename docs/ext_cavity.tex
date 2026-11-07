@@ -1,0 +1,15 @@
+\section{Photon operators and the Jaynes--Cummings model}
+So far light was a classical wave. \texttt{src/cavity.py} treats one cavity mode quantum-mechanically with the photon operators $a$ and $a^\dagger$ ($a|n\rangle=\sqrt n|n-1\rangle$, $[a,a^\dagger]=1$, exact except on the last state of the truncated Fock space) coupled to a two-level atom:
+\begin{equation}
+H=\omega_c\,a^\dagger a+\tfrac12\omega_a\sigma_z+g\,(a\sigma_++a^\dagger\sigma_-)\qquad(\hbar=1,\ \text{rotating-wave approximation}).
+\end{equation}
+The excitation number $a^\dagger a+\sigma_+\sigma_-$ commutes with $H$, so the problem splits into $2\times2$ blocks. Checks made in the tests, all exact:
+at resonance the $N$-excitation levels are $(N-\tfrac12)\omega_c\pm g\sqrt N$ (vacuum Rabi splitting $2g$); an atom starting excited in an empty cavity has $P_e(t)=\cos^2(gt)$; with detuning $\Delta=\omega_a-\omega_c$ it follows $P_e=1-\frac{4g^2}{\Delta^2+4g^2}\sin^2(\sqrt{\Delta^2+4g^2}\,t/2)$.
+
+This is a stand-alone demonstration in arbitrary units: it is not tied to a real atom or cavity, and no experimental numbers are used. Connecting it to the Zeeman levels (a two-level atom made from one Zeeman sublevel pair) would be a later step.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{jaynes_cummings.pdf}
+\caption{Left: vacuum Rabi oscillation for three detunings (dotted: $\cos^2 gt$). Right: the one-excitation levels against detuning, an avoided crossing of size $2g$.}
+\end{figure}
