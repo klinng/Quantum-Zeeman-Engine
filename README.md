@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-179%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-190%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -235,7 +235,8 @@ Sodium D1/D2 levels and the 17.196 cm⁻¹ interval: NIST Handbook (Na I tables,
 - **Global budget:** every σ in `budget.py` is labelled measured or assumed; the sodium hyperfine constant and the hydrogen Lamb shift have published σ; calcium energies only have the NIST table's precision, and the H-alpha temperature σ is an assumption. The sodium g_J(3S₁/₂) row shows a 2.3e-5 gap to the measurement because the model uses the free-electron g_s.
 - **Hyperfine in line spectra:** only the sodium D lines (`src/hyperfine_lines.py`). Hydrogen H-alpha is left out because I have no checked n = 3 hyperfine constants and the splittings are far below the 7 GHz Doppler width.
 - **Hyperfine (new):** `src/hyperfine.py` covers sodium (I = 3/2) and hydrogen n = 2 (I = 1/2). Sodium A constants are from Steck's table; hydrogen 2S is measured; the hydrogen 2P constants are leading-order theory (Fermi/24 and Fermi/60), not measured values. The sodium electric-quadrupole term (2.7 MHz) is not modelled. Ca-40 has no nuclear spin.
-- **Not modelled:** the diamagnetic term (about 0.02 cm⁻¹ at 20 T for n = 3), and electron-electron effects (one-electron model).
+- **Diamagnetic term:** estimated, not added to the Hamiltonians (`src/diamagnetic.py`). For H-alpha the largest shift is 1.1 pm at 20 T and 9.7 pm at 60 T: below 1 % of the Zeeman shift but comparable to the 8.1 pm Doppler width at 60 T. Electron-electron effects are not modelled (one-electron model).
+- **Isotope shift:** H/D from the reduced mass only (`src/isotope.py`): 178.6 pm at H-alpha. No measured value was checked; finite nuclear size is not included.
 - **Approximation:** the n = 3 Lamb shift is the measured n = 2 value scaled as 1/n³.
 - **Sodium D1 to D2 interval resolved:** the NIST Handbook (Na I tables, level source MZ81) gives 3p ²P₁/₂ = 16956.172 and ²P₃/₂ = 16973.368 cm⁻¹, so the interval is 17.196 cm⁻¹, which is what the model uses. The 17.220 that a summarising tool once suggested for Steck's table was wrong, not a real source conflict.
 - **Inputs now checked against sources** (see the Sources section): calcium term energies and the ¹P₁ rate (NIST Handbook), hydrogen Lamb shift and 2P fine structure (published measurements), hydrogen decay rates (Wiese and Fuhr 2009), two-photon 2S rate (8.2206 s⁻¹, theory). Still unchecked: the hydrogen 2P hyperfine constants (leading-order theory) and the "about 570 G" crossing.
@@ -292,10 +293,10 @@ New to the code? Read [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md): it explains ev
 - [ ] Compare full spectra with laboratory measurements of the Zeeman effect (the paper above is theory; look for its experimental companions)
 - [x] Level diagram (Grotrian) with polarisation-coloured, intensity-weighted arrows
 - [x] Hyperfine structure (I·J) for sodium and hydrogen n = 2 (still to do: compare the hydrogen crossing positions and the sodium sub-structure with a measured source)
-- [ ] Hydrogen / deuterium isotope shift (reduced mass)
+- [x] Hydrogen / deuterium isotope shift (reduced mass only; no measured value checked)
 - [x] Voigt line profiles (sodium D2; pressure width is an input, no collision coefficient built in) (Doppler + natural + pressure broadening)
 - [x] Uncertainty propagation: Monte Carlo and derivative methods plus a z-score comparison (`uncertainty.py`); still to do: attach measured uncertainties to every input and show error bands on all spectra
-- [ ] Estimate of the diamagnetic term at 60 T
+- [x] Estimate of the diamagnetic term at 60 T (first order; 9.7 pm for H-alpha)
 - [ ] Optional: photon-number operators and a Jaynes-Cummings atom-in-a-cavity demo
 - [ ] Test the optional PyTorch engine and use it for many-parameter fits
 

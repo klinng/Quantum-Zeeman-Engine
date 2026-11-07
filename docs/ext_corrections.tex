@@ -1,0 +1,22 @@
+\section{Two small corrections: the diamagnetic term and the isotope shift}
+
+\subsection*{Diamagnetic term}
+Besides the linear Zeeman term, a magnetic field adds $H_\text{dia}=\frac{e^2B^2}{8m_e}(x^2+y^2)$. To first order its value for hydrogen $|n\,l\,m\rangle$ is
+\begin{equation}
+\Delta E=\frac{e^2B^2}{8m_e}\,a_0^2\,\langle r^2\rangle\langle\sin^2\theta\rangle,\quad
+\langle r^2\rangle=\tfrac12 n^2\bigl(5n^2+1-3l(l+1)\bigr),\quad
+\langle\sin^2\theta\rangle=\frac{2(l^2+l-1+m^2)}{(2l-1)(2l+3)}
+\end{equation}
+($2/3$ for $l=0$). It grows as $B^2n^4$ (\texttt{src/diamagnetic.py}). The tests check it against the textbook result $B^2/4$ hartree for the $1s$ state in atomic units, and the $\langle r^2\rangle$ formula against numerical integration of the radial wavefunctions.
+
+For H-alpha the largest component shift is $1.1$ pm at 20 T and $9.7$ pm at 60 T. Against the Zeeman shift ($\approx1.2$ nm at 60 T) that is below 1\,\%, but at 60 T it is comparable with the 300 K Doppler width (8.1 pm), so it would be visible in a high-resolution spectrum. It is an estimate, not added to the Hamiltonians; at 20 T and below it can be ignored.
+
+\subsection*{Isotope shift}
+The electron orbits the common centre of mass, so the effective Rydberg constant is $R_X=R_\infty/(1+m_e/M_X)$ (\texttt{src/isotope.py}, CODATA masses). For H-alpha this puts deuterium $178.6$ pm to shorter wavelength than hydrogen ($4.14$ \si{\per\centi\metre}), about nine times the Zeeman shift at 1 T and twenty times the Doppler width.
+The normal-Zeeman shift scale is the same for both isotopes to $0.1\,\%$. This is a calculation from CODATA masses; I did not find a measured H--D value to compare with, and the finite nuclear size is not included.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{corrections.pdf}
+\caption{Left: largest diamagnetic shift of H-alpha against field, with the Zeeman scale and the 300 K Doppler width. Right: the H--D isotope shift against the Zeeman shift of one component and the Doppler width.}
+\end{figure}
