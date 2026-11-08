@@ -251,7 +251,7 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | 2S × 2P crossing near 573 G, no hyperfine | 573.4 G | "about 570 G" (Westig et al., arXiv:1104.4421, introduction) | single crossing |
 | Same crossing with proton hyperfine | four crossings at 538.1, 552.2, 591.0, 605.0 G; mean 571.6 G | spin-filter fields quoted in the same paper (Fig. 2 caption): 535 G and 605 G for H-alpha | 605 G matches; the lowest differs by 3 G (535 against 538.1), not explained: the quoted fields are selection settings, possibly rounded. The mean is close to "about 570 G" |
 | H 2P₁/₂ hyperfine splitting | 59.2212 MHz (input) | theory 59221.2 kHz and measured 60(2) MHz, same paper | the measurement is too coarse to test the model; Lamb shift there 1057(1) MHz agrees with the value used |
-| H 2S hyperfine splitting | 177.55686 MHz | 177.556860(16) MHz, measured (arXiv:physics/0608192) | an input, not a prediction |
+| H 2S hyperfine splitting | 177.55683887 MHz | 177 556 838.87(85) Hz, measured (Phys. Rev. Lett. 130, 203001) | an input, not a prediction; the combination 8f(2S) − f(1S) = 48 959.2 Hz agrees with bound-state QED, 48 954.1(2.3) Hz, within 1σ of the combined uncertainty |
 | Na 3S₁/₂ hyperfine splitting | 1771.6261 MHz | Steck table | an input (A), reproduced as 2A |
 | Na D2 hyperfine line strengths | 1/20, 1/4, 7/10 (F=2) and 1/6, 5/12, 5/12 (F=1) | standard angular-momentum (Racah) values | not an input: the model produces them from the dipole matrices |
 | 2P₃/₂ − 2P₁/₂ (Dirac vs measured) | 10949 MHz | 10969.13(10) MHz (Baird et al. 1972) | 0.2 % apart (QED) |
@@ -277,7 +277,8 @@ Full list with values, status and the bibliography: the "Sources" section of `do
 | Sodium group-spacing cross-check | arXiv:2104.14896 (published theory) |
 | H Lamb shift 1057.845(9) MHz | Lundeen and Pipkin, as quoted in arXiv:0809.2985 |
 | H 2P₃/₂ − 2P₁/₂ = 10969.13(10) MHz | Baird, Brandenberger, Gondaira, Metcalf, Phys. Rev. A 5, 564 (1972) |
-| H 2S hyperfine 177.556860(16) MHz; 1S Fermi value | arXiv:physics/0608192, arXiv:physics/0305073 |
+| H 2S hyperfine 177 556 838.87(85) Hz | Phys. Rev. Lett. 130, 203001 (abstract) |
+| H 1S Fermi value 1420.405751768 MHz | arXiv:physics/0608192 |
 | H crossings near 570 G; H 2P₁/₂ hyperfine theory value 59.2212 MHz | M. P. Westig et al., "Hydrogen spectroscopy with a Lamb-shift polarimeter", Eur. Phys. J. D (2010), arXiv:1104.4421 |
 | H decay-rate checks | Wiese and Fuhr, J. Phys. Chem. Ref. Data 38, 565 (2009), Table 6 |
 | H 2S two-photon decay 8.2206 s⁻¹ (theory) | Labzowsky et al. 2005, quoted in arXiv:1711.05533 |

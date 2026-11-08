@@ -73,3 +73,12 @@ def test_leading_order_hydrogen_formula_against_known_levels():
     assert f(2, 1, 1.5) == pytest.approx(H_HFS_2P32_MHZ)                  # the constant used in h_n2_hyperfine
     assert f(3, 1, 0.5) == pytest.approx(f(3, 0, 0.5) / 3)
     assert f(3, 0, 0.5) == pytest.approx(H_FERMI_1S_MHZ / 27)
+
+
+def test_d21_combination_agrees_with_bound_state_qed():
+    """D21 = 8 f(2S) - f(1S) removes the nuclear-structure part; measured 48 959.2(6.8) Hz vs theory 48 954.1(2.3) Hz."""
+    from src.hyperfine import D21_THEORY_HZ, D21_THEORY_SIGMA_HZ, H_FERMI_1S_MHZ, H_HFS_2S_MHZ, H_HFS_2S_SIGMA_MHZ
+    d21 = (8 * H_HFS_2S_MHZ - H_FERMI_1S_MHZ) * 1e6
+    assert d21 == pytest.approx(48959.2, abs=0.2)
+    sigma = np.hypot(6.8, D21_THEORY_SIGMA_HZ)
+    assert abs(d21 - D21_THEORY_HZ) < sigma                       # about 0.7 sigma

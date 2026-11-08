@@ -28,11 +28,13 @@ NA_I = 1.5
 NA_A_MHZ = {"3S1/2": 885.8130644, "3P1/2": 94.44, "3P3/2": 18.534}
 NA_G_I = -0.0008046108
 # Hydrogen, I = 1/2.
-# 1S Fermi splitting 1420.405751768 MHz and 2S splitting 177.556860(16) MHz: arXiv:physics/0608192;
-# (arXiv:physics/0608192 and arXiv:physics/0305073, measured). 2P1/2: theory value quoted in arXiv:1104.4421; 2P3/2: leading-order theory (Fermi/60), not checked against a source.
+# 1S Fermi splitting 1420.405751768 MHz: arXiv:physics/0608192. 2S splitting 177 556 838.87(85) Hz: Phys. Rev. Lett. 130, 203001
+# (Ramsey spectroscopy, abstract read; it supersedes the earlier 177.556860(16) MHz of arXiv:physics/0305073 by 21 Hz, 1.3 sigma of the old value). 2P1/2: theory value quoted in arXiv:1104.4421; 2P3/2: leading-order theory (Fermi/60), not checked against a source.
 H_I = 0.5
 H_FERMI_1S_MHZ = 1420.405751768
-H_HFS_2S_MHZ = 177.556860                    # measured
+H_HFS_2S_MHZ = 177.55683887                 # measured, +-0.00000085 MHz
+H_HFS_2S_SIGMA_MHZ = 0.85e-6
+D21_THEORY_HZ, D21_THEORY_SIGMA_HZ = 48954.1, 2.3   # 8 f(2S) - f(1S), bound-state QED, quoted in the same abstract
 H_HFS_2P12_MHZ = 59.2212                     # theory value quoted in arXiv:1104.4421 (measured there: 60(2) MHz); leading order alone gives Fermi/24 = 59.18
 H_HFS_2P32_MHZ = H_FERMI_1S_MHZ / 60         # leading-order theory, about 23.67 MHz
 H_G_I = -sc.physical_constants["proton g factor"][0] * sc.physical_constants["nuclear magneton"][0] \
