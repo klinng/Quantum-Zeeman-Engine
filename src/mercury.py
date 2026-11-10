@@ -91,7 +91,7 @@ def predicted_peak_spacing_mmhg(b_gauss: float, temperature_k: float, wavelength
     return dn / dn_dp(temperature_k)
 
 
-def pressure_scan(p_mmhg, b_tesla: float, e_mm: float, temperature_k: float = 293.0, reflectivity: float = 0.9,
+def pressure_scan(p_mmhg, b_tesla: float, e_mm: float, temperature_k: float = 300.0, reflectivity: float = 0.9,
                   observed_only: bool = False, polarisation: str = "sigma", wavelength_nm: float = LAMBDA0_NM):
     """Photomultiplier signal at the centre of the rings against the air pressure in the Fabry-Perot.
 
@@ -115,7 +115,7 @@ def pressure_scan(p_mmhg, b_tesla: float, e_mm: float, temperature_k: float = 29
     return out
 
 
-def fig_mercury_scan(e_mm: float = 10.0, temperature_k: float = 293.0, b_gauss: float = 2340.0):
+def fig_mercury_scan(e_mm: float = 10.0, temperature_k: float = 300.0, b_gauss: float = 2340.0):
     """Simulated recording without and with the field (the handout's B), and the component diagram. e_mm is an ILLUSTRATIVE spacing."""
     import matplotlib.pyplot as plt
     p = np.linspace(100, 760, 20000)
