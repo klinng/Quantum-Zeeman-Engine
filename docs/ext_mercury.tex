@@ -1,0 +1,20 @@
+\section{Mercury 546.1~nm: the teaching-lab Zeeman experiment}
+\texttt{src/mercury.py} reproduces the laboratory experiment of the course handout \cite{labtp} (mercury lamp, electromagnet, Fabry-P\'erot in a chamber whose air pressure is scanned, photomultiplier recording). The line is $7s\,^3S_1\to6p\,^3P_2$ at $546.1$~nm.
+
+\paragraph{Pattern.} The Land\'e factor $g=1+[J(J+1)+S(S+1)-L(L+1)]/[2J(J+1)]$ gives $g(^3S_1)=2$ and $g(^3P_2)=3/2$ (the two-electron engine of Section~\ref{sec:two-electron} returns $1.5012$ for $^3P_2$, the $0.0012$ being the electron's anomalous $g_s$). The nine components lie at $\delta=g_uM_u-g_lM_l=-2,-\tfrac32,\dots,+2$ with wavenumbers $\sigma=\sigma_0+\delta\,(\mu_BB/hc)$ and strengths given by the squared Clebsch--Gordan coefficients of $J=1\to J'=2$: $\sigma$ components $1,\tfrac12,\tfrac16$ at $|\delta|=1,\tfrac32,2$ and $\pi$ components $\tfrac12,\tfrac23,\tfrac12$ at $\delta=\pm\tfrac12,0$. The two components analysed in the handout, $M_J=1\to2$ and $-1\to-2$, are the two strongest $\sigma$ lines; they are $2\mu_BB/hc$ apart.
+
+\paragraph{The pressure scan.} The index between the mirrors is $n-1=(n_0-1)\,\tfrac{273}{T}\tfrac{P}{760}$ ($n_0=1.0003$, $P$ in mmHg), so the order at the centre $p=2ne\sigma$ changes with pressure. Two peaks of the two components differ in pressure by $\Delta P$, hence $\Delta\sigma=\sigma_0\Delta n/n_m$ with $\Delta n=(dn/dP)\Delta P$, and
+\begin{equation}
+\frac{\mu_B}{hc}=\frac{\Delta\sigma}{2B}.
+\end{equation}
+For the handout's $B=2340$~G and $T=293$~K the prediction is $\Delta P=32.45$~mmHg between the two peaks (the pressure period of one order, $\approx74$~mmHg for $e=10$~mm, is larger, so the two lines form doublets, as in the recordings of the poster). \texttt{bohr\_from\_peak\_spacing} turns a measured $\Delta P$ into $\mu_B/hc$ in \si{\per\centi\metre}/G, and \texttt{bohr\_uncertainty} propagates the reading error of $\Delta P$ and of $B$.
+
+\paragraph{What is checked.} (i) The Zeeman unit equals the CODATA $\mu_B/hc=0.46686$~\si{\per\centi\metre\per\tesla} and reproduces the handout's remark of about $0.0089$~nm per tesla for the 435.8~nm line. (ii) A simulated recording (all six $\sigma$ components, mirror reflectivity $R=0.9$) analysed with the handout's formula returns $\mu_B/hc$ within $2\times10^{-3}$ of the CODATA value, so the two-component simplification of the handout is justified at that finesse. This is a self-consistency check of the analysis, not a measurement.
+
+\paragraph{What is not known.} The mirror spacing $e$, the temperature and the recorded pressures are not in the handout, and no recording from this experiment is available to this report, so no experimental $\mu_B$ is derived here. The figure uses $e=10$~mm as an illustration only (the photographed poster shows roughly nine fringes between 700 and 100~mmHg, which is of that order; it was not digitised because the photograph is tilted and unscaled).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{mercury_scan.pdf}
+\caption{Simulated recording without and with $B=2340$~G (left, centre; $e=10$~mm assumed, $T=293$~K) and the nine components (right; blue $\sigma^-$, red $\sigma^+$, green $\pi$).}
+\end{figure}

@@ -73,9 +73,10 @@ from src.cavity import fig_jaynes_cummings  # noqa: E402
 from src.uncertainty_bands import fig_error_bands  # noqa: E402
 from src.calcium_lines import fig_calcium_lines  # noqa: E402
 from src.helium_data import fig_helium_2p_fan  # noqa: E402
+from src.mercury import fig_mercury_scan  # noqa: E402
 
 for name, fn in (("hydrogen_stark_fan", fig_stark_fan), ("hydrogen_anticrossing", fig_anticrossing),
-                 ("literature_sodium_groups", fig_literature_comparison), ("hyperfine", fig_hyperfine), ("uncertainty", fig_uncertainty), ("uncertainty_budget", fig_budget), ("hyperfine_lines", fig_na_d2_hyperfine), ("voigt", fig_voigt), ("corrections", fig_corrections), ("jaynes_cummings", fig_jaynes_cummings), ("error_bands", fig_error_bands), ("calcium_lines", fig_calcium_lines), ("helium_2p_fan", fig_helium_2p_fan)):
+                 ("literature_sodium_groups", fig_literature_comparison), ("hyperfine", fig_hyperfine), ("uncertainty", fig_uncertainty), ("uncertainty_budget", fig_budget), ("hyperfine_lines", fig_na_d2_hyperfine), ("voigt", fig_voigt), ("corrections", fig_corrections), ("jaynes_cummings", fig_jaynes_cummings), ("error_bands", fig_error_bands), ("calcium_lines", fig_calcium_lines), ("helium_2p_fan", fig_helium_2p_fan), ("mercury_scan", fig_mercury_scan)):
     f = fn()
     f.savefig(FIG / f"{name}.pdf")
     f.savefig(FIG / f"{name}.png", dpi=150)

@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-243%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-256%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -43,7 +43,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 243 tests (2 of them need PyTorch and skip without it)
+python -m pytest -q                  # 256 tests (2 of them need PyTorch and skip without it)
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -207,6 +207,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension K | Calcium Zeeman line spectrum 4s² ¹S₀ → 4s4p: 657 nm intercombination line, field-induced ³P₀ line | ³P₁ strength = 3ε² (ε² = 7.8e-5); ³P₀ strength ∝ B² | `calcium_lines.py` | `ext_calcium_lines.tex` |
 | Extension L | Helium 1s2s and 1s2p: exchange from Slater integrals (G¹, G⁰), spin-orbit, spin-spin tensor, Zeeman | exchange splits singlet from triplet by 2G; spin-spin gives 1 : −5 : 10 over ³P₂,₁,₀ and breaks the Landé rule; calibrated to the six NIST n = 2 levels and the Kato et al. interval (6 parameters, 6 levels: a calibration) | `helium.py`, `helium_data.py` | `ext_helium.tex` |
 | Extension M | Differentiable Voigt profile and Zeeman spectrum (Weideman Faddeeva function; gradients in B, T, P with PyTorch) | NumPy side equals scipy to 4e-14; the PyTorch tests skip when torch is absent | `torch_voigt.py` | `ext_differentiable.tex` |
+| Extension N | Mercury 546.1 nm teaching-lab experiment: nine Zeeman components, pressure-scanned Fabry-Perot, the handout's analysis of μB/hc | simulated recording analysed with the handout's formula returns μB/hc within 2e-3; no real recording yet | `mercury.py` | `ext_mercury.tex` |
 
 The report also contains a **Symbols and conventions** table (start) and a **Sources** section with the bibliography (end).
 Every part has a test file; notebooks 1 to 7 show the same ideas with explanations and saved output.
@@ -311,7 +312,7 @@ constant (leading-order theory, Fermi/60).
 
 **Provenance and testing**
 - `src/optics/` (colour, prism, polarisation, spectrometer, figures) was written earlier in this project by the repository owner. It computes every spectrum from this repository's own Hamiltonians and dipole matrices and imports only numpy, scipy, pandas and matplotlib. The later extensions added `instruments.py`, the H-alpha figures and the Grotrian diagram; the older modules deserve a review before being relied on.
-- The PyTorch half of `torch_voigt.py` was run by the repository owner (PyTorch 2.15, Windows, Python 3.11): all 243 tests pass. It was not run in the development sandbox, and `torch_engine.py` has no dedicated test.
+- The PyTorch half of `torch_voigt.py` was run by the repository owner (PyTorch 2.15, Windows, Python 3.11): all 237 tests of that date passed. It was not run in the development sandbox, and `torch_engine.py` has no dedicated test.
 
 ## Use it from Python
 
@@ -347,13 +348,13 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 hyperfine, hyperfine_lines, hyperfine_figures              (nuclear spin)
                 line_profiles, diamagnetic, isotope, corrections_figures   (line shapes, small corrections)
                 calcium_lines                                              (calcium line spectrum)
-                helium, helium_data, torch_voigt                                        (helium, differentiable spectrum)
+                helium, helium_data, mercury, torch_voigt                                        (helium, differentiable spectrum)
                 cavity                                                     (photon operators, Jaynes-Cummings)
                 uncertainty, uncertainty_bands, uncertainty_figures, budget (uncertainty)
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          243 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          256 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values
