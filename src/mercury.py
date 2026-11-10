@@ -158,3 +158,24 @@ def analyse_recording(dp_order_mmhg: float, dp_pair_mmhg: float, b_gauss: float,
     ref = CM1_PER_TESLA * 1e-4
     return {"e_mm": e_mm, "mu_b_hc_cm1_per_gauss": mu, "uncertainty": u, "codata": ref, "relative_deviation": mu / ref - 1,
             "pair_over_order": dp_pair_mmhg / dp_order_mmhg}
+
+
+def analyse_pairs(pairs_mmhg, b_gauss: float, temperature_k: float, sigma_b_gauss: float = 0.0) -> dict:
+    """Analyse several measured doublets, each given as (p1, p2) = pressures of the two neighbouring peaks in mmHg read on the recording.
+
+    For each pair: dP = |p2 - p1|, Pm = (p1 + p2)/2, mu_B/hc from the handout's formula. Returns the table and the mean, the standard
+    deviation of the values, the standard error of the mean (scatter of your readings), and the deviation from CODATA."""
+    rows = []
+    for p1, p2 in pairs_mmhg:
+        dp, pm = abs(p2 - p1), (p1 + p2) / 2
+        rows.append((p1, p2, dp, pm, bohr_from_peak_spacing(dp, b_gauss, temperature_k, p_mean_mmhg=pm)))
+    df = pd.DataFrame(rows, columns=["p1_mmhg", "p2_mmhg", "dp_mmhg", "pm_mmhg", "mu_b_hc_cm1_per_gauss"])
+    v = df.mu_b_hc_cm1_per_gauss.to_numpy()
+    mean = float(v.mean())
+    std = float(v.std(ddof=1)) if len(v) > 1 else float("nan")
+    sem = std / np.sqrt(len(v)) if len(v) > 1 else float("nan")
+    b_rel = sigma_b_gauss / b_gauss
+    total = float(np.hypot(sem, mean * b_rel)) if len(v) > 1 else float("nan")
+    ref = CM1_PER_TESLA * 1e-4
+    return {"table": df, "mean": mean, "std": std, "sem": sem, "uncertainty": total, "codata": ref,
+            "relative_deviation": mean / ref - 1, "n_sigma": (mean - ref) / total if total == total and total > 0 else float("nan")}

@@ -96,3 +96,13 @@ def test_analyse_recording_recovers_spacing_and_mu_b():
     assert abs(r["relative_deviation"]) < 3e-3
     assert r["pair_over_order"] == pytest.approx(32.45 / 74.24, rel=2e-3)
     assert r["uncertainty"] > 0
+
+
+def test_analyse_pairs_on_the_simulated_example_file(tmp_path):
+    import pandas as pd
+    from src.mercury import analyse_pairs
+    df = pd.read_csv("data/mercury_tp_example_SIMULATED.csv", comment="#")
+    r = analyse_pairs(list(zip(df.p1_mmhg, df.p2_mmhg)), 2340, 300.0, 20)
+    assert len(r["table"]) == 8
+    assert abs(r["relative_deviation"]) < 0.01
+    assert r["sem"] < r["std"] and r["uncertainty"] >= r["sem"]
