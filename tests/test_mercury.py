@@ -82,3 +82,17 @@ def test_uncertainty_scales_with_reading_error():
     u1 = bohr_uncertainty(32.0, 1.0, 2340, 20, 293.0)
     u2 = bohr_uncertainty(32.0, 2.0, 2340, 20, 293.0)
     assert u2 > u1 and u1 / bohr_from_peak_spacing(32.0, 2340, 293.0) == pytest.approx(np.hypot(1 / 32, 20 / 2340))
+
+
+def test_analyse_recording_recovers_spacing_and_mu_b():
+    from src.mercury import analyse_recording
+    p = np.linspace(100, 760, 400000)
+    y = pressure_scan(p, 0.234, 10.0, 293.0)
+    pk = np.where((y[1:-1] > y[:-2]) & (y[1:-1] >= y[2:]) & (y[1:-1] > 0.8))[0] + 1
+    order = p[pk[2]] - p[pk[0]]                       # same component, successive orders
+    pair = p[pk[3]] - p[pk[2]]
+    r = analyse_recording(order, pair, 2340, 293.0, sigma_dp_mmhg=1.0, sigma_b_gauss=20)
+    assert r["e_mm"] == pytest.approx(10.0, rel=2e-3)
+    assert abs(r["relative_deviation"]) < 3e-3
+    assert r["pair_over_order"] == pytest.approx(32.45 / 74.24, rel=2e-3)
+    assert r["uncertainty"] > 0

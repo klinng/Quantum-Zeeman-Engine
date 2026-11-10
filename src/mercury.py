@@ -140,3 +140,19 @@ def fig_mercury_scan(e_mm: float = 10.0, temperature_k: float = 293.0, b_gauss: 
     fig.suptitle(f"Virtual lab (spacing e = {e_mm:g} mm is an illustrative assumption)", fontsize=10)
     fig.tight_layout()
     return fig
+
+
+def analyse_recording(dp_order_mmhg: float, dp_pair_mmhg: float, b_gauss: float, temperature_k: float,
+                      sigma_dp_mmhg: float = 0.0, sigma_b_gauss: float = 0.0, wavelength_nm: float = LAMBDA0_NM) -> dict:
+    """The lab analysis in one call.
+
+    dp_order_mmhg: pressure between two successive peaks of the same component (one order, 'peak to peak');
+    dp_pair_mmhg: pressure between the two neighbouring peaks of the two observed components (the doublet spacing).
+    Returns the mirror spacing e (from the order: dn = lambda / (2 e)), mu_B/hc in cm^-1/G, its uncertainty, the CODATA value and
+    the relative deviation. e is only a by-product: the handout's method does not need it."""
+    e_mm = wavelength_nm * 1e-6 / (2 * dn_dp(temperature_k) * dp_order_mmhg)         # nm -> mm
+    mu = bohr_from_peak_spacing(dp_pair_mmhg, b_gauss, temperature_k, wavelength_nm=wavelength_nm)
+    u = bohr_uncertainty(dp_pair_mmhg, sigma_dp_mmhg, b_gauss, sigma_b_gauss, temperature_k, wavelength_nm=wavelength_nm)
+    ref = CM1_PER_TESLA * 1e-4
+    return {"e_mm": e_mm, "mu_b_hc_cm1_per_gauss": mu, "uncertainty": u, "codata": ref, "relative_deviation": mu / ref - 1,
+            "pair_over_order": dp_pair_mmhg / dp_order_mmhg}
