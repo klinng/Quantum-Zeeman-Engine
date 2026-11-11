@@ -40,6 +40,7 @@ RY_INF_CM1 = sc.physical_constants["Rydberg constant"][0] / 100.0          # inf
 RY_H_CM1 = RY_INF_CM1 / (1 + sc.m_e / sc.m_p)                              # hydrogen (reduced mass)
 LAMB_2S_MHZ = 1057.845                                                     # measured, E(2S1/2) - E(2P1/2)
 MHZ_TO_CM1 = 1e6 / (sc.c * 100.0)
+A_MU_OVER_A0 = 1 + sc.m_e / sc.m_p        # reduced-mass Bohr radius a_mu / a_0 = m_e / mu (hydrogen, 1.000544617)
 RATE_AU_PER_S = 1.0 / sc.physical_constants["atomic unit of time"][0]
 LINE_NAMES = {3: "Halpha", 4: "Hbeta", 5: "Hgamma"}
 
@@ -47,7 +48,9 @@ LINE_NAMES = {3: "Halpha", 4: "Hbeta", 5: "Hgamma"}
 # ------------------------------------------------------------------ radial part
 
 def radial_function(n: int, l: int, r):
-    """Hydrogen radial function R_nl(r) in atomic units (r in Bohr radii), normalised to int R^2 r^2 dr = 1."""
+    """Hydrogen radial function R_nl(r) with r in units of the CHARACTERISTIC length of the atom, normalised to
+    int R^2 r^2 dr = 1. For infinite nuclear mass that length is a_0; for hydrogen it is the reduced-mass Bohr
+    radius a_mu = a_0 m_e / mu (A_MU_OVER_A0 * a_0). The function of r/a is the same in both cases."""
     rho = 2.0 * np.asarray(r, dtype=float) / n
     norm = np.sqrt((2.0 / n) ** 3 * factorial(n - l - 1) / (2.0 * n * factorial(n + l)))
     return norm * np.exp(-rho / 2) * rho ** l * eval_genlaguerre(n - l - 1, 2 * l + 1, rho)
@@ -55,18 +58,21 @@ def radial_function(n: int, l: int, r):
 
 @lru_cache(maxsize=None)
 def radial_integral(n_up: int, l_up: int, n_low: int, l_low: int) -> float:
-    """R = int R_{n'l'}(r) r R_{nl}(r) r^2 dr in Bohr radii (the radial factor of the dipole matrix element)."""
+    """R = int R_{n'l'}(r) r R_{nl}(r) r^2 dr in units of a_mu (the radial factor of the dipole matrix element).
+    The physical length is R * A_MU_OVER_A0 * a_0; callers that need Bohr radii a_0 multiply by A_MU_OVER_A0."""
     f = lambda r: float(radial_function(n_up, l_up, r) * radial_function(n_low, l_low, r) * r ** 3)
     return float(quad(f, 0.0, 70.0 * max(n_up, n_low) ** 2, limit=400)[0])
 
 
 def einstein_a(n_up: int, l_up: int, n_low: int, l_low: int) -> float:
     """Spontaneous decay rate (1/s) of the level n_up,l_up to n_low,l_low (Bethe-Salpeter formula):
-    A = (4/3) alpha^3 w^3 * l_max / (2 l_up + 1) * R^2, with w the Bohr transition energy in hartree."""
+    A = (4/3) alpha^3 w^3 * l_max / (2 l_up + 1) * d^2, with w the Bohr transition energy in hartree (reduced-mass
+    Rydberg, so w = mu/m_e * w_inf) and d = R * a_mu/a_0 the dipole radial integral in Bohr radii. Hence
+    A is proportional to (mu/m_e)^3 * (m_e/mu)^2 = mu/m_e: 0.054 % below the infinite-mass value."""
     if abs(l_up - l_low) != 1:
         return 0.0
     w = RY_H_CM1 * (1 / n_low ** 2 - 1 / n_up ** 2) / (2 * RY_INF_CM1)
-    r = radial_integral(n_up, l_up, n_low, l_low)
+    r = radial_integral(n_up, l_up, n_low, l_low) * A_MU_OVER_A0
     return float(4 / 3 * ALPHA ** 3 * w ** 3 * max(l_up, l_low) / (2 * l_up + 1) * r ** 2 * RATE_AU_PER_S)
 
 
@@ -107,7 +113,8 @@ def manifold_hamiltonian(n: int, b_tesla: float, lamb: bool = True) -> np.ndarra
 # ------------------------------------------------------------------ transitions
 
 def full_dipole(n_up: int, n_low: int) -> dict[int, np.ndarray]:
-    """Dipole matrices D_q (dim_up x dim_low) between the two manifolds, radial factors included."""
+    """Dipole matrices D_q (dim_up x dim_low) between the two manifolds, radial factors included, in Bohr radii a_0
+    (the radial integral in a_mu units is converted with A_MU_OVER_A0)."""
     dim = lambda n: [2 * (2 * l + 1) for l in range(n)]
     du, dl = dim(n_up), dim(n_low)
     ou, ol = np.concatenate([[0], np.cumsum(du)]), np.concatenate([[0], np.cumsum(dl)])
@@ -116,7 +123,7 @@ def full_dipole(n_up: int, n_low: int) -> dict[int, np.ndarray]:
         for ll in range(n_low):
             if abs(lu - ll) != 1:
                 continue
-            r = radial_integral(n_up, lu, n_low, ll)
+            r = radial_integral(n_up, lu, n_low, ll) * A_MU_OVER_A0
             ang = dipole_matrices(lu, ll)
             for q in (-1, 0, 1):
                 out[q][ou[lu]:ou[lu + 1], ol[ll]:ol[ll + 1]] = r * ang[q]
@@ -128,8 +135,20 @@ def balmer_components(b_tesla: float, n_up: int = 3, n_low: int = 2, lamb: bool 
     """Zeeman components of the n_up -> n_low line (default H-alpha) at field B.
 
     Columns (same as optics.spectrometer.sodium_d_components): line, q, polarisation, wavelength_nm (air),
-    shift_pm (from the unperturbed Bohr line, fine structure and Zeeman included), rate (relative emission
-    rate = squared dipole matrix element in Bohr radii squared). B must be above zero.
+    shift_pm (from the unperturbed Bohr line, fine structure and Zeeman included), then three intensity
+    quantities that must not be confused:
+
+      line_strength  squared dipole matrix element |<up|r_q|low>|^2 in Bohr radii squared. Depends only on the
+                     wave functions, not on the photon frequency.
+      einstein_a     physical spontaneous-emission rate of that single component in 1/s,
+                     A = (4/3) alpha^3 w^3 |<up|r_q|low>|^2 (atomic units, w = the component's own transition
+                     energy in hartree). Summed over all lower states and polarisations it gives the total
+                     decay rate of the upper state (checked against einstein_a() in the tests).
+      rate           relative photon-emission weight used by the optics code = einstein_a / (A scale), i.e.
+                     line_strength * (w / w0)^3 with w0 the Bohr line. Across one Balmer multiplet it differs
+                     from line_strength by only ~1e-4 (the components lie within a few cm^-1 of 15233 cm^-1).
+
+    B must be above zero.
     """
     if b_tesla <= 0:
         raise ValueError("b_tesla must be positive")
@@ -140,14 +159,19 @@ def balmer_components(b_tesla: float, n_up: int = 3, n_low: int = 2, lamb: bool 
     sigma0 = RY_H_CM1 * (1 / n_low ** 2 - 1 / n_up ** 2)
     lam0 = float(vacuum_cm1_to_air_nm(sigma0))
     name = LINE_NAMES.get(n_up, f"{n_up}-{n_low}") if n_low == 2 else f"{n_up}-{n_low}"
+    w0 = sigma0 / (2 * RY_INF_CM1)                                   # Bohr line in hartree (same convention as einstein_a)
     rows = []
     for q, a in amps.items():
-        rate = np.abs(a) ** 2
-        for i, k in zip(*np.where(rate > threshold * top)):
+        strength = np.abs(a) ** 2
+        for i, k in zip(*np.where(strength > threshold * top)):
             sigma = ev_to_wavenumber(eu[i] - el[k])
             lam = float(vacuum_cm1_to_air_nm(sigma))
-            rows.append((name, q, POLARISATION[q], lam, (lam - lam0) * 1e3, float(rate[i, k])))
-    df = pd.DataFrame(rows, columns=["line", "q", "polarisation", "wavelength_nm", "shift_pm", "rate"])
+            w = sigma / (2 * RY_INF_CM1)
+            s_ik = float(strength[i, k])
+            a_ik = 4 / 3 * ALPHA ** 3 * w ** 3 * s_ik * RATE_AU_PER_S
+            rows.append((name, q, POLARISATION[q], lam, (lam - lam0) * 1e3, s_ik, a_ik, s_ik * (w / w0) ** 3))
+    df = pd.DataFrame(rows, columns=["line", "q", "polarisation", "wavelength_nm", "shift_pm",
+                                     "line_strength", "einstein_a", "rate"])
     return df.sort_values("wavelength_nm").reset_index(drop=True)
 
 

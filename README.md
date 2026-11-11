@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-265%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-270%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -46,7 +46,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 265 tests (2 of them need PyTorch and skip without it)
+python -m pytest -q                  # 270 tests (2 of them need PyTorch and skip without it)
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -260,7 +260,8 @@ For hydrogen, each shell is block-diagonal in $l$, Dirac energies fix the fine s
 | Na D2 hyperfine line strengths | 1/20, 1/4, 7/10 (F=2) and 1/6, 5/12, 5/12 (F=1) | standard angular-momentum (Racah) values | not an input: the model produces them from the dipole matrices |
 | 2P₃/₂ − 2P₁/₂ (Dirac vs measured) | 10949 MHz | 10969.13(10) MHz (Baird et al. 1972) | 0.2 % apart (QED) |
 | ⟨2p\|r\|1s⟩ | 1.290266 a₀ | 128√6/243 a₀ | exact |
-| A(2p to 1s), A(3p to 2s), A(3d to 2p) | 6.265e8, 2.242e7, 6.458e7 s⁻¹ | 6.265e8, 2.245e7, 6.465e7 s⁻¹ | about 0.1 %; reference values from Wiese and Fuhr 2009, Table 6 |
+| A(2p to 1s), A(3p to 2s), A(3d to 2p), A(3s to 2p) | 6.2649e8, 2.2448e7, 6.4651e7, 6.3136e6 s⁻¹ (reduced-mass radial scale, A ∝ μ) | 6.2649e8, 2.2448e7, 6.4651e7, 6.3143e6 s⁻¹ (Wiese and Fuhr 2009, Table 6, finite-mass convention) | within 1.1e-4; the residual is the relativistic part of the tabulated values |
+| A(2p to 1s) closed form | 6.26490e8 s⁻¹ | (2/3)⁸ α⁵ mₑc²/ħ × μ/mₑ = 6.26831e8 × 0.999456 | exact algebra, no quadrature |
 | H/D shift of H-alpha (D minus H) | −178.6 pm (reduced mass only) | −1.786 Å from rest wavelengths 6562.796 and 6561.010 Å (air), i.e. −81.6 km/s (Hébrard et al., arXiv:astro-ph/0002141) | agrees to 0.1 pm |
 | H-alpha sigma shift at 20 T | 402.27 pm | 20.11 pm/T × B = 402.20 pm | normal Zeeman limit |
 | 2S Stark shift at 10 V/cm (E along B) | 0.3650 MHz | 0.3652 MHz | second-order perturbation theory |
@@ -357,7 +358,7 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          265 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          270 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values, mercury TP template and simulated example

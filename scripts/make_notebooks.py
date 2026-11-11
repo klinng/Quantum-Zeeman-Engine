@@ -593,7 +593,7 @@ Fine structure comes from Dirac theory, the Lamb shift lifts the s levels, and t
 from src.optics.spectrometer import observe
 from src.optics.polarization import linear_polariser
 print('<2p|r|1s> = %.6f a0   exact 128*sqrt(6)/243 = %.6f' % (radial_integral(2,1,1,0), 128*6**.5/243))
-for (nu,lu,nl,ll), ref in {(2,1,1,0):6.265e8,(3,0,2,1):6.317e6,(3,1,2,0):2.245e7,(3,2,2,1):6.465e7}.items():
+for (nu,lu,nl,ll), ref in {(2,1,1,0):6.2649e8,(3,0,2,1):6.3143e6,(3,1,2,0):2.2448e7,(3,2,2,1):6.4651e7}.items():
     print('A(%d%s -> %d%s) = %.4g /s   (reference ~%.4g)' % (nu,'spdf'[lu],nl,'spdf'[ll],einstein_a(nu,lu,nl,ll),ref))"""),
 ("markdown", r"""## Check 1: the radial integral and decay rates
 

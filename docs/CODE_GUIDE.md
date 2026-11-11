@@ -269,6 +269,7 @@ Hydrogen n = 3 to n = 2 gives a real spectrum (the red Balmer line, 656 nm). The
 - `manifold_hamiltonian(n, b_tesla)`: all states of shell n, block by block, with the Zeeman term.
 - `full_dipole(n_up, n_low)`: angular part (Wigner-Eckart, from `transitions.py`) times radial integral, for q = -1, 0, +1.
 - `balmer_components(b_tesla, n_up=3, n_low=2)`: the line list, same columns as the sodium one, so every filter in `optics/` works on it.
+  Intensity columns, which are three different things: `line_strength` is the squared dipole matrix element in Bohr radii squared (wave functions only, no frequency); `einstein_a` is the physical spontaneous-emission rate of that one component in 1/s, A = (4/3) alpha^3 w^3 |d|^2, with w the component's own transition energy; `rate` is the relative photon-emission weight used by the optics filters, line_strength times (w/w0)^3 (differs from line_strength by ~1e-4 across a multiplet). The sum of `einstein_a` over all components divided by the 18 upper states equals the degeneracy-weighted mean of `einstein_a()` over 3s, 3p, 3d.
 - `doppler_fwhm_pm(...)`: thermal line width, about 8.1 pm at 300 K.
 
 **`optics/hydrogen_figures.py`**: `fig_halpha_regimes` (three field strengths times three filters, with Doppler blur) and `fig_halpha_fan` (components against field) and `animate_halpha_field_ramp` (GIF: B rises, three filter views update together).
@@ -320,7 +321,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |
 | `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |
 | `test_fabry_perot.py` | Finesse formula; Airy peak and gap; one ring at zero field; six resolved peaks at 0.3 T; polarisers leave 4 sigma or 2 pi peaks; heights near 4 : 3 : 1. |
-| `test_hydrogen_spectrum.py` | Radial functions normalised; exact Lyman-alpha integral; decay rates vs literature; fine structure = alpha^2 Ry/16; Lamb shift; level counts; equal total emission per polarisation; strong-field sigma shift = 20.11 pm/T; polariser keeps only pi; Doppler width. |
+| `test_hydrogen_spectrum.py` (incl. line strength vs omega^3 rate, component sums vs `einstein_a`) | Radial functions normalised; exact Lyman-alpha integral; decay rates vs literature; fine structure = alpha^2 Ry/16; Lamb shift; level counts; equal total emission per polarisation; strong-field sigma shift = 20.11 pm/T; polariser keeps only pi; Doppler width. |
 
 Run them all with `python -m pytest -q`.
 

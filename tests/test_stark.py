@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from src.hydrogen import h_n2, ev_to_mhz
+from src.hydrogen_spectrum import A_MU_OVER_A0
 from src.stark import (A_2P_1S, MHZ_PER_A0_VCM, anticrossing_gap_mhz, dipole_operators, h_n2_stark, lifetime_s,
                        perturbative_s_shift_mhz, quenching_rate)
 
@@ -10,8 +11,10 @@ from src.stark import (A_2P_1S, MHZ_PER_A0_VCM, anticrossing_gap_mhz, dipole_ope
 def test_dipole_operators_are_hermitian_with_textbook_size():
     x, z = dipole_operators()
     assert np.allclose(x, x.conj().T) and np.allclose(z, z.conj().T)
-    assert z[0, 4] == pytest.approx(-3.0)                  # <2s|z|2p, m=0> = -3 a0
-    assert abs(x[0, 2]) == pytest.approx(3 / np.sqrt(2))   # <2s|x|2p, m=+-1> = 3/sqrt(2) a0
+    # textbook values are in units of the atom's own Bohr radius; hydrogen's is a_mu = 1.000545 a_0 (reduced mass),
+    # so in a_0 the matrix elements are 3 a_mu and 3/sqrt(2) a_mu
+    assert z[0, 4] == pytest.approx(-3.0 * A_MU_OVER_A0, rel=1e-12)
+    assert abs(x[0, 2]) == pytest.approx(3 / np.sqrt(2) * A_MU_OVER_A0, rel=1e-12)
 
 
 def test_zero_electric_field_reproduces_the_magnetic_only_model():
