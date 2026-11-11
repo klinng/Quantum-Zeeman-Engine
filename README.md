@@ -10,7 +10,7 @@ a LaTeX derivation, a Python model, a plot or animation, and a comparison with m
 If the computed number reproduces the experiment, the model underneath is correct.
 
 The case study is the **Zeeman effect** (how a magnetic field splits atomic energy levels). It grew from four levels of theory
-into a small lab covering sodium, hydrogen and calcium: real spectra, hyperfine structure, line shapes, a virtual
+into a small lab covering sodium, hydrogen, calcium, helium and mercury: real spectra, hyperfine structure, line shapes, a virtual
 spectrometer with a prism and polarisation filters, an electric-field extension, a global uncertainty budget, and seven notebooks.
 
 <p align="center">
@@ -26,6 +26,9 @@ What the model reproduces (every line is tested; see [Results](#results-all-repr
 - **Hyperfine:** the sodium ground splitting (1771.626 MHz) and the standard D2 strength fractions (1/20, 1/4, 7/10 and 1/6, 5/12, 5/12) come out of the model.
 - **Hydrogen:** the 2S-2P crossing is at 573.4 G, which proton hyperfine splits into four (mean 571.6 G, against "about 570 G"; one of them, 605 G, matches a field quoted in the literature).
 - **H-alpha:** deuterium is 178.6 pm bluer than hydrogen, the same as the measured rest wavelengths to 0.1 pm.
+- **Hydrogen hyperfine:** the 2S interval is the newest measurement (177 556 838.87(85) Hz), and 8f(2S) − f(1S) = 48 959.2 Hz agrees with bound-state QED (48 954.1(2.3) Hz).
+- **Helium:** calibrated to the six NIST n = 2 levels and the Kato et al. 2³P interval (a calibration, not a test; the exchange integrals and the inverted triplet with its broken Landé rule come out).
+- **Mercury 546.1 nm:** the teaching-lab experiment is modelled (nine components, pressure-scanned Fabry-Perot); the analysis returns μB/hc within 1% of CODATA on a simulated recording. A real measurement is still to be added.
 - **Uncertainty:** with published input uncertainties the error bands are far narrower than the lines, so the limit is what the model leaves out, not its inputs.
 
 **How to read this repository.** In a hurry: look at the [Gallery](#gallery) and the Results tables. To use it: [Quick start](#quick-start) and [Use it from Python](#use-it-from-python). To learn or review the code: [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) explains every function. To check a number: the Sources section here and in the PDF.
@@ -357,7 +360,8 @@ src/optics/     color, prism, polarization, spectrometer, instruments, grotrian,
 tests/          258 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
-data/           experimental reference values
+data/           experimental reference values, mercury TP template and simulated example
+CITATION.cff    citation metadata for the GitHub "Cite this repository" button; mercury TP template and simulated example
 notebooks/      seven labs (levels 1 to 4, hydrogen n=2, virtual spectrometer, H-alpha), with explanations and saved output
 docs/           LaTeX report (main.tex + one file per part), figures, and CODE_GUIDE.md
 scripts/        run_all.py, make_figures.py, make_optics_figures.py, make_notebooks.py, execute_notebooks.py
@@ -391,6 +395,10 @@ Open, and what each needs from outside (if you can supply any of these, the item
 - [ ] **Laboratory Zeeman spectra:** compare full spectra with measurements (the arXiv:2104.14896 paper is theory; look for experimental companions).
 - [x] Differentiable Voigt profile and Zeeman spectrum written (NumPy side tested).
 - [x] PyTorch tests run and pass (gradcheck; gradients in B, T and P against finite differences).
+
+## How to cite
+
+GitHub's "Cite this repository" button uses `CITATION.cff`. Please also cite the sources of the inputs you use (see [Sources](#sources) and the bibliography in the PDF).
 
 ## Credits
 

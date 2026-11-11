@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software or report, please cite it as below."
+title: "Quantum Zeeman Engine"
+type: software
+authors:
+  - family-names: "Ben Miled"
+    given-names: "Mahdi"
+repository-code: "https://github.com/klinng/Quantum-Zeeman-Engine"
+license: MIT
+date-released: "2026-11-10"
+abstract: "A tested Python and LaTeX study of the Zeeman effect in sodium, hydrogen, calcium, helium and mercury: spectra, hyperfine structure, line shapes, a virtual spectrometer and Fabry-Perot, uncertainty budget, with every input traced to a source."
+keywords:
+  - Zeeman effect
+  - atomic physics
+  - hyperfine structure
+  - Fabry-Perot
+  - Python
