@@ -89,20 +89,74 @@ def fit_triplet_p_intervals(e01: float, e12: float) -> tuple[float, float]:
     return float(zeta), float(rho)
 
 
-def classify(b_tesla: float, h: np.ndarray) -> pd.DataFrame:
-    """Eigenvalues of a 1s2p Hamiltonian with <J_z>, J and S = 0 probability (same labelling as two_electron.classify_states)."""
-    o, s2sq, ls, _, s1s2 = _ops()
-    jz = o["Lz"] + o["Sz"]
+def _j_projectors():
+    """Projectors onto the J = 0, 1, 2 subspaces of the 12-state space (spectral projectors of J^2)."""
+    o = _ops()[0]
     j2 = sum((o["L" + c] + o["S" + c]) @ (o["L" + c] + o["S" + c]) for c in "xyz")
+    w, u = np.linalg.eigh(j2)
+    proj = {}
+    for jj in (0, 1, 2):
+        cols = u[:, np.abs(w - jj * (jj + 1)) < 1e-8]
+        proj[jj] = cols @ cols.conj().T
+    return j2, proj
+
+
+def classify(b_tesla: float, h: np.ndarray) -> pd.DataFrame:
+    """Eigenstates of a 1s2p Hamiltonian, sorted by energy, with labels that stay honest at finite field.
+
+    Columns: energy_ev; mj (<J_z>) and m_j (the exact integer: J_z commutes with H for B along z); singlet
+    (S = 0 probability); j2 (<J^2>); p_j0, p_j1, p_j2 (weights of the state in the J = 0, 1, 2 subspaces);
+    j (the DOMINANT J, i.e. the J with the largest weight, not the rounded root of <J^2>); j_purity (that weight).
+
+    At B = 0 every state has j_purity = 1. At finite field the Zeeman term couples J to J +- 1 at equal M_J, so
+    J is NOT a good quantum number: use j only when j_purity is close to 1 (for the nominal 2^3P levels it is
+    0.999 at 0.01 T, 0.90 at 0.1 T, and about 0.5 for some states above 1 T), and prefer m_j plus the weights
+    p_j*, or the adiabatic parentage label of classify_tracked.
+    """
+    o = _ops()[0]
+    s1s2 = _ops()[4]
+    jz = o["Lz"] + o["Sz"]
+    j2, proj = _j_projectors()
     psing = 0.25 * _I12 - s1s2
-    hh = h + 1e-12 * jz if b_tesla == 0 else h
+    hh = h + 1e-12 * jz if b_tesla == 0 else h         # lifts the M_J degeneracy at B = 0 only to get clean M_J states
     w, v = np.linalg.eigh(hh)
     ex = lambda m, k: float(np.real(v[:, k].conj() @ m @ v[:, k]))
     rows = []
     for k in range(12):
-        j = (-1 + np.sqrt(1 + 4 * ex(j2, k))) / 2
-        rows.append((w[k], ex(jz, k), round(j), ex(psing, k)))
-    return pd.DataFrame(rows, columns=["energy_ev", "mj", "j", "singlet"])
+        pj = [ex(proj[jj], k) for jj in (0, 1, 2)]
+        jmax = int(np.argmax(pj))
+        mj = ex(jz, k)
+        rows.append((w[k], mj, int(round(mj)), ex(psing, k), ex(j2, k), *pj, jmax, pj[jmax]))
+    return pd.DataFrame(rows, columns=["energy_ev", "mj", "m_j", "singlet", "j2", "p_j0", "p_j1", "p_j2", "j", "j_purity"])
+
+
+def classify_tracked(b_values, build) -> pd.DataFrame:
+    """Follow every level from the lowest field to the highest by eigenvector overlap (solvers.track_from_builder) and
+    attach its ZERO-FIELD PARENTAGE, e.g. "2^3P_1": the term and J of the state it connects to as B -> 0. This is the
+    label that remains meaningful when J is no longer a good quantum number. Returns one row per (field, level) with
+    b_tesla, level (tracked index), parent, m_j, energy_ev, singlet, j2, j_purity, p_j0..p_j2. The first value of
+    b_values should be small compared with the 2^3P fine structure (about 0.2 T per 2.3 GHz), for example 1e-4 T."""
+    from .solvers import track_from_builder
+    b_values = np.asarray(b_values, dtype=float)
+    e, v = track_from_builder(build, b_values, return_vectors=True)
+    o = _ops()[0]
+    jz = o["Lz"] + o["Sz"]
+    j2, proj = _j_projectors()
+    psing = 0.25 * _I12 - _ops()[4]
+    ex = lambda m, vec: float(np.real(vec.conj() @ m @ vec))
+    parent = {}
+    for k in range(12):
+        vec = v[0][:, k]
+        jdom = int(np.argmax([ex(proj[jj], vec) for jj in (0, 1, 2)]))
+        parent[k] = f"2^{1 if ex(psing, vec) > 0.5 else 3}P_{jdom}"
+    rows = []
+    for i, b in enumerate(b_values):
+        for k in range(12):
+            vec = v[i][:, k]
+            pj = [ex(proj[jj], vec) for jj in (0, 1, 2)]
+            rows.append((b, k, parent[k], int(round(ex(jz, vec))), e[i, k], ex(psing, vec), ex(j2, vec), max(pj), *pj))
+    return pd.DataFrame(rows, columns=["b_tesla", "level", "parent", "m_j", "energy_ev", "singlet", "j2", "j_purity",
+                                       "p_j0", "p_j1", "p_j2"])
 
 
 # ---- Slater integrals from hydrogenic orbitals ---------------------------------------------------------------------------
