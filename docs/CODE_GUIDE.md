@@ -76,12 +76,12 @@ The basis is |m_l⟩ ⊗ |m_s⟩ with m_l descending (outer) and m_s = +½, −�
 - **`track_levels(l, B_values, ζ)`** is the single-electron version: it calls `track_from_builder` with `h_total`.
 - **`find_crossings(B, y_i, y_j, include_touching=False)`** finds the field values where two tracked curves cross (sign
   change of the difference, with linear interpolation). It also catches a crossing that lands exactly on a grid point
-  (difference exactly 0, sign change across it) and reports a run of exact zeros once; a tangential touch (zero without
+  (difference exactly 0, sign change across it) a run of two or more exact zeros is a degeneracy region, not a crossing, and is excluded and returned instead by `find_zero_intervals` as `(B_start, B_end)`; a tangential touch (zero without
   a sign change) is not a crossing and is returned only with `include_touching=True`. Two crossings closer than the grid
   spacing cannot be resolved by any sign test, so the grid must be finer than their separation.
 - **`refine_crossings_from_builder(build, B, i, j, xtol=1e-12)`** is the version for final numbers: each bracket found on the
   grid is zoomed by re-diagonalising the Hamiltonian inside it (9 points per step, level identity kept by overlap), until
-  the bracket is narrower than `xtol`. Nothing is interpolated, so the result does not depend on the grid.
+  the bracket is narrower than `xtol`. Nothing is interpolated, so the result does not depend on the grid. Crossings that sit exactly on a grid point are returned as they are. The practical accuracy floor is about 1e-13 T here: the eigenvalue rounding (~1e-17 eV) divided by the gap slope (7.5e-5 eV/T), so `xtol=1e-12` sits just above the noise. A sign test only finds crossings that change the sign of E_i - E_j between samples; it does not prove that every crossing in the sweep was found.
 - **`zeeman_transitions(...)`** is a small helper returning all energy differences between two level sets.
 
 ## `src/transitions.py`: Level 4, spectra

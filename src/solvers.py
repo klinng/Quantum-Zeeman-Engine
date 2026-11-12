@@ -100,7 +100,8 @@ def find_crossings(b_values, y_i, y_j, include_touching: bool = False) -> np.nda
     Handles three cases the plain "sign change between neighbours" test gets wrong:
       * a crossing that lands EXACTLY on a grid point (d == 0): reported once, at that point, if d changes
         sign across it (the strict test d[k]*d[k+1] < 0 misses it and nobody notices);
-      * a run of exact zeros (identical curves): reported once at its first point;
+      * a run of two or more exact zeros (curves identical over an interval): NOT a crossing but a degeneracy
+        region; it is excluded here and returned by find_zero_intervals as (b_start, b_end);
       * a tangential touch (d reaches zero without changing sign): not a crossing; returned only with
         include_touching=True.
     Linear interpolation is only a first estimate (error ~ curvature * h^2); for a final value use
@@ -118,7 +119,9 @@ def find_crossings(b_values, y_i, y_j, include_touching: bool = False) -> np.nda
                 m += 1
             before = sgn[k - 1] if k > 0 else 0
             after = sgn[m + 1] if m + 1 < d.size else 0
-            if before * after < 0 or (include_touching and (before == 0 or after == 0 or before == after)):
+            if m > k:
+                pass                                        # plateau: see find_zero_intervals
+            elif before * after < 0 or (include_touching and (before == 0 or after == 0 or before == after)):
                 out.append(b[k])
             k = m + 1
         else:
@@ -126,6 +129,26 @@ def find_crossings(b_values, y_i, y_j, include_touching: bool = False) -> np.nda
                 out.append(b[k] - d[k] * (b[k + 1] - b[k]) / (d[k + 1] - d[k]))
             k += 1
     return np.array(out, dtype=float)
+
+
+def find_zero_intervals(b_values, y_i, y_j) -> list[tuple[float, float]]:
+    """Intervals (b_start, b_end) on the grid where y_i == y_j exactly at two or more consecutive grid points,
+    i.e. the levels are degenerate over a field range (typically a symmetry-protected degeneracy), not crossing
+    at one field. Exact equality is tested, so use it on curves from exactly degenerate Hamiltonians."""
+    b = np.asarray(b_values, dtype=float)
+    z = np.asarray(y_i, dtype=float) == np.asarray(y_j, dtype=float)
+    out, k = [], 0
+    while k < z.size:
+        if z[k]:
+            m = k
+            while m + 1 < z.size and z[m + 1]:
+                m += 1
+            if m > k:
+                out.append((float(b[k]), float(b[m])))
+            k = m + 1
+        else:
+            k += 1
+    return out
 
 
 def refine_crossings_from_builder(build, b_values, i: int, j: int, xtol: float = 1e-12, n_sub: int = 9,
@@ -142,7 +165,7 @@ def refine_crossings_from_builder(build, b_values, i: int, j: int, xtol: float =
     b = np.asarray(b_values, dtype=float)
     e0, v0 = tracked if tracked is not None else track_from_builder(build, b, return_vectors=True)
     d0 = e0[:, i] - e0[:, j]
-    roots = []
+    roots = [float(x) for x in find_crossings(b, e0[:, i], e0[:, j]) if np.any(b == x)]   # exact grid-point roots
     for k in np.where(d0[:-1] * d0[1:] < 0)[0]:
         lo, hi = b[k], b[k + 1]
         v_lo = v0[k]
@@ -163,7 +186,7 @@ def refine_crossings_from_builder(build, b_values, i: int, j: int, xtol: float =
             lo, hi = sub[m], sub[m + 1]
             v_lo = vs[m][:, order]
         roots.append(0.5 * (lo + hi))
-    return np.array(roots)
+    return np.array(sorted(roots))
 
 
 def zeeman_transitions(e_upper_ev, e_lower_ev):

@@ -92,13 +92,34 @@ def test_tangential_touch_is_not_a_crossing_unless_requested():
     assert np.allclose(find_crossings(b, y, 0 * b, include_touching=True), [0.0])
 
 
-def test_identical_curves_are_reported_once_not_everywhere():
-    from src.solvers import find_crossings
+def test_plateau_of_zeros_is_a_degeneracy_interval_not_a_crossing():
+    from src.solvers import find_crossings, find_zero_intervals
     b = np.linspace(0, 1, 11)
-    y = np.where(b < 0.5, b - 0.5, np.where(b > 0.7, b - 0.7, 0.0))   # zero over a plateau, sign change across it
-    assert find_crossings(b, y, 0 * b).size == 1
+    y = np.where(b < 0.5, b - 0.5, np.where(b > 0.75, b - 0.75, 0.0))   # zero on 0.5..0.7, sign change across it
+    assert find_crossings(b, y, 0 * b).size == 0
+    iv = find_zero_intervals(b, y, 0 * b)
+    assert len(iv) == 1 and np.allclose(iv[0], (0.5, 0.7))
+    assert find_zero_intervals(b, b, -b) == []          # an isolated zero is a crossing, not an interval
 
 
+def test_refinement_finds_a_crossing_that_sits_on_a_grid_point():
+    from src.solvers import refine_crossings_from_builder
+    b = np.linspace(-1, 1, 201)
+    r = refine_crossings_from_builder(lambda x: np.diag([x, -x, 5.0]), b, 0, 1)
+    assert np.allclose(r, [0.0]) and r.size == 1
+
+
+def test_refinement_survives_eigenvectors_that_rotate_with_field():
+    """Level labels are matched by overlap even though the eigenvectors rotate strongly with B (3 rad per unit
+    field); the refined crossing must still be the exact one, x = 0.4."""
+    from src.solvers import refine_crossings_from_builder
+    rot = lambda x: np.array([[np.cos(3 * x), -np.sin(3 * x)], [np.sin(3 * x), np.cos(3 * x)]])
+    def build(x):
+        u = np.zeros((3, 3)); u[:2, :2] = rot(x); u[2, 2] = 1
+        return u @ np.diag([x, 0.4, 2.0]) @ u.T          # levels x and 0.4 cross at x = 0.4 (different eigenvectors)
+    b = np.linspace(0, 1, 41)
+    fwd = refine_crossings_from_builder(build, b, 0, 1)
+    assert fwd.size == 1 and abs(fwd[0] - 0.4) < 1e-9
 def test_closely_spaced_crossings_both_found_when_grid_resolves_them():
     from src.solvers import find_crossings
     b = np.linspace(0, 1, 1001)
