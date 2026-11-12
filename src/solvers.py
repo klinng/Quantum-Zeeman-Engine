@@ -94,12 +94,76 @@ def track_levels(l: int, b_values, zeta_ev: float, g_s: float = G_S) -> np.ndarr
     return track_from_builder(lambda b: h_total(l, b, zeta_ev, g_s=g_s), b_values)
 
 
-def find_crossings(b_values, y_i, y_j) -> np.ndarray:
-    """Field values where two tracked curves y_i(B) and y_j(B) cross (linear interpolation)."""
-    b_values = np.asarray(b_values, dtype=float)
+def find_crossings(b_values, y_i, y_j, include_touching: bool = False) -> np.ndarray:
+    """Field values where two tracked curves y_i(B) and y_j(B) cross (linear interpolation in each interval).
+
+    Handles three cases the plain "sign change between neighbours" test gets wrong:
+      * a crossing that lands EXACTLY on a grid point (d == 0): reported once, at that point, if d changes
+        sign across it (the strict test d[k]*d[k+1] < 0 misses it and nobody notices);
+      * a run of exact zeros (identical curves): reported once at its first point;
+      * a tangential touch (d reaches zero without changing sign): not a crossing; returned only with
+        include_touching=True.
+    Linear interpolation is only a first estimate (error ~ curvature * h^2); for a final value use
+    refine_crossings_from_builder, which re-diagonalises inside the bracket.
+    """
+    b = np.asarray(b_values, dtype=float)
     d = np.asarray(y_i, dtype=float) - np.asarray(y_j, dtype=float)
-    idx = np.where(d[:-1] * d[1:] < 0)[0]
-    return b_values[idx] - d[idx] * (b_values[idx + 1] - b_values[idx]) / (d[idx + 1] - d[idx])
+    sgn = np.sign(d)
+    out = []
+    k = 0
+    while k < d.size:
+        if sgn[k] == 0:
+            m = k                                           # extent of the zero run [k, m]
+            while m + 1 < d.size and sgn[m + 1] == 0:
+                m += 1
+            before = sgn[k - 1] if k > 0 else 0
+            after = sgn[m + 1] if m + 1 < d.size else 0
+            if before * after < 0 or (include_touching and (before == 0 or after == 0 or before == after)):
+                out.append(b[k])
+            k = m + 1
+        else:
+            if k + 1 < d.size and sgn[k + 1] * sgn[k] < 0:
+                out.append(b[k] - d[k] * (b[k + 1] - b[k]) / (d[k + 1] - d[k]))
+            k += 1
+    return np.array(out, dtype=float)
+
+
+def refine_crossings_from_builder(build, b_values, i: int, j: int, xtol: float = 1e-12, n_sub: int = 9,
+                                  max_iter: int = 60, tracked=None) -> np.ndarray:
+    """Crossings of tracked levels i and j with the Hamiltonian RE-DIAGONALISED inside each bracket.
+
+    A first pass on b_values brackets each sign change of E_i - E_j. Each bracket is then zoomed: the
+    Hamiltonian is re-tracked on n_sub points inside it (track_from_builder, so level identity is kept by
+    overlap, not by energy order) and the sub-interval containing the sign change becomes the new bracket,
+    until its width is below xtol (in the units of b_values). tracked=(energies, vectors) from a previous
+    track_from_builder(..., return_vectors=True) call on the same grid avoids repeating the first sweep. Nothing is interpolated at the end: the
+    returned field is the midpoint of a bracket whose endpoints were both diagonalised exactly.
+    """
+    b = np.asarray(b_values, dtype=float)
+    e0, v0 = tracked if tracked is not None else track_from_builder(build, b, return_vectors=True)
+    d0 = e0[:, i] - e0[:, j]
+    roots = []
+    for k in np.where(d0[:-1] * d0[1:] < 0)[0]:
+        lo, hi = b[k], b[k + 1]
+        v_lo = v0[k]
+        for _ in range(max_iter):
+            if hi - lo <= xtol:
+                break
+            sub = np.linspace(lo, hi, n_sub)
+            # columns of the sub-sweep follow the energy order at sub[0]; order[k] = the column that is the
+            # same physical level as global level k (matched by overlap with the eigenvectors at lo)
+            _, v_first = np.linalg.eigh(build(sub[0]))
+            order = _assign(np.abs(v_lo.conj().T @ v_first) ** 2)
+            en, vs = track_from_builder(build, sub, return_vectors=True, min_overlap=0.0)
+            dd = en[:, order[i]] - en[:, order[j]]
+            hit = np.where(dd[:-1] * dd[1:] <= 0)[0]
+            if hit.size == 0:
+                break
+            m = hit[0]
+            lo, hi = sub[m], sub[m + 1]
+            v_lo = vs[m][:, order]
+        roots.append(0.5 * (lo + hi))
+    return np.array(roots)
 
 
 def zeeman_transitions(e_upper_ev, e_lower_ev):

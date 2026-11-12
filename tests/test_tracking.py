@@ -73,3 +73,66 @@ def test_coarse_grid_triggers_warning_and_confidence_is_reported():
         warnings.simplefilter("error")
         _, conf = track_from_builder(build, np.linspace(0, 0.5, 200), return_confidence=True)
     assert conf[0] == 1 and conf.min() > 0.99
+
+
+# --- crossing detection and refinement (audit priority 5) ---------------------------------------
+
+def test_crossing_exactly_on_a_grid_point_is_found_once():
+    from src.solvers import find_crossings
+    b = np.linspace(-1, 1, 201)                        # B = 0 is a grid point, d == 0 exactly there
+    assert np.allclose(find_crossings(b, b, -b), [0.0])
+    assert find_crossings(b, b, -b).size == 1          # strict d[k]*d[k+1] < 0 finds NONE of these
+
+
+def test_tangential_touch_is_not_a_crossing_unless_requested():
+    from src.solvers import find_crossings
+    b = np.linspace(-1, 1, 201)
+    y = b ** 2                                         # touches y = 0 at B = 0 without changing sign
+    assert find_crossings(b, y, 0 * b).size == 0
+    assert np.allclose(find_crossings(b, y, 0 * b, include_touching=True), [0.0])
+
+
+def test_identical_curves_are_reported_once_not_everywhere():
+    from src.solvers import find_crossings
+    b = np.linspace(0, 1, 11)
+    y = np.where(b < 0.5, b - 0.5, np.where(b > 0.7, b - 0.7, 0.0))   # zero over a plateau, sign change across it
+    assert find_crossings(b, y, 0 * b).size == 1
+
+
+def test_closely_spaced_crossings_both_found_when_grid_resolves_them():
+    from src.solvers import find_crossings
+    b = np.linspace(0, 1, 1001)
+    y = (b - 0.500) * (b - 0.504)
+    r = find_crossings(b, y, 0 * b)
+    assert np.allclose(r, [0.500, 0.504], atol=2e-4)
+    assert find_crossings(np.linspace(0, 1, 11), (np.linspace(0, 1, 11) - 0.500) * (np.linspace(0, 1, 11) - 0.504), 0).size == 0   # grid too coarse: silently blind
+
+
+def test_refinement_beats_linear_interpolation_on_a_curved_difference():
+    from src.solvers import find_crossings, refine_crossings_from_builder
+    root = 0.37
+    build = lambda x: np.diag([x * x * x + x, root ** 3 + root, 5.0])   # level 0 crosses constant level 1 at B=root
+    b = np.linspace(0, 1, 6)
+    lin = find_crossings(b, b ** 3 + b, np.full_like(b, root ** 3 + root))[0]
+    ref = refine_crossings_from_builder(build, b, 0, 1, xtol=1e-13)[0]
+    assert abs(ref - root) < 1e-12 < abs(lin - root)
+
+
+def test_refined_crossing_in_a_real_hamiltonian_is_independent_of_the_grid():
+    from src.hyperfine import lamb_crossings_gauss
+    vals = [lamb_crossings_gauss(n=n, hyperfine=False)[0] for n in (6, 41)]
+    assert max(vals) - min(vals) < 1e-7                # gauss; unrefined linear estimates differ by ~2e-4 G at n=21
+    hf = [lamb_crossings_gauss(n=n) for n in (21, 81)]
+    assert np.allclose(hf[0], hf[1], atol=1e-7) and len(hf[0]) == 4
+
+
+def test_refined_crossing_is_a_true_degeneracy_of_the_exact_eigenvalues():
+    """Independent of the tracking code: at the refined field two exact eigenvalues of H coincide (gap ~1e-17 eV,
+    i.e. rounding), and the gap grows linearly (7.5e-5 eV/T) on either side, so a gap of g eV means the
+    field is off by g/7.5e-5 T."""
+    from src.hydrogen import h_n2
+    from src.hyperfine import lamb_crossings_gauss
+    bc = lamb_crossings_gauss(hyperfine=False)[0] * 1e-4
+    w = np.linalg.eigvalsh(h_n2(bc))
+    assert np.diff(w).min() < 1e-15                    # eV, numerically degenerate pair
+    assert np.diff(np.linalg.eigvalsh(h_n2(bc + 1e-6))).min() == pytest.approx(7.54e-11, rel=0.01)

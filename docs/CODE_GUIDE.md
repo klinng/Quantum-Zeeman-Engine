@@ -74,8 +74,14 @@ The basis is |m_l⟩ ⊗ |m_s⟩ with m_l descending (outer) and m_s = +½, −�
   wrong. Here, after each field step, the new eigenvector with the biggest overlap with each old eigenvector
   is the "same" level. That gives smooth physical curves. It can also return the eigenvectors.
 - **`track_levels(l, B_values, ζ)`** is the single-electron version: it calls `track_from_builder` with `h_total`.
-- **`find_crossings(B, y_i, y_j)`** finds the field values where two tracked curves cross (sign change of the
-  difference, with linear interpolation).
+- **`find_crossings(B, y_i, y_j, include_touching=False)`** finds the field values where two tracked curves cross (sign
+  change of the difference, with linear interpolation). It also catches a crossing that lands exactly on a grid point
+  (difference exactly 0, sign change across it) and reports a run of exact zeros once; a tangential touch (zero without
+  a sign change) is not a crossing and is returned only with `include_touching=True`. Two crossings closer than the grid
+  spacing cannot be resolved by any sign test, so the grid must be finer than their separation.
+- **`refine_crossings_from_builder(build, B, i, j, xtol=1e-12)`** is the version for final numbers: each bracket found on the
+  grid is zoomed by re-diagonalising the Hamiltonian inside it (9 points per step, level identity kept by overlap), until
+  the bracket is narrower than `xtol`. Nothing is interpolated, so the result does not depend on the grid.
 - **`zeeman_transitions(...)`** is a small helper returning all energy differences between two level sets.
 
 ## `src/transitions.py`: Level 4, spectra
@@ -316,7 +322,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_cavity.py` | [a, a†] = 1 except the last state; number operator; excitation number conserved; resonant levels (N−½)w_c ± g√N; vacuum Rabi cos²(g t); detuned Rabi formula. |
 | `test_uncertainty_bands.py` | Band of a linear model matches algebra; the hydrogen 2S band equals the Lamb-shift σ; sodium level uncertainty is below the natural width and at most about 2σ_A. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
-| `test_tracking.py` | One-to-one (Hungarian) assignment where per-row argmax double-claims a level; genuine crossing followed straight through; avoided crossing gives the adiabatic branches; reversed sweep; near-degenerate pair; orthonormal columns in a real sweep; warning on a too-coarse step and the returned overlap confidence. |
+| `test_tracking.py` | Crossing on a grid point, tangential touch, plateau of zeros, closely spaced crossings, refinement vs linear interpolation, grid independence, and a true eigenvalue degeneracy at the refined field; One-to-one (Hungarian) assignment where per-row argmax double-claims a level; genuine crossing followed straight through; avoided crossing gives the adiabatic branches; reversed sweep; near-degenerate pair; orthonormal columns in a real sweep; warning on a too-coarse step and the returned overlap confidence. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |
 | `test_sodium_paschen_back.py` | Mean sigma shift = normal Zeeman 16.2 pm/T at 1, 10, 60, 120 T; 10 components; strong lines dominate at 60 T. |

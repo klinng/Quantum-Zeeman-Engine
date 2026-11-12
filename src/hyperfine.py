@@ -118,13 +118,17 @@ def h_na_3p(b_tesla: float, zeta_ev: float) -> np.ndarray:
 
 
 # ---- analysis helpers -----------------------------------------------------------------------
-def lamb_crossings_gauss(b_window_t=(0.050, 0.065), n: int = 301, hyperfine: bool = True) -> list[float]:
+def lamb_crossings_gauss(b_window_t=(0.050, 0.065), n: int = 301, hyperfine: bool = True,
+                         refine: bool = True) -> list[float]:
     """Fields (gauss) where a 2S level crosses a 2P level in the window around 573 G.
 
     Without hyperfine there is a single crossing; with hyperfine the proton spin splits it into four.
+    refine=True (default) re-diagonalises H inside each bracket until it is narrower than 1e-12 T (see
+    solvers.refine_crossings_from_builder), so the result does not depend on n; refine=False gives the
+    linear-interpolation estimate from the grid.
     """
     from .hydrogen import h_n2
-    from .solvers import find_crossings, track_from_builder
+    from .solvers import find_crossings, refine_crossings_from_builder, track_from_builder
     bs = np.linspace(*b_window_t, n)
     build = h_n2_hyperfine if hyperfine else h_n2
     n_s = 4 if hyperfine else 2
@@ -134,5 +138,9 @@ def lamb_crossings_gauss(b_window_t=(0.050, 0.065), n: int = 301, hyperfine: boo
     out = []
     for a in s_idx:
         for c in p_idx:
-            out += [float(x) * 1e4 for x in np.atleast_1d(find_crossings(bs, e[:, a], e[:, c]))]
+            if refine and np.any(np.diff(np.sign(e[:, a] - e[:, c])) != 0):
+                roots = refine_crossings_from_builder(build, bs, int(a), int(c), xtol=1e-12, tracked=(e, v))
+            else:
+                roots = find_crossings(bs, e[:, a], e[:, c])
+            out += [float(x) * 1e4 for x in np.atleast_1d(roots)]
     return sorted(out)

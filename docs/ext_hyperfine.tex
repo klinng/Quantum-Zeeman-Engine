@@ -11,6 +11,8 @@ The sodium electric-quadrupole term is not modelled; $^{40}$Ca has $I=0$.
 
 \paragraph{Checks.} The model reproduces the sodium ground splitting $2A=1771.6261$ MHz, the stretched state energy exactly, and the hydrogen 2S and 2P splittings that were put in.
 
+\paragraph{Numerical convergence.} The crossings are located by zooming each bracket with the Hamiltonian re-diagonalised inside it (bracket width $10^{-12}$\,T), so the quoted fields do not depend on the field grid: the four hyperfine crossings change by less than $10^{-8}$\,G between a 21-point and an 81-point sweep. Plain linear interpolation on the grid would be off by $1.3\times10^{-4}$\,G at 21 points and $4\times10^{-5}$\,G at 51 points, negligible against the $\sim$G accuracy of the model but now removed. At the refined 573.3707\,G two exact eigenvalues of the $n=2$ Hamiltonian coincide to rounding error.
+
 \paragraph{Result.} Without hyperfine the 2S--2P crossing of hydrogen sits at $573.4$ G. With the proton spin it splits into four crossings at $538.1$, $552.2$, $591.0$ and $605.0$ G; their mean, $571.6$ G, moves towards the commonly quoted value of about $570$ G
 \cite{westig}. The same paper quotes spin-filter fields of 535 and 605 G for H-alpha, as selection settings rather than computed crossings: our 605.0 G agrees, while our lowest crossing, 538.1 G, differs from 535 G by 3 G, a difference that is left open here because the filter's operating point may differ from the crossing field.
 
