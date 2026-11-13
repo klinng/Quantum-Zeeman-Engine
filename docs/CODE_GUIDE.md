@@ -364,3 +364,9 @@ One lab per level, each with theory in markdown, code, and saved output.
 2. Diagonalise with `solvers.py` and plot with `animation.py`.
 3. Find a measured number, add it to `data/experimental_reference.csv`, and write a test that compares it to your output.
 4. Only when the test passes, move on to the next level.
+
+## Hyperfine additions (audit)
+
+- `NA_B_MHZ = {"3P3/2": 2.724}`: electric-quadrupole constant (Yei, Sieradzan and Havey 1993). `quadrupole_operator(i, j, ij, projector)` is the unit-B operator [3(I.J)^2 + 3/2 I.J - I(I+1)J(J+1)] / [2I(2I-1)J(2J-1)] inside one J subspace (zero for J = 1/2 or I = 1/2). `h_hyperfine`, `h_with_hyperfine` take `b_quad_by_j_ev`; `h_na_3p(B, zeta, quadrupole=True)` includes it (`quadrupole=False` is the dipole-only model, which misplaces every 3P3/2 interval by 2.72 MHz).
+- `f_weights(h, l, I, eigenvectors)`: for each eigenstate, the exact m_F, the weights in the J and F subspaces, the dominant F and its purity. F is a label at B = 0 only.
+- Basis of every hyperfine function: uncoupled |l m_l>|s m_s>|I m_I>, electron first, nuclear spin innermost.

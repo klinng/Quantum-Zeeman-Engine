@@ -32,7 +32,8 @@ def test_d2_to_d1_strength_ratio_is_two(zero_field):
 
 def test_line_spacings_come_from_the_hyperfine_constants(zero_field):
     g2 = zero_field[0].freq_mhz.to_numpy()
-    assert g2[2] - g2[1] == pytest.approx(3 * NA_A_MHZ["3P3/2"], abs=1e-3)       # F'=3 minus F'=2
+    from src.hyperfine import NA_B_MHZ
+    assert g2[2] - g2[1] == pytest.approx(3 * NA_A_MHZ["3P3/2"] + NA_B_MHZ["3P3/2"], abs=1e-3)   # F'=3 minus F'=2 = 3A + B
     assert g2[5] - g2[1] == pytest.approx(1771.6261288, abs=1e-3)                # F=1 -> F'=2 minus F=2 -> F'=2
 
 

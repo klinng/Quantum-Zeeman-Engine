@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-297%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-303%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -46,7 +46,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 297 tests (2 of them need PyTorch and skip without it); python -m pytest -m spectroscopic runs only comparisons with data not used in a fit
+python -m pytest -q                  # 303 tests (2 of them need PyTorch and skip without it); python -m pytest -m spectroscopic runs only comparisons with data not used in a fit
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -304,7 +304,7 @@ constant (leading-order theory, Fermi/60).
 - The sodium g_J(3S₁/₂) row differs from the measurement by 2.3e-5 because the model uses the free-electron g_s and has no bound-state correction.
 
 **Not modelled**
-- Helium is modelled (Extension L) with effective spin-spin and spin-other-orbit parameters, calibrated to NIST levels (`helium_data.py`); electron-electron effects beyond the two-electron s-p model, and the sodium electric-quadrupole term (2.7 MHz).
+- Helium is modelled (Extension L) with effective spin-spin and spin-other-orbit parameters, calibrated to NIST levels (`helium_data.py`); electron-electron effects beyond the two-electron s-p model. The sodium 3P3/2 electric-quadrupole term (B = 2.724 MHz) is included.
 - Hyperfine in the H-alpha spectrum: no checked n = 3 constants, and the splittings are far below the 7 GHz Doppler width.
 - Pressure broadening has no built-in collision coefficient: the width is an input you choose.
 - The diamagnetic term is estimated (`diamagnetic.py`), not added to the Hamiltonians: for H-alpha the largest shift is 1.1 pm at 20 T and 9.7 pm at 60 T, below 1 % of the Zeeman shift but comparable to the 8.1 pm Doppler width at 60 T.
@@ -358,7 +358,7 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          297 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          303 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values, mercury TP template and simulated example

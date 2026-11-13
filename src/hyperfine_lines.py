@@ -3,7 +3,7 @@ r"""Sodium D lines with hyperfine structure: line positions and strengths in a m
 The electric-dipole operator acts on the electron only, so in the enlarged basis it is D (x) 1_I.
 Line strength between eigenstates u (3P, 24 states) and l (3S, 8 states) is |<u| D_q (x) 1_I |l>|^2.
 Frequencies are measured from the hyperfine-free D1 line (3P1/2 centre of gravity to 3S1/2 centre of gravity)
-and given in MHz. The electric-quadrupole constant of 3P3/2 is not modelled (2.7 MHz, see hyperfine.py).
+and given in MHz. The 3P3/2 electric-quadrupole constant B = 2.724 MHz is included (hyperfine.NA_B_MHZ). The F, F' labels of the zero-field lines are exact; in a field use m_F and the weights of hyperfine.f_weights.
 """
 from __future__ import annotations
 
