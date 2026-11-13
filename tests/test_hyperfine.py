@@ -175,3 +175,32 @@ def test_3p32_intervals_against_measured_values_not_used_in_the_model():
     assert abs(d32 - 58.310) < 3 * 0.011 and abs(d21 - 34.339) < 3 * 0.011
     wo = np.unique(np.round(_p32_levels(False), 5))
     assert abs(wo[3] - wo[2] - 58.310) > 100 * 0.011
+
+
+@pytest.mark.implementation
+def test_quadrupole_guards_raise_no_division_warnings():
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")                      # a 0/0 or division by zero would raise here
+        for i, j in ((0.5, 1.5), (1.5, 0.5), (0.5, 0.5), (0.0, 1.5)):
+            assert np.abs(quadrupole_operator(i, j, np.eye(4), np.eye(4))).max() == 0
+
+
+@pytest.mark.implementation
+def test_f_and_j_projectors_are_complete_and_consistent_with_the_hamiltonian_ordering():
+    """sum_F P_F = sum_J P_J = 1, P_F commutes with P_J and with the zero-field Hamiltonian; at any field the weights of an
+    eigenstate sum to 1 in both J and F, and m_F stays an exact integer (F_z commutes with H for B along z)."""
+    h = h_na_3p(0.3, _ZETA)
+    _, v = np.linalg.eigh(h)
+    fw = f_weights(h, 1, NA_I, v)
+    pf = [c for c in fw if c.startswith("p_f")]
+    pj = [c for c in fw if c.startswith("p_j")]
+    assert np.allclose(fw[pf].sum(axis=1), 1.0, atol=1e-12) and np.allclose(fw[pj].sum(axis=1), 1.0, atol=1e-12)
+    assert np.abs(fw.m_f - fw.m_f.round()).max() < 1e-9
+    from src.hyperfine import electron_projectors
+    proj, jop = electron_projectors(1)
+    fz = np.kron(jop["z"], np.eye(4)) + np.kron(np.eye(6), angular_momentum_ops(1.5)[2])
+    assert np.abs(fz @ h - h @ fz).max() < 1e-15                                               # F_z conserved at B != 0
+    h0 = h_na_3p(0.0, _ZETA)
+    pj32 = np.kron(proj[1.5], np.eye(4))
+    assert np.abs(pj32 @ h0 - h0 @ pj32).max() < 1e-15                                         # J = 3/2 block is closed at B = 0
