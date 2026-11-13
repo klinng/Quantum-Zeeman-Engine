@@ -12,7 +12,7 @@ Consequences, all visible in the output:
 * 3P0 and 3P2 are dark at B = 0, but a magnetic field mixes 3P0 with 3P1 (same M = 0), so 3P0 gains strength
   that grows as B^2 (the field-induced clock transition of alkaline-earth atoms).
 Only relative strengths are computed; absolute rates need the 1P1 decay rate (see two_electron.intercombination_rate).
-The 1P1 lines use the model's own mixing; configuration mixing with 4s3d is not included.
+The 1P1 lines use the model's own mixing; configuration mixing with the odd-parity 4s5p and 3d4p levels is not included.
 Energies are measured from the ground state, whose energy is zero by construction of the level fit.
 """
 from __future__ import annotations

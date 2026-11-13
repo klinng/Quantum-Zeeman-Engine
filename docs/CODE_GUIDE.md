@@ -206,7 +206,9 @@ high-resolution stage.**
 ## `src/two_electron.py`: two valence electrons (calcium 4s4p)
 
 - `operators()` and `h_two_electron(B, zeta, delta, E_t)`: the 12x12 Hamiltonian: exchange splitting, spin-orbit coupling of the p electron, Zeeman term.
-- `classify_states(B, ...)`: eigenstates labelled 3P0, 3P1, 3P2 or 1P1 by their J and singlet weight.
+- `classify_states(B, ...)`: eigenstates labelled 3P0, 3P1, 3P2 or 1P1; `j` is the dominant J with its `j_purity` and weights `p_j0..p_j2`, `m_j` is the exact integer M_J.
+- `h_two_electron_general(B, zeta_S, zeta_A, Delta, E_t)`: the same 12 states with the spin-orbit term split into L.S and L.(s2 - s1); the one-parameter model is zeta_S = zeta_A = zeta/2.
+- `calcium_four_parameter_fit(...)`: closed-form (zeta_S, zeta_A, Delta, E_t) and eps^2 = (a - l1)/(l2 - l1) from the four levels (a calibration). `calcium_fit_sensitivity(levels, sigma)`: linear error propagation for ASSUMED level uncertainties, with the correlation matrix. `intercombination_prediction(levels)`: 3P1 decay rate from the energies alone, and `displacement_for_rate`: how far the 1P1 admixture alone would have to push 3P1 to match a measured rate. `CA_ODD_J1_LEVELS_CM1`, `odd_j1_perturber_table()`: the NIST odd-parity J = 1 levels that could mix.
 - `zero_field_levels_cm1(...)` and `fit_to_levels(...)`: term energies from the model, and the fit of the three parameters to four measured energies.
 - `singlet_admixture_in_3p1(...)`: how much 1P1 is mixed into 3P1 (the reason the 657 nm intercombination line is weakly allowed).
 - `g_factor(label, ...)`: g_J from the model's own eigenvalues at a tiny field.
@@ -322,6 +324,7 @@ It is meant as a starting point for larger models (many parameters), where gradi
 | `test_cavity.py` | [a, a†] = 1 except the last state; number operator; excitation number conserved; resonant levels (N−½)w_c ± g√N; vacuum Rabi cos²(g t); detuned Rabi formula. |
 | `test_uncertainty_bands.py` | Band of a linear model matches algebra; the hydrogen 2S band equals the Lamb-shift σ; sodium level uncertainty is below the natural width and at most about 2σ_A. |
 | `test_stark.py` | Hermitian operators with -3 a0 / 3/sqrt2 a0; E = 0 reproduces hydrogen.py; isotropy at B = 0; 2S Stark shift vs perturbation theory; anticrossing near 573 G; gap linear in E and equal to 2 sqrt3 e a0 E; parallel E leaves the crossing; quenching rate and lifetime limits. |
+| `test_calcium_audit.py` | Marked `implementation`, `calibration` or `spectroscopic` (select with `pytest -m spectroscopic`): general Hamiltonian contains the one-parameter model, only zeta_A mixes S, closed forms, J purity, perturber table, sensitivity scaling; four-parameter closure; three data comparisons that record known misfits (3P1 energy 0.089 cm^-1, lifetime x1.4-1.5, displacement diagnostic). |
 | `test_tracking.py` | Crossing on a grid point, tangential touch, plateau of zeros, closely spaced crossings, refinement vs linear interpolation, grid independence, and a true eigenvalue degeneracy at the refined field; One-to-one (Hungarian) assignment where per-row argmax double-claims a level; genuine crossing followed straight through; avoided crossing gives the adiabatic branches; reversed sweep; near-degenerate pair; orthonormal columns in a real sweep; warning on a too-coarse step and the returned overlap confidence. |
 | `test_halpha_instruments.py` | R needed scales as 1/B; inverse function; ladder ordering; Doppler floor about 81 000; prism too weak but big grating enough at 1 T; prism deflection scales with B. |
 | `test_grotrian.py` | Every arrow satisfies M_up − M_low = q at five fields; polarisation matches q; M values are the expected half-integers; 10 arrows, 10 strong at 0.1 T and 6 strong at 60 T; no duplicate arrows. |

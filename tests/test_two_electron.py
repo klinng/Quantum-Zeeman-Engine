@@ -59,9 +59,11 @@ def test_fit_recovers_known_parameters():
 
 
 def test_calcium_levels_fit_consistently():
-    # four numbers, three parameters: the leftover is a genuine check of the model (Lande interval rule for calcium)
+    # four numbers, three parameters: the leftover is a genuine check of the model (Lande interval rule for calcium).
+    # This loose bound only guards against a broken fit; the fit does NOT reproduce the data to their precision (the 3P1
+    # residual is 0.089 cm^-1). That known misfit is asserted explicitly in tests/test_calcium_audit.py (marker: spectroscopic).
     *_, res = fit_to_levels(*(CA_LEVELS_CM1[k] for k in ("3P0", "3P1", "3P2", "1P1")))
-    assert np.abs(res).max() < 0.15                    # cm^-1; NIST Handbook energies; the fit has 3 parameters for 4 levels
+    assert np.abs(res).max() < 0.15
 
 
 def test_calcium_3p1_energy_matches_the_measured_frequency():
