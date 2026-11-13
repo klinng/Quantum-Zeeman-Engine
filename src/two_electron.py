@@ -212,7 +212,7 @@ def odd_j1_perturber_table() -> pd.DataFrame:
 
 
 def intercombination_prediction(levels_cm1: dict[str, float], a_1p1_per_s: float = 2.20e8) -> dict[str, float]:
-    """Independent prediction of the 4s^2 1S0 - 4s4p 3P1 decay rate from the four-parameter ENERGY fit alone; the measured
+    """Consistency check of the 4s^2 1S0 - 4s4p 3P1 decay rate from the four-parameter ENERGY fit alone; the measured
     lifetime is not used. rate = eps^2 * A(1P1) * (sigma_3P1 / sigma_1P1)^3 (vacuum wavenumbers; emission goes as the cube of
     the frequency), eps^2 = (a - l1) / (l2 - l1). Assumes one shared dipole matrix element, so it is an order-of-magnitude
     test of the model, not a precise prediction."""
