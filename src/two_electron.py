@@ -122,8 +122,13 @@ def calcium_fit_sensitivity(levels_cm1: dict[str, float], sigma_cm1: float | dic
 
     The NIST Handbook levels (source code SC85) come with no uncertainties, so sigma_cm1 is a scenario, not a data value:
     a single number for all four levels, or a dict keyed by '3P0', '3P1', '3P2', '1P1'. Returns, for each output
-    (zeta_S, zeta_A, Delta, E_t, eps2), the value, its standard error, and the correlation matrix is attached as
-    df.attrs['correlation']. The Jacobian is by central differences."""
+    (zeta_S, zeta_A, Delta, E_t, eps2), the value and ``scenario_std``: the standard deviation PROPAGATED from the assumed
+    level uncertainties (sqrt of the diagonal of J C J^T, C = diag(sigma^2), independent levels). It is a sensitivity
+    scenario, NOT an experimental standard error and NOT a fit-residual error (the fit has zero degrees of freedom).
+    The correlation matrix is attached as df.attrs['correlation']. The Jacobian is by central differences.
+
+    Compatibility: the column ``std_err`` (the former name) is kept as an exact copy of ``scenario_std`` and is deprecated;
+    new code should use ``scenario_std``."""
     keys = ["3P0", "3P1", "3P2", "1P1"]
     sig = np.array([sigma_cm1[k] if isinstance(sigma_cm1, dict) else sigma_cm1 for k in keys], dtype=float)
     out = ["zeta_S", "zeta_A", "Delta", "E_t", "eps2"]
@@ -138,7 +143,8 @@ def calcium_fit_sensitivity(levels_cm1: dict[str, float], sigma_cm1: float | dic
         jac[:, i] = (f(xp) - f(xm)) / (2 * h)
     cov = jac @ np.diag(sig ** 2) @ jac.T
     err = np.sqrt(np.diag(cov))
-    df = pd.DataFrame({"value": f(x0), "std_err": err}, index=out)
+    df = pd.DataFrame({"value": f(x0), "scenario_std": err, "std_err": err}, index=out)     # std_err: deprecated alias
+    df.attrs["note"] = "scenario_std is propagated from ASSUMED level uncertainties; std_err is a deprecated alias of it"
     df.attrs["correlation"] = pd.DataFrame(cov / np.outer(err, err), index=out, columns=out)
     return df
 

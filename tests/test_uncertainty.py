@@ -40,3 +40,20 @@ def test_sodium_hyperfine_sampling_matches_exact_propagation():
     r = monte_carlo(sodium_3p12_splitting_mhz, {"a_3p12": (94.44, 0.13)}, n=500, seed=2)
     assert r["mean"] == pytest.approx(2 * 94.44, abs=0.05)
     assert r["std"] == pytest.approx(0.26, rel=0.15)    # splitting = 2A exactly, so sigma = 2 sigma_A
+
+
+def test_monte_carlo_std_is_the_output_spread_and_sem_is_the_sampling_error_of_the_mean():
+    """std does not shrink with n (it estimates the propagated spread); sem = std / sqrt(n) does."""
+    f, inp = (lambda x: 2.0 * x), {"x": (1.0, 0.1)}
+    small, large = monte_carlo(f, inp, 100, seed=5), monte_carlo(f, inp, 10000, seed=5)
+    assert small["sem"] == pytest.approx(small["std"] / np.sqrt(100), rel=1e-12)
+    assert large["sem"] == pytest.approx(large["std"] / np.sqrt(10000), rel=1e-12)
+    assert small["std"] == pytest.approx(0.2, rel=0.2) and large["std"] == pytest.approx(0.2, rel=0.03)   # both estimate 2 sigma_x
+    assert large["sem"] < small["sem"] / 5                                                                 # sem shrinks as 1/sqrt(n)
+    assert large["sem"] < 0.02 * large["std"]                                                              # and is not an input uncertainty
+
+
+def test_sampling_error_of_sigma_is_separate_from_sem():
+    """Repeating the run with other seeds scatters std by ~1/sqrt(2(n-1)) of itself: a property of sampling, not physics."""
+    stds = [monte_carlo(lambda x: x, {"x": (0.0, 1.0)}, 200, seed=s)["std"] for s in range(60)]
+    assert np.std(stds, ddof=1) / np.mean(stds) == pytest.approx(1 / np.sqrt(2 * 199), rel=0.35)

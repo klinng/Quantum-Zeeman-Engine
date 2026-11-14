@@ -5,8 +5,13 @@ Sources (both read from the pages, not from memory):
   (physics.nist.gov/PhysRefData/Handbook/Tables/heliumtable5.htm).
 * K. Kato, T. D. G. Skinner and E. A. Hessels, arXiv:1807.07923: 2^3P_2 - 2^3P_1 = 2 291 176 590(25) Hz (measured).
 
-The model has six parameters for six levels: E_dir (1s2s), G^0, E_dir (1s2p), G^1, zeta_S, rho. Fitting them is therefore a
-CALIBRATION, not a test of the model; it makes the model a parametrised description of helium that can then PREDICT things
+The model has six parameters (E_dir 1s2s, G^0, E_dir 1s2p, G^1, zeta_S, rho). Seven numbers enter the procedure: the six NIST
+levels (3S1, 1S0, 3P2, 3P1, 3P0, 1P1) and the Kato interval. They are NOT a joint least-squares problem: the procedure is a
+sequential exact solve. Kato's interval REPLACES the table's 3P2-3P1 difference in the 2x2 solve for (zeta_S, rho), together
+with the NIST difference 3P0-3P1; the NIST 3P2 and 3P1 absolute levels still enter the 3P centroid. So there are six independent
+constraints for six parameters (zero degrees of freedom, no chi^2, no objective function), plus one redundant observation: the
+table's 3P2-3P1 interval, which is not fitted but compared with Kato (they agree to 3e-5 cm^-1, i.e. within the table's 1e-4
+rounding). Fitting them is therefore a CALIBRATION, not a test of the model; it makes the model a parametrised description of helium that can then PREDICT things
 that were not fitted (Zeeman patterns, g-factors, level mixing). Spin-orbit/spin-other-orbit and spin-spin cannot be separated
 here: zeta_S and rho are effective parameters. zeta_A (singlet-triplet spin-orbit mixing) is set to zero.
 """

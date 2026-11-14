@@ -83,9 +83,33 @@ def test_perturber_table_matches_nist_and_excludes_even_parity_and_j2():
 def test_sensitivity_is_linear_in_the_assumed_level_uncertainty():
     a = calcium_fit_sensitivity(L, 0.01)
     b = calcium_fit_sensitivity(L, 0.02)
-    assert np.allclose(b.std_err, 2 * a.std_err, rtol=1e-6)
+    assert np.allclose(b.scenario_std, 2 * a.scenario_std, rtol=1e-6)
     assert abs(a.attrs["correlation"].loc["zeta_A", "eps2"]) > 0.99                    # eps^2 and zeta_A carry the same information
-    assert a.std_err.eps2 / a.value.eps2 == pytest.approx(0.024, rel=0.1)             # 2.4 % at sigma = 0.01 cm^-1 per level (scenario)
+    assert a.scenario_std.eps2 / a.value.eps2 == pytest.approx(0.024, rel=0.1)         # 2.4 % at sigma = 0.01 cm^-1 per level (scenario)
+
+
+@pytest.mark.implementation
+def test_scenario_std_is_labelled_and_the_old_name_is_a_deprecated_alias():
+    a = calcium_fit_sensitivity(L, 0.001)
+    assert list(a.columns) == ["value", "scenario_std", "std_err"]
+    assert np.array_equal(a.scenario_std.values, a.std_err.values)                     # alias kept for compatibility
+    assert "ASSUMED" in a.attrs["note"] and "deprecated" in a.attrs["note"]
+    assert "NOT an experimental standard error" in calcium_fit_sensitivity.__doc__
+    assert "scenario_std" in calcium_fit_sensitivity.__doc__
+
+
+@pytest.mark.implementation
+def test_eps2_scenario_sigma_equals_the_analytic_jacobian():
+    """eps^2 = (a - l1)/(l2 - l1), a = (E3P2 + 2 E3P0)/3: dE/dE3P0 = (2/3)/D, dE/dE3P1 = -(l2 - a)/D^2,
+    dE/dE3P2 = (1/3)/D, dE/dE1P1 = -(a - l1)/D^2, D = l2 - l1; independent levels with sigma = 0.001 cm^-1."""
+    l0, l1, l2, lp = (L[k] for k in KEYS)
+    a, d = (l2 + 2 * l0) / 3, lp - l1
+    jac = np.array([(2 / 3) / d, -(lp - a) / d ** 2, (1 / 3) / d, -(a - l1) / d ** 2])
+    sigma = 1e-3 * np.sqrt((jac ** 2).sum())
+    got = calcium_fit_sensitivity(L, 0.001)
+    assert got.value.eps2 == pytest.approx((a - l1) / d, rel=1e-12)
+    assert got.scenario_std.eps2 == pytest.approx(sigma, rel=1e-6)
+    assert got.scenario_std.eps2 == pytest.approx(1.477e-7, rel=1e-3)
 
 
 # ---------------------------------------------------------------- calibration (closure only)
