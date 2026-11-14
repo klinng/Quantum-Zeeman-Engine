@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-312%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-312%20collected-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -46,7 +46,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 312 tests (2 of them need PyTorch and skip without it); python -m pytest -m spectroscopic runs only comparisons with data not used in a fit
+python -m pytest -q                  # 312 tests collected: 310 passed and 2 skipped without the optional PyTorch dependency, 312 passed with it; python -m pytest -m spectroscopic runs only comparisons with data not used in a fit
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -60,7 +60,7 @@ The full report is built from `docs/main.tex` (24 pages: derivations, results, s
 | **Sodium** (3p to 3s, D lines) | yes | yes | yes | yes | yes (levels and D lines) | Voigt | yes | 1 to 4, 6 | Levels 1 to 4, Extensions B, F, G, J |
 | **Hydrogen n = 2** (Lamb shift, 2s and 2p) | yes, with crossings; electric field gives anticrossings and quenching | no (no jump between 2s and 2p) | no | no | yes (levels, four crossings near 573 G) | no | yes | 5 | Extensions A, D, F |
 | **Hydrogen H-alpha** (n = 3 to 2, 656 nm) | yes | yes | yes | yes | no (no checked n = 3 constants; splittings far below the Doppler width) | Doppler only | yes (temperature sigma assumed) | 7 | Extensions C, H |
-| **Calcium 4s4p** (two electrons: singlet and triplet P terms) | yes | not yet | not yet | not yet | none (Ca-40 has no nuclear spin) | no | yes (table precision only) | none yet | Extension E |
+| **Calcium 4s4p** (two electrons: singlet and triplet P terms) | yes | not yet | not yet | not yet | none (Ca-40 has no nuclear spin) | no | assumed scenario only (NIST publishes no level uncertainties) | none yet | Extension E |
 
 A spectrum needs a jump between two shells. That is why hydrogen n = 2 alone has levels but no light, and why H-alpha was added.
 
@@ -358,7 +358,7 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          312 tests (2 need PyTorch), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          312 tests collected (2 need the optional PyTorch and are skipped without it), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values, mercury TP template and simulated example

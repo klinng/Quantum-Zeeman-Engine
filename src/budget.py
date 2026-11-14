@@ -5,8 +5,10 @@ Each row is an observable of one system (sodium, hydrogen n = 2, H-alpha, calciu
 * a model function and its inputs ``{name: (mean, sigma)}``,
 * where each sigma comes from: ``measured`` (a published uncertainty) or ``assumed`` (an illustrative choice or SCENARIO;
   replace it when a real value is found). The calcium rows use a scenario sigma of 0.001 cm^-1 per level
-  (``CA_SCENARIO_SIGMA_CM1``): that is the rounding of the NIST Handbook table, which lists NO uncertainties, so the
-  resulting sigma is "what would follow if every level were uncertain by that much", not a measured standard error,
+  (``CA_SCENARIO_SIGMA_CM1``): an assumed independent uncertainty scenario chosen at approximately the scale of the tabulated
+  precision (three levels are tabulated to 0.001 cm^-1, 3P1 to 0.0001 cm^-1). NIST does not publish uncertainties for these
+  levels, so the resulting sigma is "what would follow if every level were uncertain by that much", not a measured
+  uncertainty and not a formally derived standard deviation,
 * optionally a reference value with its own sigma, so the row gets a z-score.
 
 ``budget_table()`` runs the Monte Carlo for all rows and returns one DataFrame; ``fig_budget()`` draws it.
@@ -46,8 +48,8 @@ class Row:
     note: str = ""
 
 
-# Scenario sigma for the calcium levels: the NIST Handbook (SC85) lists no uncertainties; 0.001 cm^-1 is only the rounding
-# of the table. Other scenarios (0.01, 0.02 cm^-1) are used in tests/test_calcium_audit.py and docs/ext_two_electron.tex.
+# Scenario sigma for the calcium levels: an assumed independent uncertainty chosen at approximately the scale of the tabulated
+# precision (0.001 cm^-1 for three levels, 0.0001 for 3P1). The NIST Handbook (SC85) does not publish uncertainties for them. Other scenarios (0.01, 0.02 cm^-1) are used in tests/test_calcium_audit.py and docs/ext_two_electron.tex.
 CA_SCENARIO_SIGMA_CM1 = 0.001
 
 
@@ -90,9 +92,9 @@ def rows() -> list[Row]:
         Row("Hydrogen H-alpha", "Doppler FWHM at 300 K", "pm", _halpha_doppler_pm, {"temperature_k": (300.0, 10.0)},
             "assumed", note="temperature known to ±10 K is an assumption about the lab"),
         Row("Calcium 4s4p", "Landé interval ratio", "-", _ca_interval_ratio, ca, "assumed",
-            note="NIST Handbook energies; SCENARIO sigma 0.001 cm^-1 per level (table rounding, not a published uncertainty); the rule value 2 is an approximation, so no z-score"),
+            note="NIST Handbook energies; SCENARIO: assumed independent sigma of 0.001 cm^-1 per level, at about the scale of the tabulated precision (NIST publishes no uncertainties for these levels), not a published uncertainty; the rule value 2 is an approximation, so no z-score"),
         Row("Calcium 4s4p", "singlet admixture in 3P1", "-", _ca_admixture, ca, "assumed",
-            note="four-parameter closed form (calibration); SCENARIO sigma 0.001 cm^-1 per level (table rounding, NIST SC85 lists no uncertainties); not a standard error; omitted perturbers are model uncertainty and are not included"),
+            note="four-parameter closed form (calibration); SCENARIO: assumed independent sigma of 0.001 cm^-1 per level, at about the scale of the tabulated precision (NIST publishes no uncertainties for these levels); not a standard error; omitted perturbers are model uncertainty and are not included"),
     ]
 
 
