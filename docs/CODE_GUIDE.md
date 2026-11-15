@@ -244,6 +244,15 @@ high-resolution stage.**
 - `src/cavity.py`: `annihilation(n_max)`, `creation(n_max)`, `jaynes_cummings(n_max, w_c, w_a, g)` (basis: photon number ⊗ atom, index 0 excited), `excitation_number`, `excited_probability(...)` (exact time evolution), `fig_jaynes_cummings()`. Stand-alone, arbitrary units.
 - `src/hyperfine_figures.py`: `fig_hyperfine()` (sodium 3S Breit-Rabi diagram and the hydrogen crossing splitting).
 
+## `src/fit_covariance.py`: covariance of calibrated parameters (Stage 8B.1, partial)
+
+- `MeasurementSet.independent / from_correlation / from_covariance(names, values, ..., kind, source, units)`: values with a validated covariance and provenance (`measured`, `theory`, `recommended`, `scenario`); read-only arrays; no correlation is ever inferred. `require_positive_definite()` and `whitening_factor()` refuse singular covariances (for a later weighted fit).
+- `validate_covariance(cov)`: finite, symmetric, positive semidefinite, tolerances relative to the scale; singular PSD matrices are accepted.
+- `numerical_jacobian(func, y)`: central differences at h/2, h, 2h with a step-stability check.
+- `inverse_map_covariance(param_map, inputs, ...)`: first-order C_p = A C_y A^T; returns `InverseMapResult` (values, Jacobian, covariance, correlation, std, status ok/flagged/refused, scenario label). Covariance is None when refused.
+- `identifiability(jac, ...)`: SVD of the scaled Jacobian (rank, condition number with its scaling convention, weak combinations, status). Thresholds 1e6/1e8 are conventions.
+- Not implemented: weighted-fit covariance, residual-variance covariance, Monte Carlo engine, helium covariance. Tests: `tests/test_fit_covariance.py` (31, mathematical verification only).
+
 ## `src/uncertainty.py`: how far can a number be trusted?
 
 - `monte_carlo(model, inputs, n, seed)`: inputs are `{name: (mean, sigma)}`; draws each input from a normal distribution, runs `model(**values)`, returns mean, std and the error of the mean. Same seed gives the same answer.

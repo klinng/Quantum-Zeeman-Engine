@@ -31,7 +31,7 @@ Inputs are assumed independent (no correlations).
 \texttt{src/budget.py} puts every system in one table, each row saying where its $\sigma$ comes from: \emph{measured} (a published uncertainty) or \emph{assumed} (an illustrative value or SCENARIO, to be replaced by a published uncertainty when one exists).
 The table reports the \emph{nominal} value (the deterministic calculation at the central inputs), the propagated spread $\sigma$ (the standard deviation of the output over the input draws), and, in the code's table, also the Monte Carlo mean (\texttt{value}, unchanged) and its sampling error \texttt{mc\_sem}$=\sigma/\sqrt N$. These are three different things. $\sigma$ is the propagated input uncertainty and does not shrink with $N$; \texttt{mc\_sem} measures only how well $N$ draws pin down the mean and shrinks as $1/\sqrt N$; and the estimated $\sigma$ itself scatters by about $1/\sqrt{2(N-1)}$ of its value (5\,\% for $N=200$, 11\,\% for $N=40$), another property of the sampling. None of the three contains model error (omitted interactions), which is not statistical and is listed separately in the audit log.
 \begin{table}[h]
-\centering
+\centering\small
 \begin{tabular}{llrrl}
 \toprule
 System & Observable & Value & $\sigma$ & $\sigma$ source\\

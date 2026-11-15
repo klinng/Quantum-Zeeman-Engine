@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{amsmath,amssymb,physics,siunitx,graphicx,booktabs,hyperref}
+\usepackage{amsmath,amssymb,physics,siunitx,graphicx,booktabs,longtable,hyperref}
 \usepackage[margin=2.5cm]{geometry}
 \setlength{\emergencystretch}{3em}
 \graphicspath{{figures/}}
@@ -56,6 +56,7 @@ fine-structure splitting, then everything else is a prediction.
 \input{ext_mercury}
 \input{ext_differentiable}
 \input{ext_uncertainty}
+\input{ext_fit_covariance}
 
 \clearpage
 \section{Validation against experiment}
@@ -84,6 +85,6 @@ Na D2 hyperfine strength fractions, $F=2$ & 1/20, 1/4, 7/10 & 0.050, 0.250, 0.70
 \input{ext_sources}
 
 \section*{Acknowledgements}
-The code, the derivations and the text of this report were developed with the assistance of Claude (Anthropic). All numerical inputs were checked against the sources cited above, and the test suite (312 tests collected; 310 pass and 2 are skipped without the optional PyTorch dependency, and all 312 pass with it) and the figure scripts are in the repository.
+The code, the derivations and the text of this report were developed with the assistance of Claude (Anthropic). All numerical inputs were checked against the sources cited above, and the test suite (343 tests collected; 341 pass and 2 are skipped without the optional PyTorch dependency, and all 343 pass with it) and the figure scripts are in the repository.
 
 \end{document}

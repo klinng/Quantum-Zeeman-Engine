@@ -1,9 +1,9 @@
 \section{A differentiable Voigt profile and Zeeman spectrum}
 To fit parameters by gradients (with PyTorch), the spectrum must be a differentiable function of the field $B$, the temperature $T$ and the pressure $P$. \texttt{scipy.special.voigt\_profile} cannot be differentiated by PyTorch, and PyTorch has no complex error function, so \texttt{src/torch\_voigt.py} writes the Voigt profile with the Faddeeva function $w(z)=e^{-z^2}\operatorname{erfc}(-iz)$:
-\begin{equation}
-V(x;\sigma,\gamma)=\frac{\operatorname{Re}\,w(z)}{\sigma\sqrt{2\pi}},\quad z=\frac{x+i\gamma}{\sigma\sqrt2},\qquad
-w(z)=\frac{2\,p(Z)}{(L-iz)^2}+\frac{1/\sqrt\pi}{L-iz},\quad Z=\frac{L+iz}{L-iz},\ L=\sqrt{N/\sqrt2},
-\end{equation}
+\begin{equation}\begin{split}
+V(x;\sigma,\gamma)=\frac{\operatorname{Re}\,w(z)}{\sigma\sqrt{2\pi}},\quad z=\frac{x+i\gamma}{\sigma\sqrt2},\\
+ w(z)=\frac{2\,p(Z)}{(L-iz)^2}+\frac{1/\sqrt\pi}{L-iz},\quad Z=\frac{L+iz}{L-iz},\ L=\sqrt{N/\sqrt2},
+\end{split}\end{equation}
 the rational approximation of Weideman~\cite{weideman} with $N=32$; $p$ is a polynomial whose coefficients come from one FFT, computed once. Evaluating $p$ by Horner's rule uses only $+,\times,\div$, so the same function runs on NumPy arrays and PyTorch tensors, and autograd gives the derivatives with respect to $x,\sigma,\gamma$. The widths follow from $T$ and $P$:
 \begin{equation}
 \sigma=\nu_0\sqrt{\frac{k_BT}{mc^2}},\qquad \gamma=\frac{A}{4\pi}+k_PP,

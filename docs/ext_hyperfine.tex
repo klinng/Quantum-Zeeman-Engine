@@ -1,8 +1,10 @@
 \section{Hyperfine structure}
 The nucleus has spin $I$ and a magnetic moment. We add it to the basis (\texttt{src/hyperfine.py}). The basis used by every hyperfine calculation is the \emph{uncoupled} one, $|l\,m_l\rangle|s\,m_s\rangle|I\,m_I\rangle$ (electron part first, nuclear spin innermost; dimension $2(2l+1)(2I+1)$); the coupled states $|((l\,s)J,I)F\,m_F\rangle$ appear only through projectors. The Hamiltonian is
-\begin{equation}
-H = H_\text{fine+Zeeman}\otimes 1_I + \sum_J A_J\, P_J(\mathbf I\cdot\mathbf J)P_J + \sum_J \frac{B_J}{2I(2I-1)J(2J-1)}P_J\Big[3(\mathbf I\cdot\mathbf J)^2+\tfrac32\,\mathbf I\cdot\mathbf J-I(I+1)J(J+1)\Big]P_J + \mu_B g_I I_z B .
-\end{equation}
+\begin{multline}
+H = H_\text{fine+Zeeman}\otimes 1_I + \sum_J A_J\, P_J(\mathbf I\cdot\mathbf J)P_J\\
+{}+ \sum_J \frac{B_J}{2I(2I-1)J(2J-1)}P_J\Big[3(\mathbf I\cdot\mathbf J)^2+\tfrac32\,\mathbf I\cdot\mathbf J-I(I+1)J(J+1)\Big]P_J\\
+{}+ \mu_B g_I I_z B .
+\end{multline}
 $P_J$ projects onto electronic angular momentum $J$, so each fine-structure level has its own constants $A_J$ and $B_J$. The quadrupole term is identically zero for $J=\tfrac12$ and for $I=\tfrac12$, so it matters only for sodium $3P_{3/2}$. At zero field the levels split into $F=J+I,\dots,|J-I|$; $F$ is a good label only at $B=0$, while $m_F$ always is (field along $z$), so in a field the code reports $m_F$ and the weights in each $F$ subspace (\texttt{f\_weights}).
 
 \paragraph{Inputs.} Sodium ($I=3/2$): $A(3S_{1/2})=885.8130644$, $A(3P_{1/2})=94.44$, $A(3P_{3/2})=18.534$ MHz (Steck's table). Hydrogen ($I=1/2$): the 2S splitting
