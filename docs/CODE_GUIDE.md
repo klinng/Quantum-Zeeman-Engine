@@ -250,7 +250,8 @@ high-resolution stage.**
 - `validate_covariance(cov)`: finite, symmetric, positive semidefinite, tolerances relative to the scale; singular PSD matrices are accepted.
 - `numerical_jacobian(func, y)`: central differences at h/2, h, 2h with a step-stability check.
 - `inverse_map_covariance(param_map, inputs, ...)`: first-order C_p = A C_y A^T; returns `InverseMapResult` (values, Jacobian, covariance, correlation, std, status ok/flagged/refused, scenario label). Covariance is None when refused.
-- `identifiability(jac, ...)`: SVD of the scaled Jacobian (rank, condition number with its scaling convention, weak combinations, status). Thresholds 1e6/1e8 are conventions.
+- `identifiability(jac, ...)`: STRUCTURAL identifiability, SVD of the scaled Jacobian (rank, condition number with its scaling convention, weak combinations, status). For an inverse map it uses A_struct = S_p^-1 A S_y (explicit characteristic scales, independent of the input covariance). Thresholds 1e6/1e8 are conventions.
+- `uncertainty_sensitivity(jac, cov_y, ...)`: separate informational diagnostic of the supplied uncertainty: marginal (S_p^-1 A diag(sigma_y), ignores correlations) and covariance-aware (S_p^-1 A R, C_y = R R^T). Never refuses; a zero covariance gives a zero C_p, not a refusal.
 - Not implemented: weighted-fit covariance, residual-variance covariance, Monte Carlo engine, helium covariance. Tests: `tests/test_fit_covariance.py` (31, mathematical verification only).
 
 ## `src/uncertainty.py`: how far can a number be trusted?

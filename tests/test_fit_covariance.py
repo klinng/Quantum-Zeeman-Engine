@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from src.fit_covariance import (CovarianceError, JacobianError, MeasurementSet, identifiability, inverse_map_covariance,
-                                numerical_jacobian, validate_covariance)
+                                numerical_jacobian, uncertainty_sensitivity, validate_covariance)
 from src.two_electron import CA_LEVELS_CM1, calcium_fit_sensitivity, calcium_four_parameter_fit
 
 pytestmark = pytest.mark.implementation
@@ -350,3 +350,108 @@ def test_calcium_boundary_is_reported_as_a_domain_error_not_a_number():
 def test_existing_calcium_interface_is_unchanged():
     df = calcium_fit_sensitivity(CA_LEVELS_CM1, 0.001)
     assert list(df.columns) == ["value", "scenario_std", "std_err"] and list(df.index) == OUT
+
+
+# ------------------------------------------------------------------ review corrections: zero covariance, two diagnostics
+def test_zero_input_covariance_gives_zero_output_covariance_not_a_refusal():
+    ms = MeasurementSet.from_covariance(["y"], [2.0], [[0.0]], "measured", "exact input")
+    r = inverse_map_covariance(lambda y: 3.0 * y, ms, output_names=["p"])
+    assert r.status == "ok" and r.covariance is not None
+    assert r.covariance[0, 0] == 0.0 and r.std[0] == 0.0
+    assert r.identifiability.rank == 1 and r.identifiability.status == "ok"
+    assert r.sensitivity.is_zero and r.sensitivity.covariance_rank == 0
+    ind = inverse_map_covariance(lambda y: 3.0 * y, _ms([2.0], [0.0]))          # same via the independent constructor
+    assert ind.status == "ok" and ind.covariance[0, 0] == 0.0
+
+
+def test_structural_diagnostic_is_independent_of_the_supplied_covariance():
+    f = lambda y: np.array([y[0] + y[1], y[0] - 2 * y[1]])
+    ranks, conds = set(), set()
+    for sig in ([1.0, 1.0], [0.0, 0.0], [1e-12, 5.0], [0.0, 1.0]):
+        r = inverse_map_covariance(f, _ms([1.0, 2.0], sig))
+        assert r.status in ("ok", "flagged") and r.covariance is not None
+        ranks.add(r.identifiability.rank)
+        conds.add(round(r.identifiability.condition_number, 9))
+    assert ranks == {2} and len(conds) == 1
+    assert "independent of the input covariance" in r.identifiability.scaling
+    with pytest.raises(ValueError):
+        identifiability(np.eye(2), orientation="inverse", cov_y=np.eye(2))      # the covariance is not a structural input
+
+
+def test_zero_variance_direction_is_not_a_structural_failure_but_rank_deficiency_still_refuses():
+    ms = _ms([1.0, 1.0], [1.0, 0.0])                                             # second input exact
+    r = inverse_map_covariance(lambda y: np.array([y[0] + y[1], y[0] - y[1]]), ms)
+    assert r.status != "refused" and r.identifiability.rank == 2
+    assert r.sensitivity.covariance_rank == 1                                    # only one propagated direction
+    dep = inverse_map_covariance(lambda y: np.array([y[0], 2.0 * y[0]]), _ms([1.0], [0.0]))
+    assert dep.status == "refused" and dep.covariance is None and dep.identifiability.rank == 1
+    dep2 = inverse_map_covariance(lambda y: np.array([y[0], 2.0 * y[0]]), _ms([1.0], [1.0]))
+    assert dep2.status == "refused"                                              # unchanged by the uncertainty value
+
+
+def test_correlated_inputs_propagate_as_A_C_At_and_descriptions_state_what_is_used():
+    cov = np.array([[4.0, 1.5], [1.5, 1.0]])
+    a = np.array([[1.0, 2.0], [3.0, -1.0]])
+    ms = MeasurementSet.from_covariance(["y0", "y1"], [1.0, 1.0], cov, "measured", "correlated test")
+    r = inverse_map_covariance(lambda y: a @ y, ms)
+    assert np.allclose(r.covariance, a @ cov @ a.T, rtol=1e-6, atol=1e-8)
+    sens = r.sensitivity
+    assert "NOT included" in sens.marginal_description and "marginal" in sens.marginal_description
+    assert "full input covariance" in sens.covariance_description
+    scale = np.where(np.abs(r.values) > 0, np.abs(r.values), 1.0)
+    # squared covariance-aware singular values = eigenvalues of the scaled output covariance
+    scaled_cov = r.covariance / np.outer(scale, scale)
+    assert np.allclose(np.sort(sens.covariance_singular_values ** 2), np.sort(np.linalg.eigvalsh(scaled_cov)), rtol=1e-6)
+    # the marginal diagnostic differs from the covariance-aware one when inputs are correlated
+    assert not np.allclose(np.sort(sens.marginal_singular_values), np.sort(sens.covariance_singular_values))
+    uncorr = uncertainty_sensitivity(a, np.diag(np.diag(cov)))
+    assert np.allclose(np.sort(uncorr.marginal_singular_values), np.sort(uncorr.covariance_singular_values))
+
+
+def test_singular_psd_covariance_sensitivity_and_propagation():
+    cov = np.ones((3, 3))                                                        # rank 1
+    a = np.array([[1.0, 1.0, 1.0], [1.0, 2.0, 3.0]])
+    sens = uncertainty_sensitivity(a, cov)
+    assert sens.covariance_rank == 1 and not sens.is_zero
+    assert np.isinf(sens.covariance_cond)
+    ms = MeasurementSet.from_covariance(["a", "b", "c"], [1.0, 2.0, 3.0], cov, "scenario", "common shift")
+    r = inverse_map_covariance(lambda y: np.array([y.sum(), y @ np.array([1.0, 2.0, 3.0])]), ms)
+    assert r.status != "refused" and np.allclose(r.covariance, a @ cov @ a.T, rtol=1e-6, atol=1e-8)
+    with pytest.raises(CovarianceError):
+        uncertainty_sensitivity(a, np.array([[1.0, 0, 0], [0, -1.0, 0], [0, 0, 1.0]]))
+
+
+def test_sensitivity_reports_left_null_directions_when_outputs_exceed_inputs():
+    a = np.array([[1.0], [2.0], [3.0]])
+    res = uncertainty_sensitivity(a, np.array([[1.0]]), param_names=["a", "b", "c"], n_weak=3)
+    assert res.covariance_rank == 1 and not res.is_zero and np.isinf(res.covariance_cond)
+    assert res.covariance_singular_values.shape == (1,)
+    assert len(res.weak_directions) == 2                                        # exactly the two null directions
+    axis = np.array([1.0, 2.0, 3.0]) / np.sqrt(14.0)
+    vecs = []
+    for w in res.weak_directions:
+        assert w.singular_value == 0.0 and w.ratio_to_largest == 0.0
+        assert set(w.components) <= {"a", "b", "c"}
+        v = np.array([w.components.get(k, 0.0) for k in "abc"])
+        assert np.all(np.isfinite(v))
+        vecs.append(v)
+    # components are reported for the top three entries here (m = 3), so each vector is complete: unit norm, orthogonal to range(A)
+    full = [np.array([w.components[k] for k in "abc"]) for w in res.weak_directions]
+    for v in full:
+        assert np.linalg.norm(v) == pytest.approx(1.0, abs=1e-12)
+        assert abs(v @ axis) < 1e-12
+    assert abs(full[0] @ full[1]) < 1e-12
+    assert len(uncertainty_sensitivity(a, np.array([[1.0]]), n_weak=1).weak_directions) == 1     # documented n_weak limit
+
+
+def test_sensitivity_square_and_wide_cases_unchanged_and_validation():
+    sq = uncertainty_sensitivity(np.diag([1.0, 1e-9]), np.eye(2))                # m = n, one weak direction
+    assert sq.covariance_rank == 2 and len(sq.weak_directions) == 1 and sq.weak_directions[0].ratio_to_largest == pytest.approx(1e-9)
+    wide = uncertainty_sensitivity(np.array([[1.0, 1.0, 1.0]]), np.eye(3))       # m < n, full rank 1
+    assert wide.covariance_rank == 1 and wide.weak_directions == ()
+    with pytest.raises(ValueError, match="non-finite"):
+        uncertainty_sensitivity(np.array([[np.nan]]), np.eye(1))
+    with pytest.raises(ValueError, match="param_names"):
+        uncertainty_sensitivity(np.eye(2), np.eye(2), param_names=["only_one"])
+    with pytest.raises(ValueError):
+        uncertainty_sensitivity(np.ones(3), np.eye(3))

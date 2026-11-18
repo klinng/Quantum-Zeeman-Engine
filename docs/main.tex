@@ -85,6 +85,6 @@ Na D2 hyperfine strength fractions, $F=2$ & 1/20, 1/4, 7/10 & 0.050, 0.250, 0.70
 \input{ext_sources}
 
 \section*{Acknowledgements}
-The code, the derivations and the text of this report were developed with the assistance of Claude (Anthropic). All numerical inputs were checked against the sources cited above, and the test suite (343 tests collected; 341 pass and 2 are skipped without the optional PyTorch dependency, and all 343 pass with it) and the figure scripts are in the repository.
+The code, derivations and text of this report were developed with the assistance of Claude (Anthropic). Input values were taken from the sources cited in the sources table, which also marks each value that rests on theory alone or on an assumed scenario; some of these remain unverified against an independent source (for example the leading-order hydrogen hyperfine values and the assumed calcium level uncertainties), and the audit log lists the open items. The author has run the test suite on his own computer; the repository \url{https://github.com/klinng/Quantum-Zeeman-Engine} (README and \texttt{docs/AUDIT\_LOG.md}) gives the current test count and the audit status. Passing tests show that the code agrees with its own analytic checks and the cited reference values, not that the model is validated against experiment.
 
 \end{document}

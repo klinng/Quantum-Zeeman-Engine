@@ -27,3 +27,15 @@ Stage 8A final cleanup (documentation only): calcium scenario wording corrected 
 
 ## Stage 8B.1 - core covariance infrastructure (partial; Stage 8B is NOT complete)
 Added `src/fit_covariance.py` and `tests/test_fit_covariance.py`: MeasurementSet, validate_covariance, numerical_jacobian (step-stability check), inverse_map_covariance, identifiability. Calcium regression against `calcium_fit_sensitivity`: std agree to 2.1e-8 relative, correlation to 1.1e-8, sigma(eps2)=1.477e-7 (assumed scenario). Not implemented: weighted-fit covariance, residual-variance covariance, Monte Carlo engine, helium numerical covariance, fit_parameters integration. Deferred requirement: future Monte Carlo must separate expected domain rejection (V^2 < 0) from numerical failure and programming errors, report rejected samples and acceptance fraction, and label accepted-sample statistics as conditional. No existing public interface or physical model changed. Mathematical verification only; no experimental validation.
+
+## Stage 8B.1 - independent review corrections
+- Zero-uncertainty fix: `inverse_map_covariance` no longer refuses when an input standard deviation is zero. Structural identifiability (`identifiability`, inverse orientation) now uses A_struct = S_p^-1 A S_y with explicit characteristic parameter and input scales and does not depend on C_y; p = 3y with C_y = 0 gives C_p = 0.
+- New `uncertainty_sensitivity`: informational, never refuses; marginal version (diag sigma_y, ignores correlations) and covariance-aware version (PSD square root of C_y). Rank-deficient (functionally dependent) maps are still refused regardless of sigma.
+- 5 new deterministic tests; collection is now 348 (346 passed and 2 skipped without PyTorch).
+- `docs/main.tex` acknowledgements: the earlier uncommitted wording (all inputs verified; tests independently run) was revised, not kept, because the audit still lists unverified items (leading-order hydrogen hyperfine values, assumed calcium scenarios, diamagnetic reduced-mass factor). The new text states what was checked and what is open, and says the author ran the test suite (his own pasted output, 343 passed before this correction; he should re-run for 348).
+- Stage 8B.2 has not been started.
+
+## Stage 8B.1 - final corrections
+- `uncertainty_sensitivity`: when outputs exceed inputs (m > n) the exact left-null-space directions are now reported as zero-singular-value weak directions (up to `n_weak`); a non-finite Jacobian and a `param_names` length mismatch raise a clear ValueError.
+- Calcium wording corrected: structural identifiability condition number 33 984.9 (S_p = |p_hat|, S_y = |y_hat|) is distinct from the covariance-aware uncertainty-sensitivity condition number 37 124.5 (assumed independent 0.001 cm^-1 per level, a scenario). Different scalings, different questions.
+- Collection is now 350 (348 passed and 2 skipped without PyTorch). Stage 8B.2 has not been started.

@@ -7,7 +7,12 @@ WHAT IS IMPLEMENTED
 * ``validate_covariance``: finite values, symmetry and positive-semidefiniteness with scale-aware tolerances.
 * ``numerical_jacobian``: central differences at three step sizes with a step-stability check.
 * ``inverse_map_covariance``: C_p = A C_y A^T for an explicit parameter map p = p(y), A = dp/dy.
-* ``identifiability``: SVD diagnostics of a scaled Jacobian (rank, condition number, weak combinations, status).
+* ``identifiability``: STRUCTURAL identifiability, SVD of a Jacobian scaled by explicit characteristic scales (rank,
+  condition number, weak combinations, status). For an inverse map it is A_struct = S_p^-1 A S_y and does not depend on the
+  input covariance, so zero input uncertainty is not a structural failure.
+* ``uncertainty_sensitivity``: separate, informational diagnostic of which parameter combinations respond to the supplied
+  uncertainty: marginal (S_p^-1 A diag(sigma_y), ignores correlations) and covariance-aware (S_p^-1 A R, C_y = R R^T with a
+  PSD square root R). It never refuses. Squared covariance-aware singular values are the eigenvalues of S_p^-1 C_p S_p^-1.
 
 WHAT IS NOT IMPLEMENTED (deliberately)
 --------------------------------------
@@ -310,16 +315,24 @@ class Identifiability:
 def identifiability(jac, *, cov_y=None, scales=None, orientation: str = "forward", param_names: Sequence[str] | None = None,
                     expect_independent_params: bool = True, rank_rtol: float | None = None, flag_cond: float = 1e6,
                     refuse_cond: float = 1e8, correlation=None, corr_flag: float = 0.99, n_weak: int = 3,
-                    scales_note: str | None = None) -> Identifiability:
-    r"""SVD diagnostics of a scaled Jacobian. The thresholds are configurable diagnostic conventions, not physical limits.
+                    scales_note: str | None = None, input_scales=None, input_scales_note: str | None = None) -> Identifiability:
+    r"""STRUCTURAL identifiability: SVD diagnostics of a Jacobian scaled by explicit characteristic scales. The thresholds are
+    configurable diagnostic conventions, not physical limits. Nothing here depends on the supplied input covariance of an
+    inverse map: a zero or tiny uncertainty never makes a well-defined map unidentifiable (see ``uncertainty_sensitivity`` for
+    the separate, covariance-dependent diagnostic).
 
     ``orientation="forward"``: ``jac`` = df/dp (n_obs x m). With ``cov_y = L L^T`` (Cholesky; must be positive definite) the
         matrix analysed is  J_scaled = L^-1 J S_p,  S_p = diag(``scales``) the characteristic parameter scales.
         Without ``cov_y`` the observations are not whitened (J S_p), and the scaling string says so.
         Weak combinations are right singular vectors (directions in scaled parameter space).
     ``orientation="inverse"``: ``jac`` = A = dp/dy (m x n_in), the Jacobian of an explicit map p = p(y).
-        The matrix analysed is  A_scaled = S_p^-1 A D_y,  D_y = diag(sqrt(diag(cov_y))) (input standard deviations; no
-        full whitening is needed, and singular covariances are allowed). Weak combinations are left singular vectors.
+        The matrix analysed is  A_struct = S_p^-1 A S_y  with S_y = diag(``input_scales``) the characteristic INPUT scales
+        (default 1, stated in the scaling string). ``cov_y`` is not accepted: structural identifiability does not depend on it.
+        Meaning of the SVD A_struct = U diag(s) V^T: s_i are the gains from relative input changes (V columns, combinations of
+        the inputs in units of S_y) to relative parameter changes (U columns, combinations of the parameters in units of
+        S_p); rank < m means some parameter combination does not respond to any input (the parameters are functionally
+        dependent); s_max/s_min (``condition_number``) measures how unevenly the parameter combinations respond, in these
+        characteristic units. Weak combinations are left singular vectors (U columns).
 
     ``scales`` (length m) are the characteristic parameter scales (default 1, stated in the scaling string).
     Numerical rank: singular values above ``rank_rtol * s_max`` (default max(shape) * machine epsilon).
@@ -361,14 +374,17 @@ def identifiability(jac, *, cov_y=None, scales=None, orientation: str = "forward
             sc_txt += "; observations NOT whitened (J S_p)"
     else:
         if cov_y is not None:
-            c = np.asarray(cov_y, dtype=float)
-            validate_covariance(c, name="cov_y")
-            d_y = np.sqrt(np.diag(c))
-            sc_txt += "; inputs scaled by their standard deviations, A_scaled = S_p^-1 A diag(sigma_y)"
+            raise ValueError("structural identifiability of an inverse map does not use cov_y; pass input_scales, and use "
+                             "uncertainty_sensitivity for the covariance-dependent diagnostic")
+        if input_scales is None:
+            s_y, sy_txt = np.ones(a.shape[1]), "input scales S_y = 1 (unscaled)"
         else:
-            d_y = np.ones(a.shape[1])
-            sc_txt += "; inputs NOT scaled (S_p^-1 A)"
-        mat = a / s_p[:, None] * d_y[None, :]
+            s_y = np.asarray(input_scales, dtype=float)
+            if s_y.shape != (a.shape[1],) or np.any(s_y <= 0) or not np.all(np.isfinite(s_y)):
+                raise ValueError("input_scales must be positive, finite, one per input")
+            sy_txt = input_scales_note or "input scales S_y given explicitly"
+        sc_txt += f"; {sy_txt}; A_struct = S_p^-1 A S_y (independent of the input covariance)"
+        mat = a / s_p[:, None] * s_y[None, :]
     u, sv, vt = np.linalg.svd(mat, full_matrices=True)
     s_max = float(sv[0]) if sv.size else 0.0
     tol = (rank_rtol if rank_rtol is not None else max(mat.shape) * _EPS) * s_max
@@ -420,6 +436,81 @@ def identifiability(jac, *, cov_y=None, scales=None, orientation: str = "forward
                            status, tuple(msgs))
 
 
+# ---------------------------------------------------------------------------- uncertainty-scaled sensitivity
+@dataclass(frozen=True)
+class UncertaintySensitivity:
+    """Which parameter combinations respond to the SUPPLIED input uncertainty. This is not a structural diagnostic: a zero or
+    small value here means "no/little propagated uncertainty", never "unidentifiable".
+
+    ``marginal_*``: SVD of S_p^-1 A diag(sigma_y); uses only the marginal standard deviations and IGNORES input correlations.
+    ``covariance_*``: SVD of S_p^-1 A R with C_y = R R^T, R = V sqrt(max(lambda, 0)) from the symmetric eigendecomposition
+    C_y = V diag(lambda) V^T (a positive-semidefinite square root; singular C_y is allowed). It uses the full covariance; its
+    squared singular values are the eigenvalues of the scaled output covariance S_p^-1 C_p S_p^-1, and its left singular vectors
+    are the principal axes of the propagated uncertainty in units of S_p. ``covariance_cond`` is s_max/s_min of that matrix
+    (inf when the propagated covariance is singular, nan when it is zero)."""
+    marginal_description: str
+    covariance_description: str
+    marginal_singular_values: np.ndarray
+    covariance_singular_values: np.ndarray
+    covariance_rank: int
+    covariance_cond: float
+    is_zero: bool
+    weak_directions: tuple
+
+
+def uncertainty_sensitivity(jac, cov_y, *, scales=None, param_names: Sequence[str] | None = None, rank_rtol: float | None = None,
+                            n_weak: int = 3) -> UncertaintySensitivity:
+    """Uncertainty-scaled sensitivity of an explicit map p = p(y) with Jacobian ``jac`` = A (m x n) and input covariance
+    ``cov_y`` (any positive-semidefinite matrix, including zero). See ``UncertaintySensitivity`` for the matrices analysed.
+    ``weak_directions`` lists up to ``n_weak`` left singular vectors (parameter-space directions, smallest singular value first)
+    with a rank-deficient or negligible (< 1e-6 relative) response; when there are more outputs than inputs (m > n) the exact
+    null-space directions beyond min(m, n) are included with singular value 0. Raises ValueError for a non-2-D or non-finite
+    Jacobian, a ``param_names`` length different from m, or invalid ``scales``; CovarianceError for an invalid ``cov_y``."""
+    a = np.asarray(jac, dtype=float)
+    if a.ndim != 2:
+        raise ValueError("jac must be a 2-D array")
+    if not np.all(np.isfinite(a)):
+        raise ValueError("jac contains non-finite values")
+    m, n = a.shape
+    c = np.asarray(cov_y, dtype=float)
+    if c.shape != (n, n):
+        raise ValueError("cov_y must be n x n for an m x n Jacobian")
+    validate_covariance(c, name="cov_y")
+    s_p = np.ones(m) if scales is None else np.asarray(scales, dtype=float)
+    if s_p.shape != (m,) or np.any(s_p <= 0) or not np.all(np.isfinite(s_p)):
+        raise ValueError("scales must be positive, finite, one per parameter")
+    names = tuple(param_names) if param_names is not None else tuple(f"p{i}" for i in range(m))
+    if len(names) != m:
+        raise ValueError(f"param_names has {len(names)} entries but the Jacobian has {m} parameters (rows)")
+    lam, vec = np.linalg.eigh(0.5 * (c + c.T))
+    root = vec * np.sqrt(np.maximum(lam, 0.0))[None, :]                 # C_y = root root^T
+    mat_marg = a / s_p[:, None] * np.sqrt(np.diag(c))[None, :]
+    mat_cov = a / s_p[:, None] @ root
+    sv_m = np.linalg.svd(mat_marg, compute_uv=False)
+    u, sv, _ = np.linalg.svd(mat_cov, full_matrices=True)
+    s_max = float(sv[0]) if sv.size else 0.0
+    tol = (rank_rtol if rank_rtol is not None else max(mat_cov.shape) * _EPS) * s_max
+    rank = int(np.sum(sv > tol)) if s_max > 0 else 0
+    if s_max == 0.0:
+        cond = float("nan")
+    else:
+        cond = float(s_max / sv[m - 1]) if rank == m else float("inf")
+    weak = []
+    if s_max > 0:
+        for idx in range(m - 1, -1, -1):                                  # smallest first; u is m x m, so when m > n the
+            sval = float(sv[idx]) if idx < sv.size else 0.0              # directions beyond min(m, n) are exact null directions
+            if idx >= rank or sval / s_max < 1e-6:
+                comp = u[:, idx]
+                top = np.argsort(-np.abs(comp))[: min(3, m)]
+                weak.append(WeakDirection(sval, sval / s_max, {names[k]: float(comp[k]) for k in top}))
+                if len(weak) >= n_weak:
+                    break
+    return UncertaintySensitivity(
+        "S_p^-1 A diag(sigma_y): marginal standard deviations only; input correlations are NOT included",
+        "S_p^-1 A R with C_y = R R^T (PSD square root): full input covariance including correlations",
+        _frozen(sv_m), _frozen(sv), rank, cond, bool(s_max == 0.0), tuple(weak))
+
+
 # ---------------------------------------------------------------------------------------------- inverse-map covariance
 @dataclass(frozen=True)
 class InverseMapResult:
@@ -444,12 +535,14 @@ class InverseMapResult:
     jacobian_step_spread: float | None
     jacobian_source: str
     input_names: tuple = field(default_factory=tuple)
+    sensitivity: UncertaintySensitivity | None = None
 
 
 def inverse_map_covariance(param_map: Callable[[np.ndarray], np.ndarray], inputs: MeasurementSet, *, output_names=None,
                            output_units=None, jacobian=None, param_scales=None, outputs_are_parameters: bool = True,
                            steps=None, rel_step: float = 1e-8, step_rtol: float = 1e-5, flag_cond: float = 1e6,
-                           refuse_cond: float = 1e8, corr_flag: float = 0.99) -> InverseMapResult:
+                           refuse_cond: float = 1e8, corr_flag: float = 0.99,
+                           input_scales=None) -> InverseMapResult:
     r"""First-order covariance of p = param_map(y) for inputs y with covariance C_y:  C_p = A C_y A^T,  A = dp/dy.
 
     ``param_map(y)`` takes the input vector (ordered as ``inputs.names``) and returns a 1-D array. ``jacobian`` may be an
@@ -462,8 +555,11 @@ def inverse_map_covariance(param_map: Callable[[np.ndarray], np.ndarray], inputs
     when some outputs are derived from the others (e.g. calcium eps^2 next to its four parameters): rank deficiency is then
     only flagged, and the (singular) output covariance is returned.
 
-    ``param_scales`` are the characteristic scales S_p used by the identifiability diagnostic (default |p_hat|, or 1 where p_hat = 0).
-    The diagnostic matrix is S_p^-1 A diag(sigma_y); the scaling is recorded in ``identifiability.scaling``.
+    Two separate diagnostics are returned. (1) ``identifiability`` is STRUCTURAL: A_struct = S_p^-1 A S_y with explicit
+    characteristic parameter scales S_p (``param_scales``, default |p_hat|, 1 where p_hat = 0) and input scales S_y
+    (``input_scales``, default |y_hat|, 1 where y_hat = 0); it does not depend on C_y, so a zero input covariance gives the
+    zero output covariance rather than a refusal. It alone decides refusal. (2) ``sensitivity`` is the uncertainty-scaled,
+    informational diagnostic (marginal and covariance-aware); it never refuses.
     The result is a conditional, first-order statement; it contains no model error and is not a goodness-of-fit."""
     y0 = np.asarray(inputs.values, dtype=float)
     p0 = np.atleast_1d(np.asarray(param_map(y0), dtype=float))
@@ -491,11 +587,15 @@ def inverse_map_covariance(param_map: Callable[[np.ndarray], np.ndarray], inputs
         if not stable:
             msgs.append(f"finite-difference Jacobian is not step-stable (spread {spread:.3g} > {step_rtol:g}); no covariance returned")
     scales = (np.where(np.abs(p0) > 0, np.abs(p0), 1.0) if param_scales is None else np.asarray(param_scales, dtype=float))
+    in_scales = (np.where(np.abs(y0) > 0, np.abs(y0), 1.0) if input_scales is None else np.asarray(input_scales, dtype=float))
+    in_note = ("input scales S_y = |y_hat| (default; 1 where y_hat = 0)" if input_scales is None
+               else "input scales S_y supplied by the caller")
     scales_note = ("parameter scales S_p = |p_hat| (default; 1 where p_hat = 0)" if param_scales is None
                    else "parameter scales S_p supplied by the caller")
-    idn = identifiability(a, cov_y=inputs.cov, scales=scales, orientation="inverse", param_names=names,
-                          expect_independent_params=outputs_are_parameters, flag_cond=flag_cond, refuse_cond=refuse_cond,
-                          corr_flag=corr_flag, scales_note=scales_note)
+    idn = identifiability(a, scales=scales, orientation="inverse", param_names=names, input_scales=in_scales,
+                          input_scales_note=in_note, expect_independent_params=outputs_are_parameters, flag_cond=flag_cond,
+                          refuse_cond=refuse_cond, corr_flag=corr_flag, scales_note=scales_note)
+    sens = uncertainty_sensitivity(a, inputs.cov, scales=scales, param_names=names)
     cov = corr = std = None
     status = idn.status
     msgs.extend(idn.messages)
@@ -525,4 +625,4 @@ def inverse_map_covariance(param_map: Callable[[np.ndarray], np.ndarray], inputs
                             covariance=None if cov is None else _frozen(cov), correlation=None if corr is None else _frozen(corr),
                             std=None if std is None else _frozen(std), uncertainty_kind=inputs.kind, is_scenario=scen, label=label,
                             status=status, messages=tuple(msgs), identifiability=idn, jacobian_step_spread=spread,
-                            jacobian_source=src, input_names=inputs.names)
+                            jacobian_source=src, input_names=inputs.names, sensitivity=sens)
