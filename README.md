@@ -2,7 +2,7 @@
 
 [![Tests and PDF](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml/badge.svg)](https://github.com/klinng/Quantum-Zeeman-Engine/actions/workflows/latex.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-350%20collected-blue)
+![Tests](https://img.shields.io/badge/tests-371%20collected-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Take one big physics problem, split it into levels, and make every level checkable:**
@@ -46,7 +46,7 @@ git clone https://github.com/klinng/Quantum-Zeeman-Engine.git
 cd Quantum-Zeeman-Engine
 pip install -r requirements.txt
 python scripts/run_all.py --fast     # tests, figures, notebooks, PDF (drop --fast to also render the GIFs)
-python -m pytest -q                  # 350 tests collected: 348 passed and 2 skipped without the optional PyTorch dependency, 350 passed with it; python -m pytest -m spectroscopic runs only comparisons with data not used in a fit
+python -m pytest -q                  # 371 tests collected: 369 passed and 2 skipped without the optional PyTorch dependency, 371 passed with it; python -m pytest -m spectroscopic runs only comparisons with data not used in a fit
 ```
 
 Or only what you need: `python scripts/make_figures.py --gif`, `python scripts/make_optics_figures.py --gif`,
@@ -207,7 +207,7 @@ triplet. D1 and D2 lines cross over, so shifts are measured from the doublet's c
 | Extension H | Small corrections: diamagnetic term, H/D isotope shift | H-alpha diamagnetic shift 9.7 pm at 60 T; D bluer than H by 178.6 pm (measured: 178.6) | `diamagnetic.py`, `isotope.py` | `ext_corrections.tex` |
 | Extension I | Photon operators a, a† and the Jaynes-Cummings atom-in-a-cavity demo | vacuum Rabi cos²(g t) and splitting g√N reproduced exactly | `cavity.py` | `ext_cavity.tex` |
 | Extension J | Uncertainty: Monte Carlo and derivative propagation, z-scores, error bands, global budget | sampled σ equals exact σ (Na 3P₁/₂: 0.26 MHz); g_J(3S₁/₂) differs from measurement by 2.3e-5 | `uncertainty.py`, `uncertainty_bands.py`, `budget.py` | `ext_uncertainty.tex` |
-| Extension O | Covariance infrastructure (partial, Stage 8B.1): validated measurement covariance with provenance, inverse-map propagation, SVD identifiability diagnostics; weighted-fit and residual-variance covariance NOT implemented | reproduces `calcium_fit_sensitivity` (σ(ε²) = 1.477e-7, an assumed scenario) | `fit_covariance.py` | `ext_fit_covariance.tex` |
+| Extension O | Covariance infrastructure (partial, Stages 8B.1 and 8B.2a): validated measurement covariance with provenance, inverse-map propagation, SVD identifiability diagnostics; pure sandwich, weighted, residual-variance and exact covariance calculations (`fit_parameter_covariance`); NOT integrated into `fit_parameters` or `fit_to_levels`, no GLS fitting, no calcium/helium wrappers, no Monte Carlo or PyTorch | reproduces `calcium_fit_sensitivity` (σ(ε²) = 1.477e-7, an assumed scenario) | `fit_covariance.py` | `ext_fit_covariance.tex` |
 | Extension K | Calcium Zeeman line spectrum 4s² ¹S₀ → 4s4p: 657 nm intercombination line, field-induced ³P₀ line | ³P₁ strength = 3ε² (ε² = 7.8e-5); ³P₀ strength ∝ B² | `calcium_lines.py` | `ext_calcium_lines.tex` |
 | Extension L | Helium 1s2s and 1s2p: exchange from Slater integrals (G¹, G⁰), spin-orbit, spin-spin tensor, Zeeman | exchange splits singlet from triplet by 2G; spin-spin gives 1 : −5 : 10 over ³P₂,₁,₀ and breaks the Landé rule; calibrated to the six NIST n = 2 levels and the Kato et al. interval (6 parameters, 6 levels: a calibration) | `helium.py`, `helium_data.py` | `ext_helium.tex` |
 | Extension M | Differentiable Voigt profile and Zeeman spectrum (Weideman Faddeeva function; gradients in B, T, P with PyTorch) | NumPy side equals scipy to 4e-14; the PyTorch tests skip when torch is absent | `torch_voigt.py` | `ext_differentiable.tex` |
@@ -359,7 +359,7 @@ src/            constants, hamiltonians, solvers, transitions, fitting, validati
                 literature, torch_engine
 src/optics/     color, prism, polarization, spectrometer, instruments, grotrian, fabry_perot,
                 sodium_paschen_back, halpha_instruments, figures, hydrogen_figures
-tests/          350 tests collected (2 need the optional PyTorch and are skipped without it), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
+tests/          371 tests collected (2 need the optional PyTorch and are skipped without it), one file per module: algebra, Landé g, Paschen-Back, selection rules, sodium D lines, fitting,
                 hydrogen, H-alpha, Stark effect, two-electron atom, hyperfine, line shapes, corrections, cavity, uncertainty,
                 literature check, Fabry-Perot, optics
 data/           experimental reference values, mercury TP template and simulated example

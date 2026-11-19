@@ -14,11 +14,18 @@ WHAT IS IMPLEMENTED
   uncertainty: marginal (S_p^-1 A diag(sigma_y), ignores correlations) and covariance-aware (S_p^-1 A R, C_y = R R^T with a
   PSD square root R). It never refuses. Squared covariance-aware singular values are the eigenvalues of S_p^-1 C_p S_p^-1.
 
+* (Stage 8B.2a) ``fit_parameter_covariance`` / ``FitCovariance``: a PURE function that turns a model Jacobian J = d(model)/dp
+  at a solution, plus an explicitly supplied observation covariance or the residuals, into a parameter covariance, in one of
+  four explicitly selected modes: ``sandwich`` (unweighted estimator, known C_y), ``weighted`` (estimator that minimised
+  chi^2 with the same C_y), ``residual_variance`` (s^2 (J^T J)^-1, opt-in) and ``exact`` (square J, dof = 0). It never
+  touches an estimator; no fitting routine calls it yet.
+* (Stage 8B.2a) per-element provenance in ``MeasurementSet`` (``kind`` may be one string or one string per element).
+
 WHAT IS NOT IMPLEMENTED (deliberately)
 --------------------------------------
-Weighted-fit covariance (J^T C_y^-1 J)^-1, residual-variance covariance s^2 (J^T J)^-1, a general Monte Carlo engine,
-helium numerical covariance, and any change to ``fit_parameters`` or ``fit_to_levels``. ``MeasurementSet.require_positive_definite``
-and ``whitening_factor`` exist so that a later weighted fit can refuse singular covariances; no weighted fit uses them yet.
+A general Monte Carlo engine, helium numerical covariance, calcium wrappers, GLS or residual-variance INTEGRATION into
+``fit_parameters`` / ``fit_to_levels``, and any PyTorch route. No pseudoinverse, regularisation, default uncertainty or
+automatic noise estimate is used anywhere.
 
 WHAT THE RESULT MEANS
 ---------------------
@@ -107,12 +114,23 @@ def validate_covariance(cov, *, sym_rtol: float = 1e-10, psd_rtol: float = 1e-10
                            is_psd=True, is_pd=bool(rank == c.shape[0]))
 
 
+def _check_permutation(order, n: int) -> np.ndarray:
+    o = np.asarray(order)
+    if o.ndim != 1 or o.size != n or not np.issubdtype(o.dtype, np.integer) or sorted(o.tolist()) != list(range(n)):
+        raise ValueError(f"order must be a permutation of range({n})")
+    return o.astype(int)
+
+
 # ------------------------------------------------------------------------------------------------ MeasurementSet
 @dataclass(frozen=True)
 class MeasurementSet:
     """Named measured (or assumed) values with a covariance matrix and an explicit provenance.
 
-    ``kind`` is one of ``measured``, ``theory``, ``recommended``, ``scenario``. A ``scenario`` covariance is an ASSUMED
+    ``kind`` is one of ``measured``, ``theory``, ``recommended``, ``scenario``, or a sequence of one such string per element
+    (per-element provenance, e.g. one measured interval among assumed levels). ``element_kinds`` always holds the per-element
+    tuple; ``kind`` is the common value when all elements agree and ``"mixed"`` otherwise. ``is_scenario`` is True when ANY
+    element is a scenario, so every result propagated from a set containing an assumed element keeps its scenario label.
+    A ``scenario`` covariance is an ASSUMED
     sensitivity scenario (e.g. "every level uncertain by 0.001 cm^-1, independently"); it is not an experimentally
     established measurement covariance, and results propagated from it are labelled accordingly. Correlations are never
     inferred (not from a shared publication, not from a shared origin): they are either supplied or absent (diagonal).
@@ -121,8 +139,9 @@ class MeasurementSet:
     values: np.ndarray
     cov: np.ndarray
     units: tuple
-    kind: str
+    kind: "str | Sequence[str]"
     source: str
+    element_kinds: tuple = field(default=(), init=False)
 
     def __post_init__(self):
         names = tuple(str(n) for n in self.names)
@@ -138,13 +157,24 @@ class MeasurementSet:
         if cov.shape != (n, n):
             raise ValueError(f"covariance shape {cov.shape} does not match {n} values")
         validate_covariance(cov, name="measurement covariance")
-        if self.kind not in PROVENANCE:
-            raise ValueError(f"kind must be one of {PROVENANCE}, got {self.kind!r}")
+        if isinstance(self.kind, str):
+            if self.kind not in PROVENANCE:
+                raise ValueError(f"kind must be one of {PROVENANCE}, got {self.kind!r}")
+            elem = (self.kind,) * n
+        else:
+            elem = tuple(self.kind)
+            if len(elem) != n:
+                raise ValueError(f"per-element kind needs one entry per value ({n}), got {len(elem)}")
+            bad = [k for k in elem if k not in PROVENANCE]
+            if bad:
+                raise ValueError(f"every element kind must be one of {PROVENANCE}, got {bad!r}")
         if not isinstance(self.source, str) or not self.source.strip():
             raise ValueError("source must be a non-empty provenance description")
         units = tuple(self.units) if not isinstance(self.units, str) else (self.units,) * n
         if len(units) != n:
             raise ValueError("units must be a string or one entry per value")
+        object.__setattr__(self, "element_kinds", elem)
+        object.__setattr__(self, "kind", elem[0] if len(set(elem)) == 1 else "mixed")
         object.__setattr__(self, "names", names)
         object.__setattr__(self, "values", _frozen(values))
         object.__setattr__(self, "cov", _frozen(0.5 * (cov + cov.T)))
@@ -191,7 +221,27 @@ class MeasurementSet:
 
     @property
     def is_scenario(self) -> bool:
-        return self.kind == "scenario"
+        """True if ANY element is an assumed scenario (the conservative label for anything propagated from this set)."""
+        return "scenario" in self.element_kinds
+
+    @property
+    def is_mixed(self) -> bool:
+        return self.kind == "mixed"
+
+    @property
+    def scenario_elements(self) -> tuple:
+        return tuple(nm for nm, k in zip(self.names, self.element_kinds) if k == "scenario")
+
+    def kinds_by_name(self) -> dict:
+        return dict(zip(self.names, self.element_kinds))
+
+    def reordered(self, order) -> "MeasurementSet":
+        """A new set whose entry i is entry ``order[i]`` of this one (values, names, units, per-element kinds and BOTH the rows and
+        columns of the covariance are permuted together). ``order`` must be a permutation of range(n). Use it to align a covariance
+        with the observation ordering of a model, e.g. ``order = np.argsort(values)`` for a model that returns sorted levels."""
+        o = _check_permutation(order, self.n)
+        return MeasurementSet(tuple(self.names[i] for i in o), self.values[o], self.cov[np.ix_(o, o)],
+                              tuple(self.units[i] for i in o), tuple(self.element_kinds[i] for i in o), self.source)
 
     def correlation(self) -> np.ndarray:
         """Correlation matrix; entries involving a zero-variance input are NaN (undefined), the diagonal is 1 where defined."""
@@ -204,6 +254,14 @@ class MeasurementSet:
         return validate_covariance(self.cov, name="measurement covariance")
 
     def describe(self) -> str:
+        if self.is_mixed:
+            groups = {}
+            for nm, k in zip(self.names, self.element_kinds):
+                groups.setdefault(k, []).append(nm)
+            txt = "; ".join(f"{k}: {', '.join(v)}" for k, v in groups.items())
+            head = ("MIXED provenance, SCENARIO-dependent (the assumed elements are not experimentally established)"
+                    if self.is_scenario else "MIXED provenance")
+            return f"{head} [{txt}]: " + self.source
         if self.is_scenario:
             return ("SCENARIO covariance (assumed; not an experimentally established measurement covariance): " + self.source)
         return f"{self.kind} covariance: " + self.source
@@ -617,8 +675,10 @@ def inverse_map_covariance(param_map: Callable[[np.ndarray], np.ndarray], inputs
                 status = "flagged"
                 msgs.append(f"largest |correlation| {mc:.4g} exceeds {corr_flag}")
     scen = inputs.is_scenario
-    label = ("SENSITIVITY SCENARIO propagated from an assumed input covariance (not an experimental uncertainty); first-order, "
-             "conditional on the map; excludes model error" if scen else
+    label = (("SENSITIVITY SCENARIO propagated from an assumed input covariance (not an experimental uncertainty); first-order, "
+              "conditional on the map; excludes model error"
+              + ("; the inputs have MIXED provenance, scenario elements: " + ", ".join(inputs.scenario_elements)
+                 if inputs.is_mixed else "")) if scen else
              f"first-order propagation of {inputs.kind} input covariance; conditional on the map; excludes model error and "
              "is not a goodness-of-fit")
     return InverseMapResult(names=names, units=units, values=_frozen(p0), jacobian=_frozen(a),
@@ -626,3 +686,251 @@ def inverse_map_covariance(param_map: Callable[[np.ndarray], np.ndarray], inputs
                             std=None if std is None else _frozen(std), uncertainty_kind=inputs.kind, is_scenario=scen, label=label,
                             status=status, messages=tuple(msgs), identifiability=idn, jacobian_step_spread=spread,
                             jacobian_source=src, input_names=inputs.names, sensitivity=sens)
+
+
+# =============================================================================== parameter covariance of a fit (Stage 8B.2a)
+FIT_COVARIANCE_MODES = ("sandwich", "weighted", "residual_variance", "exact")
+UNAVAILABLE_KINDS = ("not_computed", "not_applicable", "not_available", "refused")
+
+
+@dataclass(frozen=True)
+class FitCovariance:
+    """Parameter covariance of a fit, or an honest statement that it is unavailable.
+
+    ``covariance is None`` means UNAVAILABLE (``kind`` in ``UNAVAILABLE_KINDS`` and ``reason`` says why); it is never replaced by
+    a zero matrix. A mathematically valid zero covariance (e.g. exactly known inputs) is an all-zero array with
+    ``status == "ok"``. ``kind`` of an available result is the mode that produced it (``sandwich``, ``weighted``,
+    ``residual_variance``, ``exact``). ``provenance`` is the input-covariance provenance (``scenario`` if any element is an
+    assumed scenario, ``mixed`` for mixed sets, ``residual_scaled`` for the residual-variance mode, ``unspecified`` for a bare
+    array); ``is_scenario`` keeps the scenario qualification. ``label`` states what the number is and is not. The covariance is
+    conditional on the model and first order; it contains no model discrepancy and is not a goodness-of-fit.
+    Ordering contract: parameter order = columns of the Jacobian (``param_names``); observation order = rows of the Jacobian
+    (``observation_names`` when supplied)."""
+    covariance: np.ndarray | None
+    std: np.ndarray | None
+    correlation: np.ndarray | None
+    kind: str
+    status: str                       # 'ok' | 'flagged' | 'refused' | 'unavailable'
+    reason: str
+    provenance: str
+    is_scenario: bool
+    label: str
+    param_names: tuple
+    observation_names: tuple | None
+    n_obs: int | None
+    n_params: int | None
+    dof: int | None
+    rss: float | None = None          # residual sum of squares in the units of the residuals (reported, not used unless mode says so)
+    s2: float | None = None           # residual variance RSS/dof (residual_variance mode only)
+    s2_relative_uncertainty: float | None = None   # about 1/sqrt(2 dof): the scatter of s^2 itself
+    chi2: float | None = None         # weighted mode with residuals only; reported, never used to rescale the covariance
+    chi2_per_dof: float | None = None
+    identifiability: "Identifiability | None" = None
+    messages: tuple = ()
+
+    @property
+    def available(self) -> bool:
+        return self.covariance is not None
+
+    @classmethod
+    def unavailable(cls, kind: str, reason: str, *, status: str | None = None, param_names=(), provenance: str = "none",
+                    is_scenario: bool = False, n_obs=None, n_params=None, dof=None, identifiability=None, messages=()):
+        """An explicit 'no covariance' result. ``kind``: not_computed (nobody asked), not_applicable (e.g. the residual is model
+        discrepancy, not noise), not_available (no defensible uncertainties exist), refused (asked for, but not identifiable or
+        impossible)."""
+        if kind not in UNAVAILABLE_KINDS:
+            raise ValueError(f"kind must be one of {UNAVAILABLE_KINDS}")
+        if not reason or not str(reason).strip():
+            raise ValueError("an unavailable covariance needs a reason")
+        return cls(None, None, None, kind, status or ("refused" if kind == "refused" else "unavailable"), str(reason), provenance,
+                   is_scenario, f"NO COVARIANCE ({kind}): {reason}", tuple(param_names), None, n_obs, n_params, dof,
+                   identifiability=identifiability, messages=tuple(messages))
+
+
+def fit_parameter_covariance(jac, *, mode: str, cov_y=None, residuals=None, param_names: Sequence[str] | None = None,
+                             param_values=None, scales=None, observation_names: Sequence[str] | None = None,
+                             measurement_order=None, objective_is_weighted: bool = False, flag_cond: float = 1e6,
+                             refuse_cond: float = 1e8, rank_rtol: float | None = None) -> FitCovariance:
+    r"""Parameter covariance of a fit from the model Jacobian at the solution. Pure: no estimator is run or changed.
+
+    ``jac`` = J = d(model prediction_i)/d p_j, shape (N observations x p parameters), in the units of the observations per unit of
+    the parameters, evaluated at the fitted parameters (central differences with ``numerical_jacobian`` are advised). The
+    covariance is first order (Gauss-Newton) and conditional on the model being right. NO pseudoinverse and NO regularisation is
+    used: a rank-deficient or ill-conditioned J (cond >= ``refuse_cond``) is REPORTED and refused (covariance None).
+
+    Modes (the caller selects one; nothing is inferred):
+
+    ``"sandwich"`` (needs ``cov_y``, any positive-semidefinite matrix including zero): for the UNWEIGHTED estimator
+        p_hat = argmin |r|^2 the linearised estimator is dp = A dy with A = (J^T J)^-1 J^T, so
+        C_p = A C_y A^T = (J^T J)^-1 J^T C_y J (J^T J)^-1.  A is the exact left inverse of a full-column-rank J (QR), not a
+        pseudoinverse of a deficient matrix. Equals (J^T C_y^-1 J)^-1 only when C_y is proportional to the identity.
+    ``"weighted"`` (needs a positive-definite ``cov_y`` and ``objective_is_weighted=True``): C_p = (J^T C_y^-1 J)^-1, valid ONLY
+        if the estimator minimised chi^2 = r^T C_y^-1 r with the same C_y; the function cannot verify that, so the caller must
+        assert it. With ``residuals`` the chi^2, dof and chi^2/dof are REPORTED, never used to rescale the covariance.
+    ``"residual_variance"`` (opt-in; ``cov_y`` not accepted; needs ``residuals``, N - p >= 1): C_p = s^2 (J^T J)^-1,
+        s^2 = RSS/(N - p). Assumes zero-mean, equal-variance, uncorrelated errors, a correct model and a converged fit; the
+        scatter of s^2 itself (about 1/sqrt(2(N-p))) is returned. It is residual-scaled, NOT a measurement uncertainty; if the
+        residuals are model discrepancy it measures discrepancy. RSS = 0 is refused (a vanishing residual is not zero
+        uncertainty).
+    ``"exact"`` (square J, N = p, dof = 0, needs ``cov_y``): C_p = A C_y A^T with A = J^-1. No chi^2, no residual: the fit
+        reproduces the data exactly, so nothing is left to check. Identical to the weighted formula for positive-definite C_y.
+
+    Ordering contract: row i of ``jac`` is observation i; ``cov_y`` rows and columns must be in EXACTLY that order. If the
+    observations were sorted or permuted for the model, pass ``measurement_order`` (a permutation: observation i corresponds to
+    measurement index ``measurement_order[i]``) and the covariance is permuted as C[o][:, o]; with a ``MeasurementSet`` this is
+    ``reordered(order)``. ``observation_names`` (optional) must equal the covariance's names in that order or a ValueError is
+    raised; for a bare array the alignment cannot be verified and the result says so.
+
+    Provenance: for a ``MeasurementSet`` the result carries its kind, per-element kinds and scenario qualification. Unavailable
+    information is ``covariance=None`` with a reason, never zeros."""
+    if mode not in FIT_COVARIANCE_MODES:
+        raise ValueError(f"mode must be one of {FIT_COVARIANCE_MODES}, got {mode!r}")
+    j = np.asarray(jac, dtype=float)
+    if j.ndim != 2 or j.size == 0:
+        raise ValueError("jac must be a non-empty 2-D array (observations x parameters)")
+    if not np.all(np.isfinite(j)):
+        raise ValueError("jac contains non-finite values")
+    n_obs, n_par = j.shape
+    names = tuple(param_names) if param_names is not None else tuple(f"p{i}" for i in range(n_par))
+    if len(names) != n_par:
+        raise ValueError(f"param_names has {len(names)} entries but the Jacobian has {n_par} columns")
+    obs_names = None if observation_names is None else tuple(str(x) for x in observation_names)
+    if obs_names is not None and len(obs_names) != n_obs:
+        raise ValueError(f"observation_names has {len(obs_names)} entries but the Jacobian has {n_obs} rows")
+    dof = n_obs - n_par
+
+    # ---- scales
+    if scales is not None:
+        sc = np.asarray(scales, dtype=float)
+        scale_note = "parameter scales S_p supplied by the caller"
+    elif param_values is not None:
+        pv = np.asarray(param_values, dtype=float)
+        if pv.shape != (n_par,) or not np.all(np.isfinite(pv)):
+            raise ValueError("param_values must be finite, one per parameter")
+        sc = np.where(np.abs(pv) > 0, np.abs(pv), 1.0)
+        scale_note = "parameter scales S_p = |p_hat| (1 where p_hat = 0)"
+    else:
+        sc, scale_note = np.ones(n_par), "parameter scales S_p = 1"
+    if sc.shape != (n_par,) or np.any(sc <= 0) or not np.all(np.isfinite(sc)):
+        raise ValueError("scales must be positive, finite, one per parameter")
+
+    # ---- residuals
+    r = None
+    if residuals is not None:
+        r = np.asarray(residuals, dtype=float)
+        if r.shape != (n_obs,) or not np.all(np.isfinite(r)):
+            raise ValueError(f"residuals must be a finite 1-D array of length {n_obs}")
+    if mode == "residual_variance" and r is None:
+        raise ValueError("mode 'residual_variance' needs the residuals (model minus data, in observation order)")
+    if mode == "residual_variance" and cov_y is not None:
+        raise ValueError("mode 'residual_variance' estimates the scatter from the residuals; cov_y is not accepted")
+    if mode != "residual_variance" and cov_y is None:
+        raise ValueError(f"mode {mode!r} needs an explicit cov_y (a MeasurementSet or covariance array); none is inferred")
+    if mode == "weighted" and not objective_is_weighted:
+        raise ValueError("mode 'weighted' is valid only for an estimator that minimised chi^2 = r^T C_y^-1 r with this C_y; "
+                         "assert that with objective_is_weighted=True, or use mode 'sandwich' for an unweighted estimator")
+    if mode == "exact" and n_obs != n_par:
+        raise ValueError(f"mode 'exact' needs a square Jacobian (N = p); got {n_obs} observations and {n_par} parameters")
+
+    # ---- covariance of the observations, aligned
+    cov = None
+    provenance, elems, scen, notes = "residual_scaled", None, False, []
+    if cov_y is not None:
+        order = None if measurement_order is None else _check_permutation(measurement_order, n_obs)
+        if isinstance(cov_y, MeasurementSet):
+            ms = cov_y
+            if ms.n != n_obs:
+                raise ValueError(f"cov_y has {ms.n} entries but the Jacobian has {n_obs} rows")
+            if order is not None:
+                ms = ms.reordered(order)
+            if obs_names is not None and tuple(ms.names) != obs_names:
+                raise ValueError("observation ordering contract violated: cov_y names (after measurement_order) "
+                                 f"{tuple(ms.names)} differ from observation_names {obs_names}")
+            if obs_names is None:
+                notes.append("alignment of cov_y with the Jacobian rows was not verified (no observation_names given)")
+            cov = np.array(ms.cov)
+            provenance, elems, scen = ms.kind, ms.element_kinds, ms.is_scenario
+            src_txt = ms.describe()
+        else:
+            cov = np.asarray(cov_y, dtype=float)
+            if cov.shape != (n_obs, n_obs):
+                raise ValueError(f"cov_y shape {cov.shape} does not match {n_obs} observations")
+            validate_covariance(cov, name="cov_y")
+            if order is not None:
+                cov = cov[np.ix_(order, order)]
+            provenance, src_txt = "unspecified", "covariance supplied as a bare array; its provenance is not stated"
+            notes.append("bare-array covariance: alignment with the Jacobian rows cannot be verified")
+        cov = 0.5 * (cov + cov.T)
+
+    def _unavail(kind, reason, idn=None, status=None):
+        return FitCovariance.unavailable(kind, reason, status=status, param_names=names, provenance=provenance, is_scenario=scen,
+                                         n_obs=n_obs, n_params=n_par, dof=dof, identifiability=idn, messages=tuple(notes))
+
+    if mode == "residual_variance":
+        if dof < 1:
+            return _unavail("refused", f"N - p = {dof} < 1: no degrees of freedom, so no residual variance can be estimated")
+        rss0 = float(r @ r)
+        if rss0 <= 0.0:
+            return _unavail("refused", "RSS = 0: the residual variance estimate is zero because the data are reproduced exactly; "
+                                       "this is not a statement of zero uncertainty")
+
+    # ---- structural identifiability (forward); whitened only for the weighted mode
+    wh_cov = None
+    if mode == "weighted":
+        ck = validate_covariance(cov, name="cov_y")
+        if not ck.is_pd:
+            raise CovarianceError(f"weighted fitting needs a positive-definite cov_y (rank {ck.rank} of {ck.n}); singular matrices "
+                                  "are refused, not regularised. Use mode 'sandwich' (valid for singular covariances) or "
+                                  "reformulate in independent variables.")
+        wh_cov = cov
+    idn = identifiability(j, cov_y=wh_cov, scales=sc, orientation="forward", param_names=names, flag_cond=flag_cond,
+                          refuse_cond=refuse_cond, rank_rtol=rank_rtol, scales_note=scale_note)
+    if idn.status == "refused":
+        return _unavail("refused", "the Jacobian is not identifiable for these parameters: " + "; ".join(idn.messages), idn)
+
+    # ---- computation (QR of the scaled Jacobian: exact left inverse of a full-column-rank matrix; no pseudoinverse)
+    js = j * sc[None, :]
+    chi2 = chi2_per_dof = s2 = s2_rel = None
+    rss = None if r is None else float(r @ r)
+    if mode == "weighted":
+        low = cholesky(cov, lower=True)
+        jw = solve_triangular(low, js, lower=True)
+        _, rr = np.linalg.qr(jw)
+        rinv = solve_triangular(rr, np.eye(n_par))
+        cp = (rinv @ rinv.T) * np.outer(sc, sc)
+        if r is not None:
+            rw = solve_triangular(low, r, lower=True)
+            chi2 = float(rw @ rw)
+            chi2_per_dof = chi2 / dof if dof > 0 else None
+            if dof == 0:
+                notes.append("zero degrees of freedom: chi^2 carries no goodness-of-fit information")
+        formula = "(J^T C_y^-1 J)^-1 for an estimator that minimised chi^2 = r^T C_y^-1 r with this C_y"
+    else:
+        q, rr = np.linalg.qr(js)
+        rinv = solve_triangular(rr, np.eye(n_par))
+        a_left = (rinv @ q.T) * sc[:, None]                                  # (J^T J)^-1 J^T (exact left inverse), p x N
+        if mode == "residual_variance":
+            s2 = rss / dof
+            s2_rel = 1.0 / float(np.sqrt(2.0 * dof))
+            cp = s2 * (rinv @ rinv.T) * np.outer(sc, sc)
+            formula = f"s^2 (J^T J)^-1 with s^2 = RSS/(N-p) = {s2:.6g} (N-p = {dof}); relative scatter of s^2 about {s2_rel:.2g}"
+        else:
+            cp = a_left @ cov @ a_left.T
+            formula = ("A C_y A^T with A = (J^T J)^-1 J^T for the UNWEIGHTED estimator" if mode == "sandwich"
+                       else "A C_y A^T with A = J^-1 (square, zero degrees of freedom)")
+    cp = 0.5 * (cp + cp.T)
+    std = np.sqrt(np.maximum(np.diag(cp), 0.0))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        corr = cp / np.outer(std, std)
+    status = idn.status
+    msgs = list(idn.messages) + notes
+    if mode == "residual_variance":
+        label = (f"RESIDUAL-SCALED covariance, {formula}. Assumes zero-mean, equal-variance, uncorrelated errors and a correct model; "
+                 "it is not a measurement uncertainty and contains no separate model discrepancy; first order.")
+    else:
+        head = ("SENSITIVITY SCENARIO: " if scen else "") + f"first-order {mode} covariance, {formula}; input covariance: {src_txt}"
+        label = head + "; conditional on the model; excludes model discrepancy; not a goodness-of-fit"
+    return FitCovariance(covariance=_frozen(cp), std=_frozen(std), correlation=_frozen(corr), kind=mode, status=status, reason="",
+                         provenance=provenance, is_scenario=scen, label=label, param_names=names, observation_names=obs_names,
+                         n_obs=n_obs, n_params=n_par, dof=dof, rss=rss, s2=s2, s2_relative_uncertainty=s2_rel, chi2=chi2,
+                         chi2_per_dof=chi2_per_dof, identifiability=idn, messages=tuple(msgs))

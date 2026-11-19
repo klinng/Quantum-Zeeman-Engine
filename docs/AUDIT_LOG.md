@@ -39,3 +39,9 @@ Added `src/fit_covariance.py` and `tests/test_fit_covariance.py`: MeasurementSet
 - `uncertainty_sensitivity`: when outputs exceed inputs (m > n) the exact left-null-space directions are now reported as zero-singular-value weak directions (up to `n_weak`); a non-finite Jacobian and a `param_names` length mismatch raise a clear ValueError.
 - Calcium wording corrected: structural identifiability condition number 33 984.9 (S_p = |p_hat|, S_y = |y_hat|) is distinct from the covariance-aware uncertainty-sensitivity condition number 37 124.5 (assumed independent 0.001 cm^-1 per level, a scenario). Different scalings, different questions.
 - Collection is now 350 (348 passed and 2 skipped without PyTorch). Stage 8B.2 has not been started.
+
+## Stage 8B.2a - parameter covariance of a fit (pure function) and per-element provenance
+- Added `FitCovariance` and `fit_parameter_covariance` (modes sandwich, weighted, residual_variance, exact) to `src/fit_covariance.py`; `MeasurementSet` gained per-element provenance and `reordered`. Nothing in `fitting.py`, `two_electron.py`, `helium_data.py` or `torch_engine.py` changed, and no fitting routine calls the new function.
+- Safeguards: no pseudoinverse or regularisation, no default uncertainty, no automatic residual-noise estimate; the weighted mode needs an explicit declaration that the estimator minimised the same chi^2; unavailable covariance is `None` with a reason, never zeros; the observation ordering contract is explicit and tested.
+- 21 new synthetic analytic tests (`tests/test_fit_covariance_fits.py`); collection is now 371 (369 passed and 2 skipped without PyTorch). No experimental validation is claimed.
+- Stage 8B.2b, 8B.2c, 8B.2d and 8B.3 have not been started.

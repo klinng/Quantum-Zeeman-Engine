@@ -244,7 +244,7 @@ high-resolution stage.**
 - `src/cavity.py`: `annihilation(n_max)`, `creation(n_max)`, `jaynes_cummings(n_max, w_c, w_a, g)` (basis: photon number ⊗ atom, index 0 excited), `excitation_number`, `excited_probability(...)` (exact time evolution), `fig_jaynes_cummings()`. Stand-alone, arbitrary units.
 - `src/hyperfine_figures.py`: `fig_hyperfine()` (sodium 3S Breit-Rabi diagram and the hydrogen crossing splitting).
 
-## `src/fit_covariance.py`: covariance of calibrated parameters (Stage 8B.1, partial)
+## `src/fit_covariance.py`: covariance of calibrated parameters (Stages 8B.1 and 8B.2a, partial)
 
 - `MeasurementSet.independent / from_correlation / from_covariance(names, values, ..., kind, source, units)`: values with a validated covariance and provenance (`measured`, `theory`, `recommended`, `scenario`); read-only arrays; no correlation is ever inferred. `require_positive_definite()` and `whitening_factor()` refuse singular covariances (for a later weighted fit).
 - `validate_covariance(cov)`: finite, symmetric, positive semidefinite, tolerances relative to the scale; singular PSD matrices are accepted.
@@ -252,7 +252,9 @@ high-resolution stage.**
 - `inverse_map_covariance(param_map, inputs, ...)`: first-order C_p = A C_y A^T; returns `InverseMapResult` (values, Jacobian, covariance, correlation, std, status ok/flagged/refused, scenario label). Covariance is None when refused.
 - `identifiability(jac, ...)`: STRUCTURAL identifiability, SVD of the scaled Jacobian (rank, condition number with its scaling convention, weak combinations, status). For an inverse map it uses A_struct = S_p^-1 A S_y (explicit characteristic scales, independent of the input covariance). Thresholds 1e6/1e8 are conventions.
 - `uncertainty_sensitivity(jac, cov_y, ...)`: separate informational diagnostic of the supplied uncertainty: marginal (S_p^-1 A diag(sigma_y), ignores correlations) and covariance-aware (S_p^-1 A R, C_y = R R^T). Never refuses; a zero covariance gives a zero C_p, not a refusal.
-- Not implemented: weighted-fit covariance, residual-variance covariance, Monte Carlo engine, helium covariance. Tests: `tests/test_fit_covariance.py` (31, mathematical verification only).
+- `MeasurementSet` accepts one provenance kind per element (`element_kinds`); sets with several kinds have `kind == "mixed"`, `is_scenario` is True if any element is a scenario, and `reordered(order)` permutes values, names, units, kinds and the covariance together.
+- `fit_parameter_covariance(jac, mode=..., ...)` returns a `FitCovariance` (pure; no estimator is run). Modes: `sandwich` (unweighted estimator, known C_y, singular allowed), `weighted` (needs positive-definite C_y and `objective_is_weighted=True`), `residual_variance` (opt-in, s^2 = RSS/(N-p), refused for N-p < 1 or RSS = 0), `exact` (square J, dof = 0). Rank-deficient or ill-conditioned Jacobians are refused (no pseudoinverse, no regularisation). `covariance=None` plus a `reason` means unavailable and is never a zero matrix. Row i of the Jacobian is observation i; the covariance must be in the same order (`measurement_order` permutes it; `observation_names` is checked for a MeasurementSet). Tests: `tests/test_fit_covariance_fits.py` (21, synthetic analytic problems).
+- Not implemented: integration into `fit_parameters`, GLS estimator, calcium and helium wrappers, Monte Carlo engine, PyTorch route. Tests: `tests/test_fit_covariance.py` (31, mathematical verification only).
 
 ## `src/uncertainty.py`: how far can a number be trusted?
 
