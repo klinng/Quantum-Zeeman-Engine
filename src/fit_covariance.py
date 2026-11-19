@@ -517,13 +517,23 @@ class UncertaintySensitivity:
 
 
 def uncertainty_sensitivity(jac, cov_y, *, scales=None, param_names: Sequence[str] | None = None, rank_rtol: float | None = None,
-                            n_weak: int = 3) -> UncertaintySensitivity:
+                            n_weak: int = 3, cov_rank_rtol: float | None = None) -> UncertaintySensitivity:
     """Uncertainty-scaled sensitivity of an explicit map p = p(y) with Jacobian ``jac`` = A (m x n) and input covariance
     ``cov_y`` (any positive-semidefinite matrix, including zero). See ``UncertaintySensitivity`` for the matrices analysed.
     ``weak_directions`` lists up to ``n_weak`` left singular vectors (parameter-space directions, smallest singular value first)
     with a rank-deficient or negligible (< 1e-6 relative) response; when there are more outputs than inputs (m > n) the exact
     null-space directions beyond min(m, n) are included with singular value 0. Raises ValueError for a non-2-D or non-finite
-    Jacobian, a ``param_names`` length different from m, or invalid ``scales``; CovarianceError for an invalid ``cov_y``."""
+    Jacobian, a ``param_names`` length different from m, or invalid ``scales``; CovarianceError for an invalid ``cov_y``.
+
+    Numerical rank. The square root R of C_y = V diag(lambda) V^T takes sqrt(lambda), which turns eigenvalue round-off of order
+    eps*lambda_max into singular values of order sqrt(eps)*sqrt(lambda_max): an eigenvalue that is zero in exact arithmetic
+    (e.g. C_y = ones, rank 1) can come back as +1e-15 from LAPACK and would then look like a genuine direction at the SVD
+    tolerance of order eps. Eigenvalues of C_y are therefore truncated BEFORE the square root: lambda_i <= ``cov_rank_rtol`` *
+    lambda_max is treated as zero, with default 10 n eps (n = number of inputs), the usual symmetric-eigensolver backward-error
+    scale c(n) eps ||C||_2 with a factor-10 margin. A direction whose standard deviation is below about sqrt(10 n eps)
+    (~1e-7 for n = 3) of the largest one cannot be resolved from round-off by this route and is reported as absent; larger
+    ones are kept. The rank of the scaled matrix S_p^-1 A R is then its numerical rank at ``rank_rtol``
+    (default max(shape) eps), which is exact for the zeroed columns."""
     a = np.asarray(jac, dtype=float)
     if a.ndim != 2:
         raise ValueError("jac must be a 2-D array")
@@ -541,7 +551,12 @@ def uncertainty_sensitivity(jac, cov_y, *, scales=None, param_names: Sequence[st
     if len(names) != m:
         raise ValueError(f"param_names has {len(names)} entries but the Jacobian has {m} parameters (rows)")
     lam, vec = np.linalg.eigh(0.5 * (c + c.T))
-    root = vec * np.sqrt(np.maximum(lam, 0.0))[None, :]                 # C_y = root root^T
+    n_in = c.shape[0]
+    cr = cov_rank_rtol if cov_rank_rtol is not None else 10.0 * n_in * _EPS
+    if cr < 0:
+        raise ValueError("cov_rank_rtol must be non-negative")
+    lam_cut = cr * max(float(lam[-1]), 0.0)
+    root = vec * np.sqrt(np.where(lam > lam_cut, lam, 0.0))[None, :]    # C_y = root root^T; round-off eigenvalues are dropped
     mat_marg = a / s_p[:, None] * np.sqrt(np.diag(c))[None, :]
     mat_cov = a / s_p[:, None] @ root
     sv_m = np.linalg.svd(mat_marg, compute_uv=False)

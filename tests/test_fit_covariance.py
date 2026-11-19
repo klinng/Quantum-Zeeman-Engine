@@ -455,3 +455,107 @@ def test_sensitivity_square_and_wide_cases_unchanged_and_validation():
         uncertainty_sensitivity(np.eye(2), np.eye(2), param_names=["only_one"])
     with pytest.raises(ValueError):
         uncertainty_sensitivity(np.ones(3), np.eye(3))
+
+
+# ------------------------------------------------------------------ numerical rank of a singular covariance (CI regression)
+def _eigh_with_roundoff_noise(noise_rel):
+    """np.linalg.eigh variant returning +noise_rel * lambda_max for every eigenvalue that is zero in exact arithmetic, the way
+    some LAPACK builds do (observed: +8.9e-16 for C = ones((3, 3)) with scipy's default driver)."""
+    real = np.linalg.eigh
+
+    def noisy(a, *args, **kw):
+        lam, vec = real(a, *args, **kw)
+        lam = lam.copy()
+        lam[np.abs(lam) < 1e-9 * np.max(np.abs(lam))] = noise_rel * np.max(np.abs(lam))
+        return lam, vec
+    return noisy
+
+
+def _analytic_rank(a, cov, scales=None, rtol=1e-9):
+    m = a.shape[0]
+    s = np.ones(m) if scales is None else np.asarray(scales)
+    c_p = a @ cov @ a.T / np.outer(s, s)
+    w = np.linalg.eigvalsh(0.5 * (c_p + c_p.T))
+    return int(np.sum(w > rtol * max(w.max(), 0.0))) if w.max() > 0 else 0
+
+
+@pytest.mark.parametrize("noise_rel", [0.0, 1e-16, 3e-16, 4.5e-16, 1e-15, 5e-15])
+def test_exact_rank_one_covariance_is_rank_one_whatever_the_eigensolver_round_off(monkeypatch, noise_rel):
+    cov = np.ones((3, 3))
+    a = np.array([[1.0, 1.0, 1.0], [1.0, 2.0, 3.0]])
+    monkeypatch.setattr(np.linalg, "eigh", _eigh_with_roundoff_noise(noise_rel))
+    sens = uncertainty_sensitivity(a, cov)
+    assert sens.covariance_rank == 1 and np.isinf(sens.covariance_cond) and not sens.is_zero
+    assert sens.covariance_singular_values[1] == 0.0                        # the round-off direction is removed, not merely small
+    assert sens.covariance_singular_values[0] == pytest.approx(np.sqrt(np.sum((a @ np.ones(3)) ** 2)), rel=1e-12)
+    assert _analytic_rank(a, cov) == 1                                      # A C A^T = [[9, 18], [18, 36]] has rank 1
+
+
+def test_rank_one_covariances_of_other_sizes_and_orientations(monkeypatch):
+    rng = np.random.default_rng(7)
+    monkeypatch.setattr(np.linalg, "eigh", _eigh_with_roundoff_noise(9e-16))
+    for n in (2, 4, 6):
+        v = rng.normal(size=n)
+        cov = np.outer(v, v)
+        a = rng.normal(size=(3, n))
+        sens = uncertainty_sensitivity(a, cov)
+        assert sens.covariance_rank == 1 == _analytic_rank(a, cov)
+    two = rng.normal(size=(5, 2))
+    cov2 = two @ two.T                                                       # rank 2 in 5 inputs
+    a2 = rng.normal(size=(4, 5))
+    assert uncertainty_sensitivity(a2, cov2).covariance_rank == 2 == _analytic_rank(a2, cov2)
+
+
+def test_genuinely_full_rank_covariance_keeps_every_direction_and_the_analytic_condition_number():
+    cov = np.array([[2.0, 0.5, 0.0], [0.5, 1.0, 0.2], [0.0, 0.2, 3.0]])
+    a = np.array([[1.0, 2.0, 0.0], [0.5, -1.0, 1.0]])
+    sens = uncertainty_sensitivity(a, cov)
+    w = np.linalg.eigvalsh(a @ cov @ a.T)
+    assert sens.covariance_rank == 2 == _analytic_rank(a, cov)
+    assert sens.covariance_cond == pytest.approx(np.sqrt(w.max() / w.min()), rel=1e-10)
+    assert np.allclose(np.sort(sens.covariance_singular_values ** 2), np.sort(w), rtol=1e-10)
+
+
+def test_widely_scaled_independent_inputs_are_not_hidden_by_the_tolerance():
+    # an assumed 1e-3 level uncertainty next to a measured 8.3e-10 interval (ratio ~ 1e-6 in std): both must be kept
+    cov = np.diag([1e-6, 1e-6, (8.3e-10) ** 2])
+    a = np.eye(3)
+    assert uncertainty_sensitivity(a, cov).covariance_rank == 3
+    assert uncertainty_sensitivity(a, np.diag([1.0, (1e-4) ** 2, (1e-5) ** 2])).covariance_rank == 3
+
+
+def test_nearly_singular_covariance_follows_the_documented_eigenvalue_rank_convention():
+    base = np.ones((3, 3))                                                   # eigenvalues 3, 0, 0
+    a = np.eye(3)
+    tol = 10 * 3 * np.finfo(float).eps                                       # default convention: lambda <= 10 n eps lambda_max is zero
+    for eps_, expected in ((1e-6, 3), (1e-9, 3), (1e-12, 3), (1e-13, 3), (1e-17, 1), (1e-20, 1)):
+        cov = base + eps_ * np.eye(3)                                        # eigenvalues 3 + eps, eps, eps
+        ratio = eps_ / (3 + eps_)
+        assert (ratio > tol) == (expected == 3), "test cases must straddle the documented tolerance"
+        assert uncertainty_sensitivity(a, cov).covariance_rank == expected
+    assert uncertainty_sensitivity(a, base + 1e-12 * np.eye(3), cov_rank_rtol=1e-6).covariance_rank == 1   # explicit tolerance
+    with pytest.raises(ValueError):
+        uncertainty_sensitivity(a, base, cov_rank_rtol=-1.0)
+
+
+def test_zero_covariance_gives_rank_zero_and_zero_singular_values():
+    sens = uncertainty_sensitivity(np.array([[1.0, 2.0], [3.0, 4.0]]), np.zeros((2, 2)))
+    assert sens.is_zero and sens.covariance_rank == 0 and np.all(sens.covariance_singular_values == 0.0)
+    assert np.isnan(sens.covariance_cond) and sens.weak_directions == ()
+
+
+def test_reported_rank_matches_the_rank_of_the_propagated_covariance(monkeypatch):
+    monkeypatch.setattr(np.linalg, "eigh", _eigh_with_roundoff_noise(8.9e-16))
+    cases = [(np.ones((3, 3)), np.array([[1.0, 1.0, 1.0], [1.0, 2.0, 3.0]])),
+             (np.diag([1.0, 2.0, 0.0]), np.eye(3)),
+             (np.array([[1.0, 1.0], [1.0, 1.0]]), np.array([[1.0, 2.0], [3.0, 6.0], [0.0, 1.0]])),
+             (np.diag([2.0, 1.0, 4.0]), np.array([[1.0, 1.0, 0.0], [0.0, 1.0, 1.0]]))]
+    for cov, a in cases:
+        names = [f"y{i}" for i in range(cov.shape[0])]
+        ms = MeasurementSet.from_covariance(names, np.ones(cov.shape[0]), cov, "scenario", "rank consistency")
+        res = inverse_map_covariance(lambda y, a=a: a @ y, ms, outputs_are_parameters=False)
+        w = np.linalg.eigvalsh(0.5 * (res.covariance + res.covariance.T))
+        prop_rank = int(np.sum(w > 1e-9 * w.max())) if w.max() > 0 else 0
+        sens = res.sensitivity
+        assert sens.covariance_rank == prop_rank == _analytic_rank(a, cov, scales=np.where(np.abs(res.values) > 0, np.abs(res.values), 1.0))
+        assert sens.covariance_singular_values.shape[0] == min(a.shape[0], cov.shape[0])
